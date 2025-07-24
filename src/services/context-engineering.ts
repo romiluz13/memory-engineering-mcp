@@ -87,12 +87,32 @@ The AI agent only gets the context you are appending to the PRP and training dat
 
 ## Research Process
 
-1. **Codebase Analysis** (USE HYBRID SEARCH!)
+1. **Comprehensive Memory Analysis** (MANDATORY - USE HYBRID SEARCH ACROSS ALL MEMORY!)
+   
+   **Phase 1A: Multi-Vector Memory Search**
    - \`memory_engineering/search --query "[feature type] patterns"\` - Find similar implementations
    - \`memory_engineering/search --query "[technology] examples"\` - Discover existing approaches  
    - \`memory_engineering/search --query "validation approach"\` - Find testing patterns
    - \`memory_engineering/search --query "error handling [domain]"\` - Learn error strategies
-   - \`memory_engineering/read --fileName "systemPatterns.md"\` - Get architecture context
+   - \`memory_engineering/search --query "architecture decisions"\` - Understand system design
+   - \`memory_engineering/search --query "project context requirements"\` - Get business context
+   
+   **Phase 1B: Core Memory Files Analysis**
+   - \`memory_engineering/read --fileName "systemPatterns.md"\` - Architecture and design patterns
+   - \`memory_engineering/read --fileName "techContext.md"\` - Technology stack and constraints
+   - \`memory_engineering/read --fileName "productContext.md"\` - Business requirements and user needs
+   - \`memory_engineering/read --fileName "activeContext.md"\` - Current development focus
+   - \`memory_engineering/read --fileName "progress.md"\` - Implementation history and lessons learned
+   - \`memory_engineering/read --fileName "projectbrief.md"\` - Project goals and scope
+   
+   **Phase 1C: Memory Intelligence Synthesis**
+   After gathering all memory data, synthesize into comprehensive context package that includes:
+   - Relevant patterns from ALL memory files (not just systemPatterns)
+   - Technology decisions and constraints from techContext
+   - Business requirements and user needs from productContext
+   - Current development status and blockers from activeContext
+   - Historical lessons and implementation approaches from progress
+   - Overall project vision and goals from projectbrief
 
 2. **External Research**
    - Search for similar features/patterns online

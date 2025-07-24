@@ -18,8 +18,8 @@ async function createIndexes(): Promise<void> {
     await client.connect();
     console.log('Connected to MongoDB');
 
-    const dbName = process.env.MEMORY_BANK_DB || 'memory_bank';
-    const collectionName = process.env.MEMORY_BANK_COLLECTION || 'memory_bank_documents';
+    const dbName = process.env.MEMORY_ENGINEERING_DB || process.env.MEMORY_BANK_DB || 'memory_engineering';
+    const collectionName = process.env.MEMORY_ENGINEERING_COLLECTION || process.env.MEMORY_BANK_COLLECTION || 'memory_engineering_documents';
     
     const db = client.db(dbName);
     const collection = db.collection(collectionName);
@@ -59,8 +59,8 @@ async function createIndexes(): Promise<void> {
     console.log('MongoDB Atlas Vector Search indexes must be created in the Atlas UI.');
     console.log('\n1. Go to MongoDB Atlas Console');
     console.log('2. Navigate to your cluster → Browse Collections');
-    console.log('3. Select database: memory_bank');
-    console.log('4. Select collection: memory_bank_documents');
+    console.log('3. Select database: memory_engineering');
+    console.log('4. Select collection: memory_engineering_documents');
     console.log('5. Click "Search Indexes" tab');
     console.log('6. Click "Create Search Index"');
     console.log('7. Choose "JSON Editor" and use this configuration:');

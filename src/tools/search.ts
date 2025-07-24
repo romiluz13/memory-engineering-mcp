@@ -309,19 +309,43 @@ This search understood BOTH:
 💡 TIP: Use 'hybrid' search to also find conceptually related content!`;
     }
 
-    return {
-      content: [
-        {
-          type: 'text',
-          text: `🔍 MongoDB Search Results for: "${params.query}"
+    // Optimized for Cursor MCP - chunked responses for better performance
+    const contentParts = [];
+    
+    // Part 1: Search header and explanation
+    contentParts.push({
+      type: 'text' as const,
+      text: `🔍 MongoDB Search Results for: "${params.query}"
 
 ${searchExplanation}
 
-📊 Found ${results.length} matches:
+📊 Found ${results.length} matches:`
+    });
+    
+    // Part 2: Results (chunked if many results)
+    if (formattedResults.length > 2000) {
+      const chunks = formattedResults.match(/.{1,1800}/g) || [];
+      chunks.forEach((chunk, index) => {
+        contentParts.push({
+          type: 'text' as const,
+          text: `📋 Results (Part ${index + 1}/${chunks.length}):
 
-${formattedResults}
+${chunk}`
+        });
+      });
+    } else {
+      contentParts.push({
+        type: 'text' as const,
+        text: `📋 Search Results:
 
-📍 NEXT STEPS:
+${formattedResults}`
+      });
+    }
+    
+    // Part 3: Next steps and MongoDB advantages
+    contentParts.push({
+      type: 'text' as const,
+      text: `📍 NEXT STEPS:
 1. 📖 Read the most relevant file: memory_engineering/read --fileName "[filename]"
 2. 🔄 Update your knowledge: memory_engineering/update --fileName "[filename]"
 3. 🚀 Create new features based on patterns found!
@@ -332,9 +356,11 @@ ${formattedResults}
 - Full-text search ✓
 - Version history ✓
 
-No external vector DB needed - MongoDB does it ALL!`,
-        },
-      ],
+No external vector DB needed - MongoDB does it ALL!`
+    });
+
+    return {
+      content: contentParts,
     };
   } catch (error) {
     logger.error('Search tool error:', error);

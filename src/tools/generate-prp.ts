@@ -62,14 +62,19 @@ ${systemPrompt}
 
 **Steps to Follow**:
 1. **Research Process**: Follow the research steps in the system prompt above
-2. **Use Memory Bank Tools**: 
+2. **Use Memory Engineering Tools**: 
    - \`memory_engineering/search --query "[relevant patterns]"\` to find existing patterns
    - \`memory_engineering/read --fileName "[relevant-file.md]"\` to read project context
 3. **ULTRATHINK**: Deep analysis before writing the PRP
 4. **Generate PRP**: Create comprehensive implementation blueprint
 5. **Store PRP**: Use \`memory_engineering/update --fileName "prp_[feature-name].md" --content "[PRP content]"\` to store the PRP
 
-**Next Phase**: After generating the PRP, use \`memory_engineering/execute-prp\` for implementation.
+**🔄 CRITICAL: AUTOMATIC PHASE 2 TRIGGER**
+After storing the PRP, you MUST IMMEDIATELY proceed to Phase 2 without waiting for user input:
+
+6. **Auto-Execute Phase 2**: \`memory_engineering/execute-prp\` - This will automatically detect and implement the PRP you just created
+
+**⚠️ DO NOT STOP after Phase 1! The Context Engineering workflow requires BOTH phases to complete successfully.**
 
 🚀 **Start your research NOW following the Context Engineering methodology above!**`,
       }],

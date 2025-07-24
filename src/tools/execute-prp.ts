@@ -80,18 +80,50 @@ ${systemPrompt}
 
 **PRP File**: ${prpName}
 
-**Steps to Follow**:
+**🔄 CONTEXT ENGINEERING PHASE 2 - MANDATORY STEPS (DO NOT SKIP ANY!):**
+
 1. **Load PRP**: Use \`memory_engineering/read --fileName "prp_${prpName}.md"\` to load the PRP
+   - This contains ALL research from Phase 1 including patterns, constraints, and validation gates
+   - The PRP is your complete implementation blueprint - follow it EXACTLY
+
 2. **ULTRATHINK**: Plan implementation strategy based on PRP content
+   - Analyze the comprehensive research findings embedded in the PRP
+   - Plan step-by-step implementation following discovered patterns
+   - Identify potential issues and mitigation strategies
+
 3. **Execute Implementation**: Follow the PRP blueprint exactly
+   - Use patterns and approaches discovered in Phase 1 research
+   - Reference code examples and architectural decisions from memory files
+   - Follow validation approaches discovered in research
+
 4. **Run Validation Gates**: Execute each validation command from the PRP
+   - TypeScript compilation: \`npm run typecheck\`
+   - Linting: \`npm run lint\`
+   - Testing: \`npm run test\`
+   - Build process: \`npm run build\`
+   - Any custom validation specified in the PRP
+
 5. **Self-Correction**: Fix failures and retry until all gates pass
-6. **Complete**: Ensure all requirements are met
+   - If validation fails, analyze error against PRP guidance
+   - Apply fixes based on patterns and solutions in PRP
+   - Re-run validation gates until all pass
+
+6. **Update Progress**: \`memory_engineering/update --fileName "progress.md"\`
+   - Document what was implemented
+   - Note any issues encountered and solutions applied
+   - Update project status for future reference
+
+**🚨 CRITICAL REMINDER - CONTEXT ENGINEERING METHODOLOGY:**
+- You are implementing a researched solution, not improvising
+- All patterns, constraints, and approaches were discovered in Phase 1
+- The PRP contains comprehensive context - use it as your guide
+- Do not deviate from discovered patterns without validation
+- Complete validation is mandatory - no shortcuts
 
 **Available Tools**:
 - \`memory_engineering/read\` - Read PRP and memory files
-- \`memory_engineering/search\` - Find implementation patterns
-- \`memory_engineering/update\` - Update progress
+- \`memory_engineering/search\` - Find additional implementation patterns if needed
+- \`memory_engineering/update\` - Update progress and memory files
 - Standard coding tools (bash, file operations, etc.)
 
 🚀 **Start implementation NOW following the Context Engineering methodology above!**`,
