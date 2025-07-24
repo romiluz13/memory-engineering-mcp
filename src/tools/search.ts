@@ -121,8 +121,7 @@ export async function searchTool(args: unknown): Promise<CallToolResult> {
         };
       }
 
-      // MongoDB Atlas Vector Search aggregation
-      // Use without filter and then match - works with basic vector index
+      // MongoDB Atlas Vector Search aggregation with PROJECT ISOLATION FILTER
       results = await collection
         .aggregate([
           {
@@ -132,11 +131,9 @@ export async function searchTool(args: unknown): Promise<CallToolResult> {
               queryVector: queryVector,
               numCandidates: params.limit * 10,
               limit: params.limit * 2,
-            },
-          },
-          {
-            $match: {
-              projectId: config.projectId,
+              filter: {
+                projectId: { $eq: config.projectId }
+              },
             },
           },
           {
@@ -184,11 +181,9 @@ export async function searchTool(args: unknown): Promise<CallToolResult> {
                         queryVector: queryVector,
                         numCandidates: params.limit * 10,
                         limit: params.limit,
-                      },
-                    },
-                    {
-                      $match: {
-                        projectId: config.projectId,
+                        filter: {
+                          projectId: { $eq: config.projectId }
+                        },
                       },
                     },
                   ],
