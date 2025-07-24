@@ -517,6 +517,7 @@ ${creativeSuggestions}
     }
     
     return {
+      isError: true,
       content: [
         {
           type: 'text',

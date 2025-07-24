@@ -1,6 +1,6 @@
 {
   "name": "memory-engineering-mcp",
-  "version": "1.4.2",
+  "version": "1.4.3",
   "description": "MongoDB-powered MCP server for autonomous context management and AI development workflows",
   "main": "dist/index.js",
   "type": "module",

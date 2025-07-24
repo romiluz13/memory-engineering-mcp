@@ -454,6 +454,15 @@ Next steps:
     };
   } catch (error) {
     logger.error('Init tool error:', error);
-    throw error;
+    
+    return {
+      isError: true,
+      content: [
+        {
+          type: 'text',
+          text: `Failed to initialize Memory Engineering: ${error instanceof Error ? error.message : 'Unknown error occurred'}`,
+        },
+      ],
+    };
   }
 }
