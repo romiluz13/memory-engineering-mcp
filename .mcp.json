@@ -1,0 +1,14 @@
+{
+  "mcpServers": {
+    "memory-engineering": {
+      "command": "npx",
+      "args": ["memory-engineering-mcp"],
+      "env": {
+        "MONGODB_URI": "your-mongodb-atlas-connection-string",
+        "VOYAGE_API_KEY": "your-voyage-ai-api-key",
+        "MEMORY_ENGINEERING_DB": "memory_engineering",
+        "MEMORY_ENGINEERING_COLLECTION": "memory_engineering_documents"
+      }
+    }
+  }
+}

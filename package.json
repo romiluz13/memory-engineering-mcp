@@ -1,0 +1,81 @@
+{
+  "name": "memory-engineering-mcp",
+  "version": "1.0.0",
+  "description": "MongoDB-powered MCP server for autonomous context management and AI development workflows",
+  "main": "dist/index.js",
+  "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/romiluz13/memory-engineering-mcp.git"
+  },
+  "homepage": "https://github.com/romiluz13/memory-engineering-mcp#readme",
+  "bugs": {
+    "url": "https://github.com/romiluz13/memory-engineering-mcp/issues"
+  },
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "test": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "lint": "eslint src --ext ts",
+    "typecheck": "tsc --noEmit",
+    "prepublishOnly": "pnpm build && pnpm test",
+    "mcp:inspect": "npx @modelcontextprotocol/inspector dist/index.js",
+    "db:indexes": "tsx scripts/create-indexes.ts",
+    "db:check": "tsx scripts/check-indexes.ts"
+  },
+  "bin": {
+    "memory-engineering-mcp": "./bin/memory-engineering-mcp.js"
+  },
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "mongodb",
+    "memory-engineering",
+    "context-engineering",
+    "hybrid-search",
+    "vector-search",
+    "ai-development",
+    "autonomous-development",
+    "claude",
+    "llm",
+    "embeddings",
+    "rankfusion"
+  ],
+  "author": "romiluz13",
+  "license": "MIT",
+  "files": [
+    "dist",
+    "bin",
+    "scripts",
+    "TEMPLATES",
+    "README.md",
+    "LICENSE",
+    ".env.example",
+    ".mcp.json"
+  ],
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "packageManager": "pnpm@10.13.1",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.16.0",
+    "dotenv": "^17.2.0",
+    "mongodb": "^6.17.0",
+    "voyageai": "^0.0.4",
+    "zod": "^4.0.5"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.31.0",
+    "@types/node": "^24.0.15",
+    "@types/node-fetch": "^2.6.12",
+    "@typescript-eslint/eslint-plugin": "^8.38.0",
+    "@typescript-eslint/parser": "^8.38.0",
+    "@vitest/coverage-v8": "^3.2.4",
+    "eslint": "^9.31.0",
+    "prettier": "^3.6.2",
+    "tsx": "^4.20.3",
+    "typescript": "^5.8.3",
+    "vitest": "^3.2.4"
+  }
+}
