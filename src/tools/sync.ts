@@ -44,7 +44,7 @@ export async function syncTool(args: unknown): Promise<CallToolResult> {
             type: 'text',
             text: `✅ All memory files are already synced!
 
-Your MongoDB-powered Memory Bank is READY for action:
+Your MongoDB-powered Memory Engineering system is READY for action:
 - 🔍 Hybrid search is active
 - 🧠 Vector embeddings are current
 - 📝 Text indexes are built
@@ -146,7 +146,7 @@ Your MongoDB-powered Memory Bank is READY for action:
       content: [
         {
           type: 'text',
-          text: `✨ Memory Bank Synchronized - MongoDB Magic Activated!
+          text: `✨ Memory Engineering Synchronized - MongoDB Magic Activated!
 
 📊 SYNC STATISTICS:
 - Files synced: ${documents.length}
@@ -182,7 +182,7 @@ Your MongoDB-powered Memory Bank is READY for action:
 - 🔄 Version history (track changes)
 - 🔗 References (auto-discovered connections)
 
-💡 PRO TIP: The more you use Memory Bank, the smarter it gets!
+💡 PRO TIP: The more you use Memory Engineering, the smarter it gets!
 Every search, every blueprint, every update makes future development FASTER!
 
 🎉 NO EXTERNAL VECTOR DB NEEDED - MongoDB does it ALL!`,

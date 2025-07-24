@@ -7,7 +7,7 @@ import { logger } from '../utils/logger.js';
 import { createHash } from 'crypto';
 import { initializeContextEngineeringTemplates } from '../services/context-engineering.js';
 
-const MEMORY_BANK_DIR = '.memory-engineering';
+const MEMORY_ENGINEERING_DIR = '.memory-engineering';
 const CONFIG_FILE = 'config.json';
 
 const INITIAL_MEMORY_TEMPLATES = {
@@ -312,13 +312,13 @@ export async function initTool(args: unknown): Promise<CallToolResult> {
     const projectName = params.projectName || basename(projectPath);
 
     // Create .memory-engineering directory
-    const memoryBankPath = join(projectPath, MEMORY_BANK_DIR);
-    if (!existsSync(memoryBankPath)) {
-      mkdirSync(memoryBankPath, { recursive: true });
+    const memoryEngineeringPath = join(projectPath, MEMORY_ENGINEERING_DIR);
+    if (!existsSync(memoryEngineeringPath)) {
+      mkdirSync(memoryEngineeringPath, { recursive: true });
     }
 
     // Check if already initialized
-    const configPath = join(memoryBankPath, CONFIG_FILE);
+    const configPath = join(memoryEngineeringPath, CONFIG_FILE);
     if (existsSync(configPath)) {
       return {
         content: [

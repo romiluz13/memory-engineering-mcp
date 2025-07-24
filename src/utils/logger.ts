@@ -10,7 +10,7 @@ class FileLogger {
     if (!existsSync(logDir)) {
       mkdirSync(logDir, { recursive: true });
     }
-    this.logFile = join(logDir, `memory-bank-${new Date().toISOString().split('T')[0]}.log`);
+    this.logFile = join(logDir, `memory-engineering-${new Date().toISOString().split('T')[0]}.log`);
   }
 
   private log(level: string, message: string, ...args: unknown[]): void {

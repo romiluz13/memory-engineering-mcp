@@ -1,7 +1,7 @@
 # Memory Engineering MCP Server - Project Context
 
-## 🚀 Project Status: v1.4.5 - PERFECT MCP Tools Implementation!
-MongoDB-powered Memory Engineering MCP server with **native $rankFusion hybrid search** and **PERFECTLY OPTIMIZED Context Engineering Workflow**. After comprehensive 7-phase tools audit following MCP best practices, our system is now FLAWLESS! Successfully published as `mongodb-memory-bank-mcp-v2` on npm.
+## 🚀 Project Status: v1.4.0 - Natural Context Engineering Workflow!
+MongoDB-powered Memory Engineering MCP server with **native $rankFusion hybrid search** and **Natural Context Engineering Workflow**. The AI now guides through the complete workflow automatically! Successfully published as `memory-engineering-mcp` on npm.
 
 ## 🎯 Latest Achievement: v1.4.5 - PERFECT MCP Implementation!
 - ✅ **MCP Best Practices**: Comprehensive 7-phase tools audit based on official MCP research
@@ -229,7 +229,7 @@ import { Server } from "@modelcontextprotocol/sdk/server/index.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 
 const server = new Server({
-  name: "memory-bank-mcp",
+  name: "memory-engineering-mcp",
   version: "1.0.0"
 });
 
@@ -372,7 +372,7 @@ memory_engineering/feature --action search --name "auth"
 3. Store in `.memory-engineering/config.json`
 
 ### Index Strategy
-- **Collection**: `memory_bank_documents`
+- **Collection**: `memory_engineering_documents`
 - **Compound Index**: `{ projectId: 1, fileName: 1 }`
 - **Vector Search Index**: On `contentVector` field
 - **Text Index**: On `content` field for hybrid search

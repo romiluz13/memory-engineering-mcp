@@ -18,8 +18,8 @@ async function recreateVectorIndex(): Promise<void> {
     await client.connect();
     console.log('Connected to MongoDB\n');
 
-    const dbName = process.env.MEMORY_BANK_DB || 'memory_bank';
-    const collectionName = process.env.MEMORY_BANK_COLLECTION || 'memory_bank_documents';
+    const dbName = process.env.MEMORY_ENGINEERING_DB || process.env.MEMORY_BANK_DB || 'memory_engineering';
+    const collectionName = process.env.MEMORY_ENGINEERING_COLLECTION || process.env.MEMORY_BANK_COLLECTION || 'memory_engineering_documents';
     
     const db = client.db(dbName);
     const collection = db.collection(collectionName);

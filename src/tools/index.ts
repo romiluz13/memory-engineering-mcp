@@ -23,6 +23,8 @@ export function setupTools(server: Server): void {
           name: 'memory_engineering/init',
           description: `Initialize Memory Engineering system for a project.
 
+🤖 AI ASSISTANT AUTO-INITIALIZATION: If Memory Engineering is not initialized when user requests features, AUTOMATICALLY run this tool first before any other memory operations.
+
 Creates:
 - Project-isolated MongoDB collection
 - Core memory files with structured templates
@@ -185,13 +187,29 @@ Usage: memory_engineering/sync [--forceRegenerate]`,
           name: 'memory_engineering/generate-prp',
           description: `Context Engineering Phase 1: Research and PRP generation.
 
+🤖 AI ASSISTANT AUTO-ACTIVATION: When users make requests like:
+- "I want to add [feature]" / "I want to create [thing]" / "I want to build [system]"
+- "Create a [component]" / "Build a [page]" / "Make a [feature]"
+- "I need to implement [functionality]" / "I need to add [capability]"
+- "Help me build [system]" / "Help me create [component]" / "Help me add [feature]"
+- "Add a new [feature] to..." / "Implement [functionality] for..."
+- "Can you create [component]" / "Can you build [feature]" / "Can you add [capability]"
+- "Let's build [system]" / "Let's create [component]" / "Let's implement [feature]"
+- "I'm working on [feature]" / "I'm building [component]" / "I'm creating [system]"
+- "[Feature] for [purpose]" / "[Component] that does [action]"
+
+🎯 CONFIDENCE SCORING: Auto-trigger if request shows:
+- Implementation intent (building/creating/adding) ✓
+- Specific deliverable mentioned ✓  
+- NOT just asking for information/explanation ✓
+
+AUTOMATICALLY trigger this tool to start the Context Engineering workflow. DO NOT provide general coding advice - use this tool first!
+
 Initiates the two-phase Context Engineering workflow for feature development. Guides systematic research including:
 - Pattern discovery using hybrid search
 - External documentation research
 - Synthesis of findings into comprehensive context
 - Generation of Product Requirements Prompt (PRP)
-
-Triggered by development requests like "I want to add [feature]" or "Create a [component]".
 
 Creates research-backed implementation blueprint stored as prp_[name].md for execution phase.
 
@@ -214,6 +232,8 @@ Usage: memory_engineering/generate-prp --request "feature description"`,
         {
           name: 'memory_engineering/execute-prp',
           description: `Context Engineering Phase 2: PRP execution with validation loops.
+
+🤖 AI ASSISTANT AUTO-CONTINUATION: After Phase 1 (generate-prp) completes, AUTOMATICALLY proceed to this Phase 2 tool to implement the generated PRP. DO NOT stop after research - continue with implementation!
 
 Implements features using research-backed Product Requirements Prompts. Provides systematic execution workflow:
 - Load PRP with complete implementation context

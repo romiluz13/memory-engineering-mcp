@@ -10,8 +10,8 @@ import { logger } from './utils/logger.js';
 // Load environment variables
 config({ path: '.env.local' });
 
-const SERVER_NAME = 'memory-bank-mcp';
-const SERVER_VERSION = '0.1.0';
+const SERVER_NAME = 'memory-engineering-mcp';
+const SERVER_VERSION = '1.0.0';
 
 async function main(): Promise<void> {
   // Create server instance
