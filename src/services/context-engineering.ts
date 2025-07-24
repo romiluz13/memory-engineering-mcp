@@ -85,6 +85,34 @@ Generate a complete PRP for general feature implementation with thorough researc
 
 The AI agent only gets the context you are appending to the PRP and training data. Assume the AI agent has access to the codebase and the same knowledge cutoff as you, so its important that your research findings are included or referenced in the PRP. The Agent has Websearch capabilities, so pass urls to documentation and examples.
 
+## STEP 0: Project Type Detection (CRITICAL FIRST STEP!)
+
+**BEFORE starting research, determine the project type:**
+
+🔍 **Project Analysis Checklist:**
+- Check if directory has package.json, requirements.txt, Cargo.toml, etc.
+- Look for src/, lib/, app/ directories with actual code
+- Examine existing file structure and complexity
+- Review memory files: Are they populated with real data or just templates?
+
+**Project Classification:**
+- **NEW PROJECT**: Empty directory, template placeholders in memory files like "[Project name here]"
+- **EXISTING PROJECT**: Has real code, dependencies, actual implementation
+
+**🚨 CRITICAL: Adapt your research strategy based on project type!**
+
+**For EXISTING PROJECTS:**
+- Include codebase exploration alongside memory analysis
+- Search actual files for patterns and architecture
+- Understand current implementation before suggesting changes
+- Respect existing conventions and patterns
+- Build upon what exists rather than replacing
+
+**For NEW PROJECTS:**
+- Rely primarily on memory templates and external research
+- Focus on establishing new patterns and architecture
+- Use memory files as foundation for guidance
+
 ## Research Process
 
 1. **Comprehensive Memory Analysis** (MANDATORY - USE HYBRID SEARCH ACROSS ALL MEMORY!)
@@ -96,6 +124,39 @@ The AI agent only gets the context you are appending to the PRP and training dat
    - \`memory_engineering/search --query "error handling [domain]"\` - Learn error strategies
    - \`memory_engineering/search --query "architecture decisions"\` - Understand system design
    - \`memory_engineering/search --query "project context requirements"\` - Get business context
+   
+   **Phase 1A2: INNOVATIVE HYBRID SEARCH APPLICATIONS** 🚀
+   MongoDB $rankFusion gives us REVOLUTIONARY capabilities - use creatively:
+   
+   **🧠 Semantic Code Pattern Discovery:**
+   - \`memory_engineering/search --query "performance bottleneck optimization"\` - Find speed improvements
+   - \`memory_engineering/search --query "user experience enhancement"\` - Discover UX patterns
+   - \`memory_engineering/search --query "security vulnerability prevention"\` - Learn security patterns
+   - \`memory_engineering/search --query "maintainability improvement"\` - Find refactoring opportunities
+   
+   **🔗 Intelligent Correlation Discovery:**
+   - \`memory_engineering/search --query "similar complexity features"\` - Find comparable implementations
+   - \`memory_engineering/search --query "related business logic"\` - Discover connected functionality
+   - \`memory_engineering/search --query "impact analysis dependencies"\` - Understand change ripple effects
+   - \`memory_engineering/search --query "testing strategy precedents"\` - Find testing approaches
+   
+   **🎯 Context-Aware Feature Intelligence:**
+   - \`memory_engineering/search --query "user workflow step before"\` - Understand user journey context
+   - \`memory_engineering/search --query "technical debt related"\` - Find improvement opportunities
+   - \`memory_engineering/search --query "performance impact considerations"\` - Assess system load
+   - \`memory_engineering/search --query "integration complexity similar"\` - Learn from similar integrations
+   
+   **🔄 Dynamic Development Intelligence:**
+   - \`memory_engineering/search --query "error patterns encountered"\` - Learn from past mistakes
+   - \`memory_engineering/search --query "scaling challenges faced"\` - Understand growth pain points
+   - \`memory_engineering/search --query "user feedback incorporated"\` - Find user-driven improvements
+   - \`memory_engineering/search --query "debugging techniques used"\` - Discover troubleshooting approaches
+   
+   **💡 Creative Problem-Solving Searches:**
+   - \`memory_engineering/search --query "unconventional solution approach"\` - Find creative implementations
+   - \`memory_engineering/search --query "cross-functional impact"\` - Understand broader implications
+   - \`memory_engineering/search --query "trade-off decisions made"\` - Learn from architectural choices
+   - \`memory_engineering/search --query "team knowledge sharing"\` - Find collaborative patterns
    
    **Phase 1B: Core Memory Files Analysis**
    - \`memory_engineering/read --fileName "systemPatterns.md"\` - Architecture and design patterns
@@ -113,6 +174,16 @@ The AI agent only gets the context you are appending to the PRP and training dat
    - Current development status and blockers from activeContext
    - Historical lessons and implementation approaches from progress
    - Overall project vision and goals from projectbrief
+
+   **Phase 1D: Codebase Exploration (FOR EXISTING PROJECTS ONLY)**
+   If this is an EXISTING PROJECT, also perform:
+   - Examine package.json/requirements.txt for dependencies and scripts
+   - Review main entry points (index.js, main.py, etc.)
+   - Analyze existing folder structure and naming conventions
+   - Look for similar features already implemented
+   - Understand current testing and build patterns
+   - Identify key architectural decisions in actual code
+   - Note any existing patterns that should be followed
 
 2. **External Research**
    - Search for similar features/patterns online
