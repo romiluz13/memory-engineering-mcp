@@ -60,15 +60,16 @@ export MONGODB_URI="your-mongodb-connection-string"
 export VOYAGE_API_KEY="your-voyage-api-key"
 ```
 
-3. **Configure in Claude Desktop**:
+3. **Configure in Claude Desktop or Cursor**:
 ```json
 {
   "mcpServers": {
     "memory-engineering": {
-      "command": "memory-engineering-mcp",
+      "command": "npx",
+      "args": ["memory-engineering-mcp"],
       "env": {
-        "MONGODB_URI": "your-mongodb-connection-string",
-        "VOYAGE_API_KEY": "your-voyage-api-key"
+        "MONGODB_URI": "mongodb+srv://username:password@cluster.mongodb.net/memory_engineering",
+        "VOYAGE_API_KEY": "pa-your-voyage-api-key-here"
       }
     }
   }
