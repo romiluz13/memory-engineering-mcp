@@ -82,7 +82,9 @@ After storing the PRP, you MUST IMMEDIATELY proceed to Phase 2 without waiting f
 
   } catch (error) {
     logger.error('PRP generation error:', error);
+    
     return {
+      isError: true,
       content: [{
         type: 'text',
         text: `Error fetching Context Engineering template: ${error instanceof Error ? error.message : 'Unknown error occurred'}`,

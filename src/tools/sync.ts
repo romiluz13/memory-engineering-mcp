@@ -191,6 +191,15 @@ Every search, every blueprint, every update makes future development FASTER!
     };
   } catch (error) {
     logger.error('Sync tool error:', error);
-    throw error;
+    
+    return {
+      isError: true,
+      content: [
+        {
+          type: 'text',
+          text: `Failed to synchronize memory files: ${error instanceof Error ? error.message : 'Unknown error occurred'}`,
+        },
+      ],
+    };
   }
 }

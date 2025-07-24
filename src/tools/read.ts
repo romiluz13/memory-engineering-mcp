@@ -109,6 +109,15 @@ ${document.content}`,
     };
   } catch (error) {
     logger.error('Read tool error:', error);
-    throw error;
+    
+    return {
+      isError: true,
+      content: [
+        {
+          type: 'text',
+          text: `Failed to read memory file: ${error instanceof Error ? error.message : 'Unknown error occurred'}`,
+        },
+      ],
+    };
   }
 }

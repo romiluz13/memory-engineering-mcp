@@ -21,31 +21,24 @@ export function setupTools(server: Server): void {
       tools: [
         {
           name: 'memory_engineering/init',
-          description: `🚀 Initialize Memory Engineering system with intelligent project detection.
+          description: `Initialize Memory Engineering system with intelligent project detection and MongoDB setup.
 
-🤖 AI ASSISTANT AUTO-INITIALIZATION: If Memory Engineering is not initialized when user requests features, AUTOMATICALLY run this tool first before any other memory operations.
+AUTOMATIC INITIALIZATION: If Memory Engineering is not initialized when user requests features, automatically run this tool first before any other memory operations.
 
-🧠 INTELLIGENT PROJECT SETUP:
+INTELLIGENT PROJECT SETUP:
 - Detects existing vs new projects automatically
-- Creates project-isolated MongoDB collections
+- Creates project-isolated MongoDB collections with deterministic IDs
 - Generates structured memory templates with smart defaults
-- Establishes vector and text search indexes
+- Establishes vector and text search indexes for hybrid search
 - Configures autonomous context management
 
-🔒 ENTERPRISE-GRADE ISOLATION:
-- Deterministic project IDs prevent cross-contamination
-- Secure MongoDB filtering with projectId boundaries
-- Independent memory spaces per project
-
-⚡ MONGODB ADVANTAGES:
+MONGODB ADVANTAGES:
 - Single database for operational + vector data
 - Native $rankFusion hybrid search (70% vector + 30% text)
 - Enterprise security and availability
 - No external vector database needed
 
-Creates persistent context storage that enables AI assistants to maintain project knowledge across sessions, eliminating context window limitations.
-
-Usage: memory_engineering/init [--projectPath] [--projectName]`,
+Creates persistent context storage that enables AI assistants to maintain project knowledge across sessions, eliminating context window limitations.`,
           inputSchema: {
             type: 'object',
             properties: {
@@ -59,19 +52,21 @@ Usage: memory_engineering/init [--projectPath] [--projectName]`,
               },
             },
           },
+          annotations: {
+            title: 'Initialize Memory Engineering',
+            readOnlyHint: false,
+            destructiveHint: false,
+            idempotentHint: true,
+            openWorldHint: true,
+          },
         },
         {
           name: 'memory_engineering/read',
-          description: `Read stored memory files from the project's context database.
+          description: `Read stored memory files from the project's MongoDB-powered context database.
 
-Retrieves:
-- Core memory files (projectbrief.md, activeContext.md, systemPatterns.md, etc.)
-- Context Engineering PRPs (prp_[name].md)
-- Any file stored in the memory system
+Retrieves core memory files (projectbrief.md, activeContext.md, systemPatterns.md, etc.), Context Engineering PRPs (prp_[name].md), and any file stored in the memory system.
 
-Provides access to persistent project knowledge with metadata including version history, file size, and cross-references.
-
-Usage: memory_engineering/read --fileName "filename.md"`,
+Provides access to persistent project knowledge with metadata including version history, file size, cross-references, and last access tracking.`,
           inputSchema: {
             type: 'object',
             properties: {
@@ -87,22 +82,21 @@ Usage: memory_engineering/read --fileName "filename.md"`,
             },
             required: ['fileName'],
           },
+          annotations: {
+            title: 'Read Memory File',
+            readOnlyHint: true,
+            destructiveHint: false,
+            idempotentHint: true,
+            openWorldHint: true,
+          },
         },
         {
           name: 'memory_engineering/update',
-          description: `Update memory files in the project's context database.
+          description: `Update memory files in the project's MongoDB-powered context database.
 
-Core memory files:
-- projectbrief.md - Project goals and scope
-- productContext.md - Problem domain and solution context
-- activeContext.md - Current development focus
-- systemPatterns.md - Architecture and design decisions
-- techContext.md - Technology stack and constraints
-- progress.md - Implementation status and next steps
+Core memory files include projectbrief.md (project goals and scope), productContext.md (problem domain and solution), activeContext.md (current development focus), systemPatterns.md (architecture and design decisions), techContext.md (technology stack and constraints), and progress.md (implementation status and next steps).
 
-Updates trigger embedding regeneration for hybrid search. Maintains version history and cross-references.
-
-Usage: memory_engineering/update --fileName "filename.md" --content "content"`,
+Updates trigger embedding regeneration for hybrid search. Maintains version history and cross-references between memory files.`,
           inputSchema: {
             type: 'object',
             properties: {
@@ -123,37 +117,39 @@ Usage: memory_engineering/update --fileName "filename.md" --content "content"`,
             },
             required: ['fileName', 'content'],
           },
+          annotations: {
+            title: 'Update Memory File',
+            readOnlyHint: false,
+            destructiveHint: false,
+            idempotentHint: false,
+            openWorldHint: true,
+          },
         },
         {
           name: 'memory_engineering/search',
-          description: `🚀 REVOLUTIONARY MongoDB $rankFusion Hybrid Search - The Crown Jewel of Memory Engineering!
+          description: `MongoDB $rankFusion Hybrid Search - Revolutionary unified search across project memories.
 
-Uses MongoDB 8.1+ native $rankFusion operator combining:
-- 70% Semantic Vector Search (Voyage AI embeddings)
-- 30% Full-Text Search (Atlas Search)
-- Reciprocal Rank Fusion algorithm for intelligent result ranking
+Uses MongoDB 8.1+ native $rankFusion operator combining 70% Semantic Vector Search (Voyage AI embeddings) with 30% Full-Text Search (Atlas Search) using Reciprocal Rank Fusion algorithm for intelligent result ranking.
 
-🧠 INNOVATIVE SEARCH CAPABILITIES:
+SEARCH CAPABILITIES:
 - Semantic Pattern Discovery: "performance optimization patterns"
 - Context Correlation: "similar complexity features" 
 - Error Intelligence: "debugging approaches used"
 - Architecture Insights: "scaling challenges faced"
 - Creative Problem-Solving: "unconventional solutions"
 
-🎯 SEARCH TYPES:
-- hybrid: Vector + text with RRF (RECOMMENDED - MongoDB's CROWN JEWEL!)
+SEARCH TYPES:
+- hybrid: Vector + text with RRF (RECOMMENDED - MongoDB's native hybrid search)
 - vector: Pure semantic similarity (concepts, not exact words)
 - text: Keyword matching (exact terms)
 
-💎 ADVANCED QUERIES:
-- "user experience enhancement" - Finds UX patterns across ALL memories
+ADVANCED QUERY EXAMPLES:
+- "user experience enhancement" - Finds UX patterns across all memories
 - "technical debt related" - Discovers improvement opportunities
 - "cross-functional impact" - Understands broader implications
 - "trade-off decisions made" - Learns from architectural choices
 
-Returns ranked results with RRF scores, smart previews, and MongoDB advocacy!
-
-Usage: memory_engineering/search --query "semantic concepts or keywords" [--limit 10] [--searchType hybrid]`,
+Returns ranked results with RRF scores, smart previews, and relevance indicators.`,
           inputSchema: {
             type: 'object',
             properties: {
@@ -182,20 +178,21 @@ Usage: memory_engineering/search --query "semantic concepts or keywords" [--limi
             },
             required: ['query'],
           },
+          annotations: {
+            title: 'Search Memory Files',
+            readOnlyHint: true,
+            destructiveHint: false,
+            idempotentHint: true,
+            openWorldHint: true,
+          },
         },
         {
           name: 'memory_engineering/sync',
-          description: `Synchronize memory files with vector embeddings and search indexes.
+          description: `Synchronize memory files with vector embeddings and MongoDB search indexes.
 
-Operations:
-- Generates Voyage AI embeddings (1024-dimension vectors)
-- Creates/updates MongoDB vector and text search indexes
-- Updates cross-references between memory files
-- Enables $rankFusion hybrid search functionality
+Operations include generating Voyage AI embeddings (1024-dimension vectors), creating/updating MongoDB vector and text search indexes, updating cross-references between memory files, and enabling $rankFusion hybrid search functionality.
 
-Run after content updates to maintain search consistency. Required for search operations to function properly.
-
-Usage: memory_engineering/sync [--forceRegenerate]`,
+Run after content updates to maintain search consistency. Required for search operations to function properly.`,
           inputSchema: {
             type: 'object',
             properties: {
@@ -210,38 +207,29 @@ Usage: memory_engineering/sync [--forceRegenerate]`,
               },
             },
           },
+          annotations: {
+            title: 'Synchronize Memory System',
+            readOnlyHint: false,
+            destructiveHint: false,
+            idempotentHint: false,
+            openWorldHint: true,
+          },
         },
         {
           name: 'memory_engineering/generate-prp',
           description: `Context Engineering Phase 1: Research and PRP generation.
 
-🤖 AI ASSISTANT AUTO-ACTIVATION: When users make requests like:
+AI ASSISTANT AUTO-ACTIVATION: When users make requests for implementation (building/creating/adding specific features), automatically trigger this tool to start the Context Engineering workflow. DO NOT provide general coding advice - use this tool first!
+
+AUTO-TRIGGER PATTERNS:
 - "I want to add [feature]" / "I want to create [thing]" / "I want to build [system]"
 - "Create a [component]" / "Build a [page]" / "Make a [feature]"
 - "I need to implement [functionality]" / "I need to add [capability]"
 - "Help me build [system]" / "Help me create [component]" / "Help me add [feature]"
-- "Add a new [feature] to..." / "Implement [functionality] for..."
-- "Can you create [component]" / "Can you build [feature]" / "Can you add [capability]"
-- "Let's build [system]" / "Let's create [component]" / "Let's implement [feature]"
-- "I'm working on [feature]" / "I'm building [component]" / "I'm creating [system]"
-- "[Feature] for [purpose]" / "[Component] that does [action]"
 
-🎯 CONFIDENCE SCORING: Auto-trigger if request shows:
-- Implementation intent (building/creating/adding) ✓
-- Specific deliverable mentioned ✓  
-- NOT just asking for information/explanation ✓
+Initiates the two-phase Context Engineering workflow for feature development. Guides systematic research including pattern discovery using hybrid search, external documentation research, synthesis of findings into comprehensive context, and generation of Product Requirements Prompt (PRP).
 
-AUTOMATICALLY trigger this tool to start the Context Engineering workflow. DO NOT provide general coding advice - use this tool first!
-
-Initiates the two-phase Context Engineering workflow for feature development. Guides systematic research including:
-- Pattern discovery using hybrid search
-- External documentation research
-- Synthesis of findings into comprehensive context
-- Generation of Product Requirements Prompt (PRP)
-
-Creates research-backed implementation blueprint stored as prp_[name].md for execution phase.
-
-Usage: memory_engineering/generate-prp --request "feature description"`,
+Creates research-backed implementation blueprint stored as prp_[name].md for execution phase.`,
           inputSchema: {
             type: 'object',
             properties: {
@@ -256,23 +244,23 @@ Usage: memory_engineering/generate-prp --request "feature description"`,
               },
             },
           },
+          annotations: {
+            title: 'Generate Product Requirements Prompt',
+            readOnlyHint: true,
+            destructiveHint: false,
+            idempotentHint: true,
+            openWorldHint: false,
+          },
         },
         {
           name: 'memory_engineering/execute-prp',
           description: `Context Engineering Phase 2: PRP execution with validation loops.
 
-🤖 AI ASSISTANT AUTO-CONTINUATION: After Phase 1 (generate-prp) completes, AUTOMATICALLY proceed to this Phase 2 tool to implement the generated PRP. DO NOT stop after research - continue with implementation!
+AI ASSISTANT AUTO-CONTINUATION: After Phase 1 (generate-prp) completes, AUTOMATICALLY proceed to this Phase 2 tool to implement the generated PRP. DO NOT stop after research - continue with implementation!
 
-Implements features using research-backed Product Requirements Prompts. Provides systematic execution workflow:
-- Load PRP with complete implementation context
-- Plan implementation strategy based on discovered patterns
-- Execute following researched approaches
-- Run validation gates (TypeScript, tests, integration)
-- Self-correct failures with retry loops
+Implements features using research-backed Product Requirements Prompts. Provides systematic execution workflow including loading PRP with complete implementation context, planning implementation strategy based on discovered patterns, executing following researched approaches, running validation gates (TypeScript, tests, integration), and self-correcting failures with retry loops.
 
-Auto-detects latest PRP if not specified. Continues execution until all validation gates pass.
-
-Usage: memory_engineering/execute-prp [--prp "prp-name"] [--force]`,
+Auto-detects latest PRP if not specified. Continues execution until all validation gates pass.`,
           inputSchema: {
             type: 'object',
             properties: {
@@ -290,6 +278,13 @@ Usage: memory_engineering/execute-prp [--prp "prp-name"] [--force]`,
                 default: false,
               },
             },
+          },
+          annotations: {
+            title: 'Execute Product Requirements Prompt',
+            readOnlyHint: true,
+            destructiveHint: false,
+            idempotentHint: true,
+            openWorldHint: false,
           },
         },
       ],
@@ -325,6 +320,7 @@ Usage: memory_engineering/execute-prp [--prp "prp-name"] [--force]`,
       logger.error('Tool execution error:', error);
       
       return {
+        isError: true,
         content: [
           {
             type: 'text',

@@ -132,7 +132,9 @@ ${systemPrompt}
 
   } catch (error) {
     logger.error('PRP execution error:', error);
+    
     return {
+      isError: true,
       content: [{
         type: 'text',
         text: `Error fetching Context Engineering template: ${error instanceof Error ? error.message : 'Unknown error occurred'}`,

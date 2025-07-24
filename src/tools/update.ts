@@ -113,7 +113,16 @@ Note: Embeddings have been cleared. Run memory_engineering/sync to regenerate th
     };
   } catch (error) {
     logger.error('Update tool error:', error);
-    throw error;
+    
+    return {
+      isError: true,
+      content: [
+        {
+          type: 'text',
+          text: `Failed to update memory file: ${error instanceof Error ? error.message : 'Unknown error occurred'}`,
+        },
+      ],
+    };
   }
 }
 
