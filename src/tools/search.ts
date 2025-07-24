@@ -6,6 +6,46 @@ import { getMemoryCollection } from '../db/connection.js';
 import { generateEmbedding } from '../embeddings/voyage.js';
 import { logger } from '../utils/logger.js';
 
+// Generate creative search suggestions based on query patterns
+function generateCreativeSearchSuggestions(query: string): string {
+  const lowerQuery = query.toLowerCase();
+  const suggestions = [];
+  
+  // Pattern-based suggestions
+  if (lowerQuery.includes('performance') || lowerQuery.includes('speed') || lowerQuery.includes('optimization')) {
+    suggestions.push('🚀 "scaling challenges faced" - Learn from performance bottlenecks');
+    suggestions.push('⚡ "bottleneck optimization patterns" - Discover speed improvements');
+    suggestions.push('📊 "performance metrics tracking" - Find measurement approaches');
+  }
+  
+  if (lowerQuery.includes('error') || lowerQuery.includes('bug') || lowerQuery.includes('debug')) {
+    suggestions.push('🔍 "debugging techniques used" - Learn troubleshooting patterns');
+    suggestions.push('🛠️ "error handling strategies" - Discover robust error management');
+    suggestions.push('🔄 "recovery patterns implemented" - Find resilience approaches');
+  }
+  
+  if (lowerQuery.includes('user') || lowerQuery.includes('ux') || lowerQuery.includes('interface')) {
+    suggestions.push('👥 "user feedback incorporated" - Learn from user insights');
+    suggestions.push('🎨 "user experience enhancement" - Discover UX patterns');
+    suggestions.push('📱 "user workflow optimization" - Find journey improvements');
+  }
+  
+  if (lowerQuery.includes('test') || lowerQuery.includes('quality') || lowerQuery.includes('validation')) {
+    suggestions.push('🧪 "testing strategy precedents" - Find testing approaches');
+    suggestions.push('✅ "validation patterns used" - Discover quality gates');
+    suggestions.push('🔬 "quality assurance methods" - Learn QA techniques');
+  }
+  
+  // Always add some creative cross-cutting suggestions
+  suggestions.push('🔗 "related business logic" - Find connected functionality');
+  suggestions.push('🎯 "similar complexity features" - Discover comparable implementations');
+  suggestions.push('💡 "unconventional solution approach" - Find creative alternatives');
+  suggestions.push('⚖️ "trade-off decisions made" - Learn from architectural choices');
+  
+  return suggestions.length > 0 ? suggestions.slice(0, 4).join('\n') : 
+    '🔍 "related patterns found" - Explore connected concepts\n💡 "lessons learned documented" - Discover implementation insights';
+}
+
 export async function searchTool(args: unknown): Promise<CallToolResult> {
   try {
     const params = SearchToolSchema.parse(args);
@@ -283,12 +323,36 @@ ${params.searchType === 'hybrid' ?
       // Ensure score is always a number before calling toFixed
       const scoreValue = typeof doc.score === 'number' ? doc.score : 0;
       
-      // Add content stats for AI context awareness
-      const contentStats = `[${(doc.content.length / 1024).toFixed(1)}KB, ${doc.metadata.version || 1} versions]`;
+      // Add enhanced context stats for AI intelligence
+      const contentStats = `[${(doc.content.length / 1024).toFixed(1)}KB, v${doc.metadata.version || 1}]`;
       
-      return `## ${index + 1}. ${doc.fileName} (${doc.metadata.type}) ${contentStats}
-Score: ${scoreValue.toFixed(3)}${scoreInfo}
-Preview: ${preview}`;
+      // Add intelligent relevance indicators
+      const relevanceIndicators = [];
+      if (scoreValue > 0.8) relevanceIndicators.push('🎯 HIGH RELEVANCE');
+      else if (scoreValue > 0.5) relevanceIndicators.push('📋 MEDIUM RELEVANCE');
+      else relevanceIndicators.push('💡 POTENTIAL INSIGHT');
+      
+      // Add content type intelligence
+      const typeEmoji: Record<string, string> = {
+        'projectbrief': '🎯',
+        'productContext': '🌟', 
+        'activeContext': '⚡',
+        'systemPatterns': '🏗️',
+        'techContext': '🔧',
+        'progress': '📈'
+      };
+      const emoji = typeEmoji[doc.metadata.type] || '📄';
+      
+      // Add last updated intelligence
+      const lastUpdated = doc.metadata.lastUpdated ? 
+        new Date(doc.metadata.lastUpdated).toLocaleDateString() : 'Unknown';
+      
+      return `## ${index + 1}. ${emoji} ${doc.fileName} ${relevanceIndicators.join(' ')}
+**Type**: ${doc.metadata.type} ${contentStats} | **Updated**: ${lastUpdated}
+**RRF Score**: ${scoreValue.toFixed(3)}${scoreInfo}
+**Context**: ${preview}
+
+🧠 **AI Integration Notes**: This ${doc.metadata.type} file contains patterns relevant to your query. Consider cross-referencing with related memory files for complete context.`;
     }).join('\n\n');
 
     // Create search type explanation
@@ -342,21 +406,27 @@ ${formattedResults}`
       });
     }
     
-    // Part 3: Next steps and MongoDB advantages
+    // Part 3: Intelligent next steps and creative suggestions
+    const creativeSuggestions = generateCreativeSearchSuggestions(params.query);
+    
     contentParts.push({
       type: 'text' as const,
-      text: `📍 NEXT STEPS:
-1. 📖 Read the most relevant file: memory_engineering/read --fileName "[filename]"
-2. 🔄 Update your knowledge: memory_engineering/update --fileName "[filename]"
-3. 🚀 Create new features based on patterns found!
+      text: `📍 INTELLIGENT NEXT STEPS:
+1. 📖 Deep dive: memory_engineering/read --fileName "[most relevant filename]"
+2. 🔄 Cross-reference: Search related concepts using suggestions below
+3. 🚀 Pattern synthesis: Combine findings from multiple memory files
+4. 💡 Context expansion: Update memories with new insights discovered
 
-🏆 MongoDB ADVANTAGE: ONE database for:
-- Operational data ✓
-- Vector embeddings ✓  
-- Full-text search ✓
-- Version history ✓
+🧠 CREATIVE SEARCH SUGGESTIONS:
+${creativeSuggestions}
 
-No external vector DB needed - MongoDB does it ALL!`
+🏆 MongoDB $rankFusion POWER:
+- Semantic understanding of "${params.query}" concepts ✓
+- Keyword matching for exact terms ✓  
+- Reciprocal Rank Fusion combining both approaches ✓
+- One unified database - no external vector DB needed ✓
+
+💎 The beauty of MongoDB: Operational data + vector embeddings + full-text search + version history ALL in one place!`
     });
 
     return {
@@ -365,28 +435,85 @@ No external vector DB needed - MongoDB does it ALL!`
   } catch (error) {
     logger.error('Search tool error:', error);
     
-    // Provide user-friendly error messages
-    let errorMessage = 'Search failed: ';
+    // Enhanced user-friendly error messages with solutions
+    let errorMessage = '';
     const errorMsg = error instanceof Error ? error.message : String(error);
     
     if (errorMsg.includes('no mongodb atlas search index found')) {
-      errorMessage = `Search indexes are being created. Please wait a moment and try again.
+      errorMessage = `🔧 **MongoDB Atlas Search Index Setup Required**
 
-The following indexes are being set up:
-- Vector search index for semantic search
-- Atlas Search index for text search
+**The Issue**: Search indexes are still being created or need to be set up manually.
 
-This typically takes 1-2 minutes. Run memory_engineering/sync to ensure indexes are created.`;
+**Quick Fix**:
+1. Run: \`memory_engineering/sync\` to create indexes automatically
+2. Wait 1-2 minutes for Atlas to build indexes
+3. Try your search again
+
+**Manual Setup** (if automatic fails):
+1. Go to MongoDB Atlas Console
+2. Navigate to your cluster → Search → Create Search Index
+3. Use the JSON configuration from: \`npm run db:indexes\`
+
+**Current Status**: 
+- Vector search index: Creating...
+- Atlas Search index: Creating...
+
+💡 **Pro Tip**: Use \`memory_engineering/search --searchType vector\` while text index builds!`;
     } else if (errorMsg.includes('text index required')) {
-      errorMessage = `Text search is not available yet. The Atlas Search index is being created.
+      errorMessage = `📝 **Atlas Search Index Not Ready**
 
-In the meantime, you can use:
-- searchType: "vector" for semantic search
-- Run memory_engineering/sync to create search indexes`;
-    } else if (error instanceof Error && 'code' in error && error.code === 6) {
-      errorMessage = 'Connection error. Please check your MongoDB connection and try again.';
+**The Issue**: Text search requires Atlas Search index which is still building.
+
+**Immediate Solutions**:
+1. 🧠 Use vector search: \`memory_engineering/search --query "[your query]" --searchType vector\`
+2. 🔄 Run: \`memory_engineering/sync\` to ensure index creation
+3. ⏳ Wait 1-2 minutes for Atlas to build text index
+
+**Why This Happens**: Atlas Search indexes take time to build for optimal performance.
+
+💎 **MongoDB Magic**: While text search builds, vector search with Voyage AI embeddings works perfectly!`;
+    } else if (errorMsg.includes('connection') || errorMsg.includes('network')) {
+      errorMessage = `🔌 **MongoDB Connection Issue**
+
+**The Issue**: Cannot connect to your MongoDB Atlas database.
+
+**Solutions**:
+1. ✅ Check your \`MONGODB_URI\` in environment variables
+2. 🌐 Verify internet connection
+3. 🔑 Confirm MongoDB Atlas access (IP whitelist, credentials)
+4. 🔄 Try: \`memory_engineering/sync\` to test connection
+
+**Environment Check**:
+- MONGODB_URI: ${process.env.MONGODB_URI ? '✅ Set' : '❌ Missing'}
+- VOYAGE_API_KEY: ${process.env.VOYAGE_API_KEY ? '✅ Set' : '❌ Missing'}
+
+💡 **Pro Tip**: Test connection with: \`npm run db:check\``;
+    } else if (errorMsg.includes('voyage') || errorMsg.includes('embedding')) {
+      errorMessage = `🧠 **Voyage AI Embedding Error**
+
+**The Issue**: Cannot generate embeddings for semantic search.
+
+**Solutions**:
+1. ✅ Check your \`VOYAGE_API_KEY\` in environment variables
+2. 🔄 Try text-only search: \`memory_engineering/search --query "[your query]" --searchType text\`
+3. 🌐 Verify Voyage AI API status
+
+**Quick Workaround**: Use text search while fixing embedding issue!`;
     } else {
-      errorMessage += errorMsg || 'Unknown error occurred';
+      errorMessage = `🚨 **Memory Engineering Search Error**
+
+**The Issue**: ${errorMsg}
+
+**General Solutions**:
+1. 🔄 Try: \`memory_engineering/sync\` to refresh system
+2. 🔧 Check: \`memory_engineering/init\` was run for this project
+3. 📋 Verify: Project has memory files to search
+
+**Get Help**: 
+- Check system status with available memory files
+- Ensure MongoDB Atlas and Voyage AI are properly configured
+
+💡 **Debug Info**: ${errorMsg}`;
     }
     
     return {

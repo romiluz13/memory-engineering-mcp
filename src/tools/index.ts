@@ -21,17 +21,29 @@ export function setupTools(server: Server): void {
       tools: [
         {
           name: 'memory_engineering/init',
-          description: `Initialize Memory Engineering system for a project.
+          description: `🚀 Initialize Memory Engineering system with intelligent project detection.
 
 🤖 AI ASSISTANT AUTO-INITIALIZATION: If Memory Engineering is not initialized when user requests features, AUTOMATICALLY run this tool first before any other memory operations.
 
-Creates:
-- Project-isolated MongoDB collection
-- Core memory files with structured templates
-- Vector and text search indexes
-- Configuration for autonomous context management
+🧠 INTELLIGENT PROJECT SETUP:
+- Detects existing vs new projects automatically
+- Creates project-isolated MongoDB collections
+- Generates structured memory templates with smart defaults
+- Establishes vector and text search indexes
+- Configures autonomous context management
 
-Sets up persistent context storage that enables AI assistants to maintain project knowledge across sessions, eliminating context window limitations.
+🔒 ENTERPRISE-GRADE ISOLATION:
+- Deterministic project IDs prevent cross-contamination
+- Secure MongoDB filtering with projectId boundaries
+- Independent memory spaces per project
+
+⚡ MONGODB ADVANTAGES:
+- Single database for operational + vector data
+- Native $rankFusion hybrid search (70% vector + 30% text)
+- Enterprise security and availability
+- No external vector database needed
+
+Creates persistent context storage that enables AI assistants to maintain project knowledge across sessions, eliminating context window limitations.
 
 Usage: memory_engineering/init [--projectPath] [--projectName]`,
           inputSchema: {
@@ -114,18 +126,34 @@ Usage: memory_engineering/update --fileName "filename.md" --content "content"`,
         },
         {
           name: 'memory_engineering/search',
-          description: `Search project memory using MongoDB $rankFusion hybrid search.
+          description: `🚀 REVOLUTIONARY MongoDB $rankFusion Hybrid Search - The Crown Jewel of Memory Engineering!
 
-Combines semantic vector search (70%) with text matching (30%) using MongoDB's native $rankFusion operator. Enables pattern discovery, similar feature identification, and context research.
+Uses MongoDB 8.1+ native $rankFusion operator combining:
+- 70% Semantic Vector Search (Voyage AI embeddings)
+- 30% Full-Text Search (Atlas Search)
+- Reciprocal Rank Fusion algorithm for intelligent result ranking
 
-Search types:
-- hybrid: Vector + text search with reciprocal rank fusion (default)
-- vector: Semantic similarity search only
-- text: Keyword matching only
+🧠 INNOVATIVE SEARCH CAPABILITIES:
+- Semantic Pattern Discovery: "performance optimization patterns"
+- Context Correlation: "similar complexity features" 
+- Error Intelligence: "debugging approaches used"
+- Architecture Insights: "scaling challenges faced"
+- Creative Problem-Solving: "unconventional solutions"
 
-Returns ranked results with relevance scores and metadata.
+🎯 SEARCH TYPES:
+- hybrid: Vector + text with RRF (RECOMMENDED - MongoDB's CROWN JEWEL!)
+- vector: Pure semantic similarity (concepts, not exact words)
+- text: Keyword matching (exact terms)
 
-Usage: memory_engineering/search --query "search terms" [--limit 10] [--searchType hybrid]`,
+💎 ADVANCED QUERIES:
+- "user experience enhancement" - Finds UX patterns across ALL memories
+- "technical debt related" - Discovers improvement opportunities
+- "cross-functional impact" - Understands broader implications
+- "trade-off decisions made" - Learns from architectural choices
+
+Returns ranked results with RRF scores, smart previews, and MongoDB advocacy!
+
+Usage: memory_engineering/search --query "semantic concepts or keywords" [--limit 10] [--searchType hybrid]`,
           inputSchema: {
             type: 'object',
             properties: {

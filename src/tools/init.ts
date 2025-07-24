@@ -45,11 +45,18 @@ const INITIAL_MEMORY_TEMPLATES = {
 - **Business**: [e.g., Reduces Z by N%]
 
 ## AI Context Guide
-**When coding this project, remember:**
-- Start with [this component/feature]
-- Use [specific patterns/libraries]
-- Avoid [anti-patterns]
-- See systemPatterns.md for architecture
+**🤖 For AI Coding Assistants - Critical Implementation Notes:**
+- **Entry Point**: Start with [main component/feature - e.g., src/components/App.tsx]
+- **Architecture**: Follow patterns documented in systemPatterns.md
+- **Libraries**: Use [specific libraries - e.g., React, TypeScript, MongoDB]
+- **Patterns**: Implement [key patterns - e.g., hooks, context, error boundaries]
+- **Anti-patterns**: Avoid [specific issues - e.g., prop drilling, uncontrolled components]
+- **Testing**: Use [testing approach - e.g., Jest, React Testing Library]
+- **Performance**: Consider [optimization strategies - e.g., lazy loading, memoization]
+
+**🚀 Context Engineering Integration:**
+This project is optimized for Memory Engineering MCP with MongoDB hybrid search.
+Use memory_engineering/search to discover patterns and memory_engineering/update to document learnings.
 `,
   'productContext.md': `# Product Context
 
@@ -125,10 +132,29 @@ npm test     # [Test command]
 - [ ] [Technical decision needed]
 - [ ] [Design choice to make]
 
-## AI Coding Notes
-- Currently working in: [file/module]
-- Watch out for: [gotchas]
-- Related files: [see techContext.md for stack]
+## 🤖 AI Coding Assistant Context
+**Real-time development state for AI assistants:**
+
+### 🎯 Current Focus
+- **Active Module**: [file/module currently being developed]
+- **Implementation Stage**: [planning/coding/testing/debugging]
+- **Complexity Level**: [simple/medium/complex/experimental]
+
+### ⚠️ Critical Gotchas & Warnings
+- **Watch out for**: [specific issues - e.g., async race conditions, memory leaks]
+- **Common Mistakes**: [patterns to avoid in this project]
+- **Dependencies**: [fragile integrations that need care]
+
+### 🔗 Context Integration
+- **Memory Search**: Use "current development patterns" to find similar work
+- **Related Memory Files**: Cross-reference with systemPatterns.md, techContext.md
+- **Pattern Discovery**: Search for "[current feature type] implementation examples"
+
+### 🚀 AI Workflow Optimization
+- **Before Implementation**: Search existing patterns using hybrid search
+- **During Development**: Update this file with real-time progress
+- **After Completion**: Document learnings and update systemPatterns.md
+- **Context Engineering**: Use memory_engineering/generate-prp for complex features
 `,
   'systemPatterns.md': `# System Patterns
 
@@ -176,11 +202,31 @@ npm test     # [Test command]
 - **Optimizations**: [What we've optimized]
 - **Monitoring**: [How to measure]
 
-## AI Implementation Guide
-- **Entry Points**: Start with [these files]
-- **Core Logic**: Located in [these modules]
-- **Extension Points**: Add features at [these interfaces]
-- **Testing**: Run [these tests] when changing [this]
+## 🤖 AI Implementation Guide
+**For AI Coding Assistants - Step-by-Step Implementation:**
+
+### 🚀 Getting Started
+- **Entry Points**: Start with [main files - e.g., src/index.ts, src/App.tsx]
+- **Core Logic**: Located in [key modules - e.g., src/services/, src/components/]
+- **Extension Points**: Add features at [interfaces - e.g., src/types/, src/hooks/]
+- **Testing**: Run [test commands] when changing [specific modules]
+
+### 🔍 Code Discovery Strategy
+- **Search Patterns**: Use memory_engineering/search to find similar implementations
+- **Pattern Recognition**: Look for [consistent patterns - e.g., naming conventions, file structure]
+- **Dependencies**: Check [key dependencies - e.g., package.json, imports]
+- **Configuration**: Review [config files - e.g., tsconfig.json, webpack.config.js]
+
+### 🛠️ Development Workflow
+- **Before Coding**: Search existing patterns using hybrid search
+- **During Development**: Follow established conventions and patterns
+- **After Implementation**: Update this memory file with new patterns learned
+- **Testing**: Use [specific testing patterns - e.g., unit tests, integration tests]
+
+### 🚨 Critical Implementation Notes
+- **NEVER**: [Anti-patterns to avoid - e.g., direct DOM manipulation in React]
+- **ALWAYS**: [Best practices to follow - e.g., use TypeScript types, error boundaries]
+- **MEMORY INTEGRATION**: Document new patterns in Memory Engineering system
 `,
   'techContext.md': `# Technical Context
 
