@@ -183,7 +183,7 @@ export async function searchTool(args: unknown): Promise<CallToolResult> {
           },
           {
             $addFields: {
-              score: { $meta: 'searchScore' }, // RRF score from $rankFusion
+              score: { $meta: 'score' }, // RRF score from $rankFusion
             },
           },
           {

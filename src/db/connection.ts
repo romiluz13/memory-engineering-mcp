@@ -20,7 +20,7 @@ export async function connectToMongoDB(): Promise<void> {
 
     await client.connect();
     
-    const dbName = process.env.MEMORY_ENGINEERING_DB || process.env.MEMORY_BANK_DB || 'memory_engineering';
+    const dbName = process.env.MEMORY_ENGINEERING_DB || 'memory_engineering';
     db = client.db(dbName);
     
     // Verify connection
@@ -51,6 +51,6 @@ export function getDb(): Db {
 }
 
 export function getMemoryCollection(): Collection<MemoryDocument> {
-  const collectionName = process.env.MEMORY_ENGINEERING_COLLECTION || process.env.MEMORY_BANK_COLLECTION || 'memory_engineering_documents';
+  const collectionName = process.env.MEMORY_ENGINEERING_COLLECTION || 'memory_engineering_documents';
   return getDb().collection<MemoryDocument>(collectionName);
 }
