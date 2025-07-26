@@ -45,15 +45,15 @@ export async function syncTool(args: unknown): Promise<CallToolResult> {
         content: [
           {
             type: 'text',
-            text: `✅ All memories are already synced!
+            text: `All memories are already synced.
 
-🧠 Memory Engineering 2.0 Status:
+Status:
 - Vector embeddings: Current
 - Text search: Indexed
-- $rankFusion: Ready
+- Search: $rankFusion ready
 
-Use memory_engineering/search to query your memories.
-Force regeneration? Use: memory_engineering/sync --forceRegenerate true`,
+Use memory_engineering/search to query memories.
+To force regeneration: memory_engineering/sync --forceRegenerate true`,
           },
         ],
       };
@@ -105,31 +105,26 @@ Force regeneration? Use: memory_engineering/sync --forceRegenerate true`,
       content: [
         {
           type: 'text',
-          text: `🧠 Memory Engineering 2.0 Synchronized!
+          text: `Memory synchronization complete.
 
-📊 Sync Results:
-- Memories synced: ${documents.length}
+Sync Results:
+- Memories processed: ${documents.length}
 - Embeddings generated: ${result.modifiedCount}
-- Model: voyage-3-large (1024 dimensions)
+- Embedding model: voyage-3-large (1024 dimensions)
 
-📈 Memory Distribution:
+Memory Distribution:
 ${memorySummary.map(m => 
   `- ${m._id}: ${m.count} memories (avg importance: ${m.avgImportance.toFixed(1)}/10)`
 ).join('\n')}
 
-💎 MongoDB $rankFusion Ready!
-The revolutionary search that combines:
-- 🧠 40% Semantic search (concepts)
-- 📝 30% Pattern matching (proven solutions) 
-- ⏰ 20% Temporal relevance (recent context)
-- 📈 10% Evolution tracking (frequently helpful)
+Search Configuration:
+- $rankFusion weights: 40% semantic, 30% patterns, 20% temporal, 10% evolution
+- Indexes: vector search, text search, TTL
 
-🚀 Try These Searches:
-1. memory_engineering/search --query "error handling patterns"
-2. memory_engineering/search --query "performance optimization"
-3. memory_engineering/search --query "recent changes" --searchType "temporal"
-
-Your AI assistant now has perfect memory recall! 🎯`,
+Example searches:
+- memory_engineering/search --query "error handling patterns"
+- memory_engineering/search --query "performance optimization"
+- memory_engineering/search --query "recent changes" --searchType "temporal"`,
         },
       ],
     };

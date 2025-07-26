@@ -401,34 +401,32 @@ Search type used: ${searchType}`,
     };
   }
 
-  let content = `# Search Results for: "${query}"\n\n`;
-  content += `Found ${results.length} relevant memories (${searchType} search)\n\n`;
+  let content = `Search Results: "${query}"\n\n`;
+  content += `Found ${results.length} memories (${searchType} search)\n\n`;
 
   results.forEach((doc, index) => {
-    content += `## ${index + 1}. `;
+    content += `${index + 1}. `;
     
     // Title based on memory class
     switch (doc.memoryClass) {
       case 'core':
-        content += `📚 ${doc.content.fileName || 'Core Memory'}`;
+        content += `[Core] ${doc.content.fileName || 'Memory'}`;
         break;
       case 'working':
-        content += `⚡ ${doc.content.event?.action || 'Working Memory'}`;
+        content += `[Working] ${doc.content.event?.action || 'Event'}`;
         break;
       case 'insight':
-        content += `💡 ${doc.content.insight?.pattern || 'Insight'}`;
+        content += `[Insight] ${doc.content.insight?.pattern || 'Pattern'}`;
         break;
       case 'evolution':
-        content += `📈 Evolution: ${doc.content.evolution?.query || 'Query'}`;
+        content += `[Evolution] Query: ${doc.content.evolution?.query || 'unknown'}`;
         break;
       default:
-        content += `📄 ${doc.memoryClass}/${doc.memoryType}`;
+        content += `[${doc.memoryClass}] ${doc.memoryType}`;
     }
     
     content += `\n`;
-    content += `- **Importance**: ${doc.metadata.importance}/10\n`;
-    content += `- **Accessed**: ${doc.metadata.accessCount} times\n`;
-    content += `- **Last Updated**: ${doc.metadata.freshness.toISOString().split('T')[0]}\n`;
+    content += `  Importance: ${doc.metadata.importance}/10 | Accessed: ${doc.metadata.accessCount}x | Updated: ${doc.metadata.freshness.toISOString().split('T')[0]}\n`;
     
     // Preview of content
     let preview = '';
@@ -448,20 +446,17 @@ Search type used: ${searchType}`,
     }
     
     if (preview) {
-      content += `- **Preview**: ${preview}...\n`;
+      content += `  Preview: ${preview}...\n`;
     }
-    
-    content += `- **ID**: ${doc._id}\n\n`;
+    content += `  ID: ${doc._id}\n\n`;
   });
 
-  // Add search suggestions
-  content += `---\n\n`;
-  content += `💡 **Search Tips**:\n`;
-  content += `- Use "rankfusion" (default) for best results combining all search types\n`;
-  content += `- Use "vector" for semantic/conceptual similarity\n`;
-  content += `- Use "text" for exact keyword matching\n`;
-  content += `- Use "temporal" for time-weighted results\n\n`;
-  content += `To view full memory: memory_engineering/read --fileName "name" or use the memory ID`;
+  content += `\nSearch types:\n`;
+  content += `- rankfusion (default): Combines all search methods\n`;
+  content += `- vector: Semantic similarity\n`;
+  content += `- text: Keyword matching\n`;
+  content += `- temporal: Time-weighted relevance\n\n`;
+  content += `To view details: memory_engineering/read --fileName [name] or use memory ID`;
 
   return {
     content: [
