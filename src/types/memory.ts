@@ -1,37 +1,100 @@
 import { z } from 'zod';
 import type { ObjectId } from 'mongodb';
 
-// Memory file types
-export const MEMORY_FILE_TYPES = [
-  'projectbrief',
-  'productContext', 
-  'activeContext',
-  'systemPatterns',
-  'techContext',
-  'progress',
-  'custom',
+// Memory classes for the new 4-class system
+export const MEMORY_CLASSES = ['core', 'working', 'insight', 'evolution'] as const;
+export type MemoryClass = typeof MEMORY_CLASSES[number];
+
+// Memory types within each class
+export const MEMORY_TYPES = ['pattern', 'context', 'event', 'learning', 'meta'] as const;
+export type MemoryType = typeof MEMORY_TYPES[number];
+
+// Core memory file names (for backward compatibility)
+export const CORE_MEMORY_FILES = [
+  'projectbrief.md',
+  'systemPatterns.md', 
+  'activeContext.md',
+  'techContext.md',
+  'progress.md',
+  'codebaseMap.md'
 ] as const;
 
-export type MemoryFileType = typeof MEMORY_FILE_TYPES[number];
-
-// MongoDB document schema
+// MongoDB document schema for unified memory collection
 export interface MemoryDocument {
   _id?: ObjectId;
   projectId: string;
-  fileName: string;
-  content: string;
-  contentVector?: number[];
-  metadata: {
-    lastUpdated: Date;
-    version: number;
-    type: MemoryFileType;
-    fileSize: number;
-    researchId?: string;
-    prpGenerated?: boolean;
+  
+  // Classification
+  memoryClass: MemoryClass;
+  memoryType: MemoryType;
+  
+  // Flexible content based on class
+  content: {
+    // For core memories (markdown files)
+    fileName?: string;
+    markdown?: string;
+    
+    // For working memories (events)
+    event?: {
+      timestamp: Date;
+      action: string;
+      context: Record<string, any>;
+      solution?: string;
+      duration?: number;
+      outcome?: {
+        success: boolean;
+        errors?: Array<{ type: string; message: string }>;
+      };
+    };
+    
+    // For insights (patterns)
+    insight?: {
+      pattern: string;
+      confidence: number;
+      evidence: ObjectId[];
+      discovered: Date;
+    };
+    
+    // For evolution (self-improvement)
+    evolution?: {
+      query: string;
+      resultCount: number;
+      feedback?: 'helpful' | 'not_helpful';
+      timestamp: Date;
+      improvements?: string[];
+    };
   };
-  references: string[];
+  
+  // Search and retrieval
+  contentVector?: number[];     // voyage-3-large embeddings (1024 dims)
+  searchableText?: string;       // Concatenated for text search
+  
+  // Metadata
+  metadata: {
+    importance: number;          // 1-10
+    freshness: Date;            // Last access
+    accessCount: number;
+    autoExpire?: Date;          // TTL for working memories
+    tags: string[];
+    codeReferences?: Array<{
+      file: string;
+      line: number;
+      snippet: string;
+    }>;
+    version?: number;           // For core memories
+  };
+  
   createdAt: Date;
   updatedAt: Date;
+}
+
+// Project configuration
+export interface ProjectConfig {
+  projectId: string;
+  projectPath: string;
+  name: string;
+  createdAt: Date;
+  memoryVersion: '2.0';
 }
 
 // Zod schemas for validation
@@ -39,18 +102,9 @@ export const ProjectConfigSchema = z.object({
   projectId: z.string().uuid(),
   projectPath: z.string(),
   name: z.string(),
-  createdAt: z.string().datetime(),
+  createdAt: z.date(),
+  memoryVersion: z.literal('2.0'),
 });
-
-export type ProjectConfig = z.infer<typeof ProjectConfigSchema>;
-
-export const MemoryFileSchema = z.object({
-  fileName: z.string().regex(/^[a-zA-Z0-9-_]+\.md$/),
-  content: z.string().min(1),
-  type: z.enum(MEMORY_FILE_TYPES),
-});
-
-export type MemoryFile = z.infer<typeof MemoryFileSchema>;
 
 // Tool input schemas
 export const InitToolSchema = z.object({
@@ -59,13 +113,17 @@ export const InitToolSchema = z.object({
 });
 
 export const ReadToolSchema = z.object({
-  fileName: z.string().regex(/^[a-zA-Z0-9-_]+\.md$/),
+  fileName: z.string().optional(),
+  memoryClass: z.enum(MEMORY_CLASSES).optional(),
+  memoryType: z.enum(MEMORY_TYPES).optional(),
   projectPath: z.string().optional(),
 });
 
 export const UpdateToolSchema = z.object({
-  fileName: z.string().regex(/^[a-zA-Z0-9-_]+\.md$/),
+  fileName: z.string().optional(),
   content: z.string().min(1),
+  memoryClass: z.enum(MEMORY_CLASSES).optional(),
+  memoryType: z.enum(MEMORY_TYPES).optional(),
   projectPath: z.string().optional(),
 });
 
@@ -73,7 +131,7 @@ export const SearchToolSchema = z.object({
   query: z.string().min(1),
   projectPath: z.string().optional(),
   limit: z.number().int().positive().max(50).default(10),
-  searchType: z.enum(['hybrid', 'vector', 'text']).default('hybrid'),
+  searchType: z.enum(['rankfusion', 'vector', 'text', 'temporal']).default('rankfusion'),
 });
 
 export const SyncToolSchema = z.object({
@@ -81,73 +139,92 @@ export const SyncToolSchema = z.object({
   forceRegenerate: z.boolean().default(false),
 });
 
-// Context Engineering PRP tools (simplified)
-export const GeneratePRPSchema = z.object({
-  request: z.string().min(3),
-  projectPath: z.string().optional(),
-});
-
-export const ExecutePRPSchema = z.object({
-  prp: z.string().optional(),
-  projectPath: z.string().optional(),
-  force: z.boolean().default(false),
-  forceRefresh: z.boolean().default(false),
-  skipApproval: z.boolean().default(false),
-  executionMode: z.enum(['autonomous', 'guided']).default('autonomous'),
-});
-
-// Execution state tracking
-export interface ExecutionState {
-  _id?: ObjectId;
-  projectId: string;
-  prpName: string;
-  executionId: string;
-  status: 'planning' | 'executing' | 'validating' | 'complete' | 'failed';
-  currentStep: number;
-  totalSteps: number;
-  completedSteps: string[];
-  lastCalled: Date;
-  callCount: number;
-  createdAt: Date;
-  updatedAt: Date;
-}
-
-// Autonomous AI Command structures
-export interface AutonomousCommand {
-  step: number;
-  type: 'read_prp' | 'create_file' | 'edit_file' | 'run_command' | 'validation' | 'progress_update';
-  action: string;
-  purpose: string;
-  path?: string;
-  content?: string;
-  command?: string;
-  expectedOutcome?: string;
-  onFailure?: string;
-}
-
-export interface AutonomousExecutionPlan {
-  executionMode: 'autonomous';
-  executionId: string;
-  prpName: string;
-  totalSteps: number;
-  implementationPlan: AutonomousCommand[];
-  completionSignal: string;
-  progressTracking: {
-    updateOn: 'step_completion' | 'validation_pass' | 'final_complete';
-    progressFile: 'progress.md';
+// Memory creation helpers
+export function createCoreMemory(
+  projectId: string,
+  fileName: string,
+  content: string
+): Partial<MemoryDocument> {
+  return {
+    projectId,
+    memoryClass: 'core',
+    memoryType: 'context',
+    content: {
+      fileName,
+      markdown: content,
+    },
+    metadata: {
+      importance: 10,
+      freshness: new Date(),
+      accessCount: 0,
+      tags: ['core', fileName.replace('.md', '')],
+      version: 1,
+    },
+    createdAt: new Date(),
+    updatedAt: new Date(),
   };
 }
 
-// Validation schemas for execution state
-export const ExecutionStateSchema = z.object({
-  projectId: z.string().uuid(),
-  prpName: z.string(),
-  executionId: z.string(),
-  status: z.enum(['planning', 'executing', 'validating', 'complete', 'failed']),
-  currentStep: z.number(),
-  totalSteps: z.number(),
-  completedSteps: z.array(z.string()),
-  lastCalled: z.date(),
-  callCount: z.number(),
-});
+export function createWorkingMemory(
+  projectId: string,
+  event: MemoryDocument['content']['event']
+): Partial<MemoryDocument> {
+  const thirtyDaysFromNow = new Date();
+  thirtyDaysFromNow.setDate(thirtyDaysFromNow.getDate() + 30);
+  
+  return {
+    projectId,
+    memoryClass: 'working',
+    memoryType: 'event',
+    content: { event },
+    metadata: {
+      importance: 5,
+      freshness: new Date(),
+      accessCount: 0,
+      autoExpire: thirtyDaysFromNow,
+      tags: ['working', event?.action || 'event'],
+    },
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  };
+}
 
+export function createInsightMemory(
+  projectId: string,
+  insight: MemoryDocument['content']['insight']
+): Partial<MemoryDocument> {
+  return {
+    projectId,
+    memoryClass: 'insight',
+    memoryType: 'pattern',
+    content: { insight },
+    metadata: {
+      importance: Math.round(insight?.confidence || 5),
+      freshness: new Date(),
+      accessCount: 0,
+      tags: ['insight', 'pattern'],
+    },
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  };
+}
+
+export function createEvolutionMemory(
+  projectId: string,
+  evolution: MemoryDocument['content']['evolution']
+): Partial<MemoryDocument> {
+  return {
+    projectId,
+    memoryClass: 'evolution',
+    memoryType: 'meta',
+    content: { evolution },
+    metadata: {
+      importance: 3,
+      freshness: new Date(),
+      accessCount: 0,
+      tags: ['evolution', 'meta', 'learning'],
+    },
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  };
+}

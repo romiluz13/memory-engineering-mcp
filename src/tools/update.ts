@@ -1,7 +1,16 @@
 import { join } from 'path';
 import { readFileSync, existsSync } from 'fs';
 import type { CallToolResult } from '@modelcontextprotocol/sdk/types.js';
-import { UpdateToolSchema, type ProjectConfig, type MemoryFileType } from '../types/memory.js';
+import { 
+  UpdateToolSchema, 
+  type ProjectConfig, 
+  type MemoryDocument,
+  createCoreMemory,
+  createWorkingMemory,
+  createInsightMemory,
+  createEvolutionMemory,
+  CORE_MEMORY_FILES
+} from '../types/memory.js';
 import { getMemoryCollection } from '../db/connection.js';
 import { logger } from '../utils/logger.js';
 
@@ -24,93 +33,27 @@ export async function updateTool(args: unknown): Promise<CallToolResult> {
     }
 
     const config: ProjectConfig = JSON.parse(readFileSync(configPath, 'utf-8'));
-
-    // Update in MongoDB
     const collection = getMemoryCollection();
-    const now = new Date();
 
-    // Check if file exists
-    const existing = await collection.findOne({
-      projectId: config.projectId,
-      fileName: params.fileName,
-    });
-
-    if (!existing) {
-      // Create new file if it doesn't exist (for custom files)
-      const fileType: MemoryFileType = params.fileName.replace('.md', '') as MemoryFileType;
-      
-      await collection.insertOne({
-        projectId: config.projectId,
-        fileName: params.fileName,
-        content: params.content,
-        metadata: {
-          lastUpdated: now,
-          version: 1,
-          type: fileType === 'projectbrief' || 
-                fileType === 'productContext' || 
-                fileType === 'activeContext' ||
-                fileType === 'systemPatterns' ||
-                fileType === 'techContext' ||
-                fileType === 'progress' ? fileType : 'custom',
-          fileSize: Buffer.byteLength(params.content, 'utf-8'),
-        },
-        references: extractReferences(params.content),
-        createdAt: now,
-        updatedAt: now,
-      });
-
-      logger.info(`Created new memory file: ${params.fileName} for project: ${config.projectId}`);
-
+    // Handle different update types
+    if (params.fileName) {
+      // Legacy: Update core memory by fileName
+      return await updateCoreMemoryByFileName(collection, config.projectId, params.fileName, params.content);
+    } else if (params.memoryClass) {
+      // New: Create memories based on class
+      return await createNewMemory(collection, config.projectId, params);
+    } else {
       return {
+        isError: true,
         content: [
           {
             type: 'text',
-            text: `Created new memory file: ${params.fileName}
-
-Remember to run memory_engineering/sync to generate embeddings for search.`,
+            text: 'Either fileName or memoryClass must be specified',
           },
         ],
       };
     }
 
-    // Update existing file
-    const result = await collection.updateOne(
-      {
-        projectId: config.projectId,
-        fileName: params.fileName,
-      },
-      {
-        $set: {
-          content: params.content,
-          'metadata.lastUpdated': now,
-          'metadata.fileSize': Buffer.byteLength(params.content, 'utf-8'),
-          references: extractReferences(params.content),
-          updatedAt: now,
-          contentVector: undefined, // Clear embeddings - will be regenerated
-        },
-        $inc: {
-          'metadata.version': 1,
-        },
-      },
-    );
-
-    if (result.modifiedCount === 0) {
-      throw new Error('Failed to update memory file');
-    }
-
-    logger.info(`Updated memory file: ${params.fileName} for project: ${config.projectId}`);
-
-    return {
-      content: [
-        {
-          type: 'text',
-          text: `Updated memory file: ${params.fileName}
-Version: ${existing.metadata.version + 1}
-
-Note: Embeddings have been cleared. Run memory_engineering/sync to regenerate them for search functionality.`,
-        },
-      ],
-    };
   } catch (error) {
     logger.error('Update tool error:', error);
     
@@ -119,27 +62,224 @@ Note: Embeddings have been cleared. Run memory_engineering/sync to regenerate th
       content: [
         {
           type: 'text',
-          text: `Failed to update memory file: ${error instanceof Error ? error.message : 'Unknown error occurred'}`,
+          text: `Failed to update memory: ${error instanceof Error ? error.message : 'Unknown error occurred'}`,
         },
       ],
     };
   }
 }
 
-function extractReferences(content: string): string[] {
-  // Extract references to other memory files
-  const references: string[] = [];
-  const patterns = [
-    /\b(projectbrief|productContext|activeContext|systemPatterns|techContext|progress)\.md\b/gi,
-    /\bprp_[a-z0-9-]+\.md\b/gi,
-  ];
-  
-  patterns.forEach(regex => {
-    const matches = content.match(regex);
-    if (matches) {
-      references.push(...matches.map(m => m.toLowerCase()));
-    }
+async function updateCoreMemoryByFileName(
+  collection: any,
+  projectId: string,
+  fileName: string,
+  content: string
+): Promise<CallToolResult> {
+  // Check if it's a known core memory file
+  if (!CORE_MEMORY_FILES.includes(fileName as any)) {
+    return {
+      isError: true,
+      content: [
+        {
+          type: 'text',
+          text: `Unknown core memory file: ${fileName}. Valid files: ${CORE_MEMORY_FILES.join(', ')}`,
+        },
+      ],
+    };
+  }
+
+  // Find existing core memory
+  const existing = await collection.findOne({
+    projectId,
+    memoryClass: 'core',
+    'content.fileName': fileName,
   });
 
-  return [...new Set(references)];
+  const now = new Date();
+
+  if (!existing) {
+    // Create new core memory
+    const memory = createCoreMemory(projectId, fileName, content);
+    await collection.insertOne(memory);
+
+    logger.info(`Created new core memory: ${fileName} for project: ${projectId}`);
+
+    return {
+      content: [
+        {
+          type: 'text',
+          text: `Created new core memory file: ${fileName}
+
+Remember to run memory_engineering/sync to generate embeddings for search.`,
+        },
+      ],
+    };
+  }
+
+  // Update existing core memory
+  const result = await collection.updateOne(
+    {
+      _id: existing._id,
+    },
+    {
+      $set: {
+        'content.markdown': content,
+        'metadata.freshness': now,
+        updatedAt: now,
+        contentVector: undefined, // Clear embeddings
+        searchableText: extractSearchableText(content),
+      },
+      $inc: {
+        'metadata.version': 1,
+      },
+    },
+  );
+
+  if (result.modifiedCount === 0) {
+    throw new Error('Failed to update core memory');
+  }
+
+  logger.info(`Updated core memory: ${fileName} for project: ${projectId}`);
+
+  return {
+    content: [
+      {
+        type: 'text',
+        text: `Updated core memory: ${fileName}
+Version: ${(existing.metadata.version || 0) + 1}
+
+Note: Embeddings cleared. Run memory_engineering/sync to regenerate for search.`,
+      },
+    ],
+  };
+}
+
+async function createNewMemory(
+  collection: any,
+  projectId: string,
+  params: any
+): Promise<CallToolResult> {
+  let memory: Partial<MemoryDocument>;
+  let description = '';
+
+  switch (params.memoryClass) {
+    case 'working':
+      // Parse content as JSON for working memory
+      try {
+        const eventData = JSON.parse(params.content);
+        memory = createWorkingMemory(projectId, {
+          timestamp: new Date(),
+          action: eventData.action || 'unknown',
+          context: eventData.context || {},
+          solution: eventData.solution,
+          duration: eventData.duration,
+          outcome: eventData.outcome,
+        });
+        description = `Created working memory for action: ${eventData.action}`;
+      } catch (e) {
+        return {
+          isError: true,
+          content: [
+            {
+              type: 'text',
+              text: 'Working memory content must be valid JSON with action, context, and optional solution/outcome',
+            },
+          ],
+        };
+      }
+      break;
+
+    case 'insight':
+      try {
+        const insightData = JSON.parse(params.content);
+        memory = createInsightMemory(projectId, {
+          pattern: insightData.pattern,
+          confidence: insightData.confidence || 5,
+          evidence: insightData.evidence || [],
+          discovered: new Date(),
+        });
+        description = `Created insight memory: ${insightData.pattern}`;
+      } catch (e) {
+        return {
+          isError: true,
+          content: [
+            {
+              type: 'text',
+              text: 'Insight memory content must be valid JSON with pattern and confidence',
+            },
+          ],
+        };
+      }
+      break;
+
+    case 'evolution':
+      try {
+        const evolutionData = JSON.parse(params.content);
+        memory = createEvolutionMemory(projectId, {
+          query: evolutionData.query,
+          resultCount: evolutionData.resultCount || 0,
+          feedback: evolutionData.feedback,
+          timestamp: new Date(),
+          improvements: evolutionData.improvements,
+        });
+        description = `Created evolution memory for query: ${evolutionData.query}`;
+      } catch (e) {
+        return {
+          isError: true,
+          content: [
+            {
+              type: 'text',
+              text: 'Evolution memory content must be valid JSON with query and optional feedback',
+            },
+          ],
+        };
+      }
+      break;
+
+    default:
+      return {
+        isError: true,
+        content: [
+          {
+            type: 'text',
+            text: `Invalid memory class: ${params.memoryClass}. Valid: core, working, insight, evolution`,
+          },
+        ],
+      };
+  }
+
+  // Add searchable text
+  memory.searchableText = extractSearchableText(params.content);
+
+  // Insert the memory
+  const result = await collection.insertOne(memory);
+  
+  logger.info(`Created ${params.memoryClass} memory: ${result.insertedId}`);
+
+  return {
+    content: [
+      {
+        type: 'text',
+        text: `${description}
+ID: ${result.insertedId}
+Class: ${params.memoryClass}
+Type: ${params.memoryType || memory.memoryType}
+
+Run memory_engineering/sync to generate embeddings for search.`,
+      },
+    ],
+  };
+}
+
+function extractSearchableText(content: string): string {
+  // Extract text content for search, removing markdown formatting
+  return content
+    .replace(/#{1,6}\s/g, '') // Remove headers
+    .replace(/\*\*([^*]+)\*\*/g, '$1') // Remove bold
+    .replace(/\*([^*]+)\*/g, '$1') // Remove italic
+    .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1') // Remove links
+    .replace(/```[^`]*```/g, '') // Remove code blocks
+    .replace(/`([^`]+)`/g, '$1') // Remove inline code
+    .replace(/\n{3,}/g, '\n\n') // Normalize newlines
+    .trim();
 }

@@ -1,275 +1,211 @@
-# Memory Engineering MCP Server
+# Memory Engineering MCP Server v2.0
 
 [![npm version](https://badge.fury.io/js/memory-engineering-mcp.svg)](https://www.npmjs.com/package/memory-engineering-mcp)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-A MongoDB-powered MCP (Model Context Protocol) server that enables AI assistants to maintain persistent, project-aware memory across sessions. Built with MongoDB Atlas Vector Search's native $rankFusion hybrid search capabilities.
+> 🧠 **Give your AI coding assistant a photographic memory** - MongoDB-powered persistent memory system using revolutionary $rankFusion hybrid search
 
-## Overview
+## 🎯 Mission
 
-Memory Engineering MCP transforms how AI assistants work with project context by providing:
+Every AI coding assistant (Cursor, Windsurf, Claude Code) suffers from memory loss between sessions. Memory Engineering MCP solves this with a MongoDB-powered brain that remembers everything, finds patterns, and gets smarter over time.
 
-- **Persistent Memory**: Context survives across sessions and conversations
-- **Project Isolation**: Each project maintains its own secure memory space
-- **Hybrid Search**: MongoDB's native $rankFusion combines vector and text search
-- **Context Engineering**: Two-phase workflow for systematic feature development
+## 🚀 Why Memory Engineering 2.0?
 
-## Key Features
+- **Zero Context Loss**: Your AI assistant remembers every debug session, every pattern, every lesson learned
+- **Pattern Recognition**: Automatically discovers and learns from recurring patterns in your codebase
+- **Self-Improving**: Gets smarter with every interaction through evolution memory
+- **MongoDB $rankFusion**: The ONLY database that can combine vector + text + temporal search in one query
 
-### 🧠 Intelligent Memory System
-- Structured project documentation that evolves with your codebase
-- Six core memory files: project brief, product context, active context, system patterns, tech context, and progress
-- Automatic cross-reference detection between memory files
+## 🧠 The 4-Class Memory System
 
-### 🔍 MongoDB $rankFusion Hybrid Search
-- Native MongoDB 8.1+ $rankFusion operator for hybrid search
-- Reciprocal Rank Fusion algorithm intelligently combines results
-- Configurable weights (default: 70% vector, 30% text)
-- Voyage AI embeddings for semantic similarity
+### 1. **Core Memories** (The Foundation)
+The 6 essential files that define your project:
+- `projectbrief.md` - Overall project vision and goals
+- `systemPatterns.md` - Architecture patterns and code conventions
+- `activeContext.md` - Current sprint/task focus
+- `techContext.md` - Technology stack and dependencies
+- `progress.md` - Completed work and lessons learned
+- `codebaseMap.md` - File structure and key modules
 
-### 🏗️ Context Engineering Workflow
-- **Phase 1**: `memory_engineering/generate-prp` - Research and planning
-- **Phase 2**: `memory_engineering/execute-prp` - Implementation with validation
-- ULTRATHINK integration for systematic feature development
-- Validation gates ensure production-ready code
+### 2. **Working Memories** (Daily Events)
+Automatically captured coding events with 30-day TTL:
+- Debug sessions with solutions
+- Implementation approaches
+- Code review insights
+- Performance optimizations
 
-### 🚀 Production Ready
-- TypeScript with strict type checking
-- Comprehensive test suite with Vitest
-- MongoDB Atlas Vector Search integration
-- ESLint and Prettier for code quality
+### 3. **Insight Memories** (Auto-Generated Patterns)
+AI-discovered patterns from your development:
+- Recurring error solutions
+- Successful implementation patterns
+- Performance bottlenecks
+- Team coding habits
 
-## Installation
+### 4. **Evolution Memories** (Self-Improvement)
+Tracks how the system gets smarter:
+- Query effectiveness
+- Memory usage patterns
+- Improvement suggestions
+- Learning from feedback
 
-### Prerequisites
+## 💎 MongoDB's Secret Weapon: $rankFusion
 
-- Node.js 18+
-- MongoDB Atlas cluster with Vector Search enabled
-- Voyage AI API key
+Only MongoDB 8.1+ can do this:
 
-### Quick Start
-
-1. **Install the package**:
-```bash
-npm install -g memory-engineering-mcp
-```
-
-2. **Configure environment variables**:
-```bash
-export MONGODB_URI="your-mongodb-connection-string"
-export VOYAGE_API_KEY="your-voyage-api-key"
-```
-
-3. **Configure in Claude Desktop or Cursor**:
-```json
+```javascript
 {
-  "mcpServers": {
-    "memory-engineering": {
-      "command": "npx",
-      "args": ["memory-engineering-mcp"],
-      "env": {
-        "MONGODB_URI": "mongodb+srv://username:password@cluster.mongodb.net/memory_engineering",
-        "VOYAGE_API_KEY": "pa-your-voyage-api-key-here"
+  $rankFusion: {
+    input: {
+      pipelines: {
+        semantic: [/* vector search */],
+        recent: [/* temporal relevance */],  
+        patterns: [/* proven solutions */],
+        evolution: [/* frequently helpful */]
+      }
+    },
+    combination: {
+      weights: { 
+        semantic: 0.4,
+        recent: 0.2,
+        patterns: 0.3,
+        evolution: 0.1
       }
     }
   }
 }
 ```
 
-### Development Setup
+One query that intelligently combines ALL search dimensions!
 
-1. **Clone the repository**:
+## 🛠️ Installation
+
+### Prerequisites
+- Node.js 18+
+- MongoDB Atlas 8.1+ (for $rankFusion)
+- Voyage AI API key
+
+### Quick Start
+
+1. **Install globally**:
 ```bash
-git clone https://github.com/romiluz13/memory-engineering-mcp.git
-cd memory-engineering-mcp
+npm install -g memory-engineering-mcp
 ```
 
-2. **Install dependencies**:
+2. **Set environment variables**:
 ```bash
-pnpm install
+export MONGODB_URI="your-mongodb-atlas-uri"
+export VOYAGE_API_KEY="your-voyage-api-key"
 ```
 
-3. **Configure environment**:
-```bash
-cp .env.example .env.local
-# Edit .env.local with your credentials
-```
-
-4. **Build and setup**:
-```bash
-pnpm build
-pnpm run db:indexes
-```
-
-## Available MCP Tools
-
-### Core Memory Operations
-- `memory_engineering/init` - Initialize memory system for a project
-- `memory_engineering/read` - Read stored memory files
-- `memory_engineering/update` - Update memory files with new content
-- `memory_engineering/search` - Hybrid search across project memories
-- `memory_engineering/sync` - Generate embeddings and update indexes
-
-### Context Engineering Workflow
-- `memory_engineering/generate-prp` - Research phase: analyze patterns and create implementation plan
-- `memory_engineering/execute-prp` - Implementation phase: execute plan with validation loops
-
-## Memory Structure
-
-The system uses six core memory files:
-
-1. **projectbrief.md** - Project goals, scope, and high-level requirements
-2. **productContext.md** - Problem domain, user needs, and solution approach
-3. **activeContext.md** - Current development focus and recent changes
-4. **systemPatterns.md** - Architecture decisions and design patterns
-5. **techContext.md** - Technology stack, tools, and constraints
-6. **progress.md** - Implementation status and next steps
-
-## MongoDB Setup
-
-### Required Indexes
-
-The system requires specific MongoDB indexes for optimal performance:
-
-```bash
-# Create indexes automatically
-pnpm run db:indexes
-
-# Or check existing indexes
-pnpm run db:check
-```
-
-### Vector Search Index
-
-MongoDB Atlas Vector Search index configuration:
+3. **Configure your AI assistant** (Claude Code example):
 ```json
 {
-  "name": "memory_vector_index",
-  "type": "vectorSearch",
-  "definition": {
-    "fields": [{
-      "type": "vector",
-      "path": "contentVector",
-      "numDimensions": 1024,
-      "similarity": "cosine"
-    }]
+  "mcpServers": {
+    "memory-engineering": {
+      "command": "memory-engineering-mcp",
+      "env": {
+        "MONGODB_URI": "{{from-env}}",
+        "VOYAGE_API_KEY": "{{from-env}}"
+      }
+    }
   }
 }
 ```
 
-## Usage Examples
+## 🎮 Usage
 
-### Basic Memory Operations
+### Initialize Memory System
 ```bash
-# Initialize memory for a project
-memory_engineering/init --projectPath "/path/to/project"
-
-# Read project brief
-memory_engineering/read --fileName "projectbrief.md"
-
-# Update active context
-memory_engineering/update --fileName "activeContext.md" --content "Working on authentication system"
-
-# Search for authentication patterns
-memory_engineering/search --query "authentication patterns" --searchType "hybrid"
+# Your AI assistant will automatically run:
+memory_engineering/init
 ```
 
-### Context Engineering Workflow
+### Search Across All Memories
 ```bash
-# Phase 1: Research and planning
-memory_engineering/generate-prp --request "I need to add user authentication"
-
-# Phase 2: Implementation
-memory_engineering/execute-prp --prp "user-authentication"
+# Find patterns and solutions
+memory_engineering/search --query "authentication error handling"
 ```
 
-## Architecture
-
-### Project Isolation
-Each project gets:
-- Unique project ID based on workspace path
-- Isolated MongoDB documents with `projectId` filter
-- Separate vector embeddings and search indexes
-- Independent memory evolution
-
-### Hybrid Search
-MongoDB's $rankFusion operator provides:
-- Semantic search via Voyage AI embeddings
-- Text search via Atlas Search
-- Intelligent result ranking
-- Configurable scoring weights
-
-### Context Engineering
-Two-phase workflow ensures:
-- Systematic research before implementation
-- Pattern discovery from existing code
-- Validation loops with self-correction
-- Production-ready code output
-
-## Testing
-
-Run the test suite:
+### Core Memory Management
 ```bash
+# Read a memory file
+memory_engineering/read --fileName "systemPatterns.md"
+
+# Update with new patterns
+memory_engineering/update --fileName "progress.md" --content "..."
+```
+
+### Sync Embeddings
+```bash
+# After updates, sync for search
+memory_engineering/sync
+```
+
+## 🔧 Development
+
+```bash
+# Clone and setup
+git clone https://github.com/romiluz13/memory-engineering-mcp.git
+cd memory-engineering-mcp
+pnpm install
+
+# Configure
+cp .env.example .env.local
+# Edit .env.local
+
+# Build and test
+pnpm build
 pnpm test
+pnpm typecheck
+
+# Create MongoDB indexes
+pnpm db:indexes
 ```
 
-Run with coverage:
-```bash
-pnpm test:coverage
-```
+## 📊 How It Works
 
-Test MCP functionality:
-```bash
-pnpm mcp:inspect
-```
+1. **Memory Creation**: As you code, memories are automatically created
+2. **Vector Embeddings**: Voyage AI generates semantic embeddings
+3. **$rankFusion Search**: Combines multiple search strategies
+4. **Pattern Discovery**: Aggregation pipelines find insights
+5. **Evolution**: System learns from usage patterns
 
-## Contributing
+## 🎯 Perfect For
+
+- **Large Codebases**: Never lose context in complex projects
+- **Team Development**: Share discovered patterns
+- **Long Projects**: Maintain context over months
+- **AI Pair Programming**: Make your AI assistant truly intelligent
+
+## 🏗️ Architecture
+
+- **Single MongoDB Collection**: Unified, flexible schema
+- **4 Memory Classes**: Core, Working, Insight, Evolution
+- **TTL Indexes**: Automatic memory lifecycle
+- **Vector + Text Search**: Best of both worlds
+- **MCP Protocol**: Standard AI assistant integration
+
+## 🤝 Contributing
+
+We're building the future of AI-assisted development! Contributions welcome:
 
 1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Run tests: `pnpm test`
-5. Check linting: `pnpm lint`
-6. Submit a pull request
+2. Create your feature branch
+3. Follow the 4-class memory architecture
+4. Add tests for new features
+5. Submit a pull request
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for detailed guidelines.
+## 📄 License
 
-## Environment Variables
+MIT - Make AI assistants smarter everywhere!
 
-| Variable | Description | Required |
-|----------|-------------|----------|
-| `MONGODB_URI` | MongoDB Atlas connection string | Yes |
-| `VOYAGE_API_KEY` | Voyage AI API key for embeddings | Yes |
-| `MEMORY_ENGINEERING_DB` | Database name (default: memory_engineering) | No |
-| `MEMORY_ENGINEERING_COLLECTION` | Collection name (default: memory_engineering_documents) | No |
+## 🙏 Acknowledgments
 
-## Troubleshooting
+- MongoDB for the revolutionary $rankFusion operator
+- Voyage AI for excellent embeddings
+- The MCP protocol team
+- All developers tired of context-less AI assistants
 
-### Common Issues
+---
 
-**Vector search not working**:
-- Ensure MongoDB Atlas cluster supports Vector Search
-- Check that vector index is created and active
-- Run `pnpm run db:check` to verify setup
-
-**Embeddings not generating**:
-- Verify Voyage AI API key is set correctly
-- Check network connectivity
-- Run `memory_engineering/sync` to regenerate embeddings
-
-**Project isolation issues**:
-- Ensure each project has unique `projectId`
-- Check MongoDB queries include `projectId` filter
-- Verify `.memory-engineering/config.json` exists
-
-## License
-
-MIT License. See [LICENSE](LICENSE) for details.
-
-## Links
-
-- [GitHub Repository](https://github.com/romiluz13/memory-engineering-mcp)
-- [npm Package](https://www.npmjs.com/package/memory-engineering-mcp)
-- [Model Context Protocol](https://modelcontextprotocol.io/)
-- [MongoDB Atlas Vector Search](https://www.mongodb.com/products/platform/atlas-vector-search)
-- [Voyage AI](https://voyageai.com/)
+*"We're not just storing memories. We're building the cognitive infrastructure that makes every AI coding assistant feel like it has a PhD in your codebase."*

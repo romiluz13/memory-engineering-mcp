@@ -1,11 +1,10 @@
 import { join, basename } from 'path';
 import { existsSync, mkdirSync, writeFileSync } from 'fs';
 import type { CallToolResult } from '@modelcontextprotocol/sdk/types.js';
-import { InitToolSchema, type ProjectConfig, type MemoryFileType } from '../types/memory.js';
+import { InitToolSchema, type ProjectConfig, createCoreMemory, CORE_MEMORY_FILES } from '../types/memory.js';
 import { getMemoryCollection } from '../db/connection.js';
 import { logger } from '../utils/logger.js';
 import { createHash } from 'crypto';
-import { initializeContextEngineeringTemplates } from '../services/context-engineering.js';
 
 const MEMORY_ENGINEERING_DIR = '.memory-engineering';
 const CONFIG_FILE = 'config.json';
@@ -46,423 +45,459 @@ const INITIAL_MEMORY_TEMPLATES = {
 
 ## AI Context Guide
 **🤖 For AI Coding Assistants - Critical Implementation Notes:**
-- **Entry Point**: Start with [main component/feature - e.g., src/components/App.tsx]
+- **Entry Point**: Start with [main component/feature]
 - **Architecture**: Follow patterns documented in systemPatterns.md
-- **Libraries**: Use [specific libraries - e.g., React, TypeScript, MongoDB]
-- **Patterns**: Implement [key patterns - e.g., hooks, context, error boundaries]
-- **Anti-patterns**: Avoid [specific issues - e.g., prop drilling, uncontrolled components]
-- **Testing**: Use [testing approach - e.g., Jest, React Testing Library]
-- **Performance**: Consider [optimization strategies - e.g., lazy loading, memoization]
-
-**🚀 Context Engineering Integration:**
-This project is optimized for Memory Engineering MCP with MongoDB hybrid search.
-Use memory_engineering/search to discover patterns and memory_engineering/update to document learnings.
+- **State Management**: [Redux/Context/Zustand - specify approach]
+- **Testing Strategy**: [Jest/Vitest/Playwright - specify tools]
+- **Key Dependencies**: Check techContext.md for versions
 `,
-  'productContext.md': `# Product Context
 
-## Problem Statement
-**The Problem**: [Specific problem in 1-2 sentences]
-**Current Solutions**: [What exists today and why it's not enough]
-**Our Approach**: [How we're different/better]
-
-## Target Users
-### Primary User
-- **Who**: [Specific user type]
-- **Needs**: [What they're trying to accomplish]
-- **Pain Points**: [Current frustrations]
-
-### User Journey
-1. [Step 1: Discovery]
-2. [Step 2: First use]
-3. [Step 3: Regular use]
-
-## Key Features
-- **Feature 1**: [What it does] → [User benefit]
-- **Feature 2**: [What it does] → [User benefit]
-
-## Competitive Analysis
-- **Alternative 1**: [Pros/Cons]
-- **Alternative 2**: [Pros/Cons]
-- **Our Advantage**: [Why choose us]
-
-## Success Metrics
-- **Adoption**: [Target metrics]
-- **Engagement**: [Usage patterns]
-- **Satisfaction**: [Quality measures]
-`,
-  'activeContext.md': `# Active Context
-
-## Current Sprint/Phase
-**Goal**: [What we're trying to achieve this sprint]
-**Deadline**: [When it needs to be done]
-
-## Active Tasks
-### In Progress
-- [ ] [Current task with context]
-  - Status: [Where we are]
-  - Blockers: [Any issues]
-  - Next: [Immediate next step]
-
-### Up Next
-- [ ] [Next priority]
-- [ ] [Following task]
-
-## Recent Changes
-- **[Date]**: [What changed and why]
-- **[Date]**: [Important update]
-
-## Working Directory Structure
-\`\`\`
-src/
-├── [Key directories with purpose]
-└── [Current focus area]
-\`\`\`
-
-## Key Commands
-\`\`\`bash
-# Development
-npm run dev  # [What this does]
-npm test     # [Test command]
-
-# Project-specific
-[Important commands]
-\`\`\`
-
-## Open Questions
-- [ ] [Technical decision needed]
-- [ ] [Design choice to make]
-
-## 🤖 AI Coding Assistant Context
-**Real-time development state for AI assistants:**
-
-### 🎯 Current Focus
-- **Active Module**: [file/module currently being developed]
-- **Implementation Stage**: [planning/coding/testing/debugging]
-- **Complexity Level**: [simple/medium/complex/experimental]
-
-### ⚠️ Critical Gotchas & Warnings
-- **Watch out for**: [specific issues - e.g., async race conditions, memory leaks]
-- **Common Mistakes**: [patterns to avoid in this project]
-- **Dependencies**: [fragile integrations that need care]
-
-### 🔗 Context Integration
-- **Memory Search**: Use "current development patterns" to find similar work
-- **Related Memory Files**: Cross-reference with systemPatterns.md, techContext.md
-- **Pattern Discovery**: Search for "[current feature type] implementation examples"
-
-### 🚀 AI Workflow Optimization
-- **Before Implementation**: Search existing patterns using hybrid search
-- **During Development**: Update this file with real-time progress
-- **After Completion**: Document learnings and update systemPatterns.md
-- **Context Engineering**: Use memory_engineering/generate-prp for complex features
-`,
   'systemPatterns.md': `# System Patterns
 
 ## Architecture Overview
-\`\`\`
-[ASCII diagram or component layout]
-\`\`\`
-
-## Core Design Principles
-1. **[Principle]**: [Why it matters here]
-2. **[Principle]**: [How we implement it]
-
-## Key Components
-### [Component Name]
-- **Purpose**: [What it does]
-- **Interface**: [How to use it]
-- **Location**: \`src/path/to/component\`
-- **Example**:
-\`\`\`typescript
-// Quick usage example
-\`\`\`
+[High-level architecture description]
 
 ## Design Patterns
-### [Pattern Name]
-- **Where**: [Which components use this]
-- **Why**: [Problem it solves]
-- **Implementation**:
-\`\`\`typescript
-// Code example
+### Pattern 1: [Name]
+- **When to use**: [Specific scenarios]
+- **Implementation**: [Code example or reference]
+- **Benefits**: [Why this pattern]
+
+### Pattern 2: [Name]
+- **When to use**: [Specific scenarios]
+- **Implementation**: [Code example or reference]
+- **Benefits**: [Why this pattern]
+
+## Code Standards
+### Naming Conventions
+- **Components**: PascalCase (e.g., UserProfile)
+- **Functions**: camelCase (e.g., getUserData)
+- **Constants**: UPPER_SNAKE_CASE (e.g., API_ENDPOINT)
+- **Files**: kebab-case (e.g., user-profile.tsx)
+
+### File Organization
+\`\`\`
+src/
+├── components/     # Reusable UI components
+├── pages/         # Page components
+├── hooks/         # Custom React hooks
+├── utils/         # Helper functions
+├── services/      # API and external services
+└── types/         # TypeScript type definitions
 \`\`\`
 
-## Data Flow
-1. **Input**: [How data enters]
-2. **Processing**: [Key transformations]
-3. **Storage**: [Where/how stored]
-4. **Output**: [How data exits]
+## Common Patterns
+### Error Handling
+\`\`\`typescript
+try {
+  // Operation
+} catch (error) {
+  logger.error('Context:', error);
+  // User-friendly error handling
+}
+\`\`\`
 
-## Error Handling Strategy
-- **Validation**: [Input validation approach]
-- **Error Types**: [Common errors and handling]
-- **User Feedback**: [How errors are communicated]
+### Data Fetching
+[Your preferred pattern - hooks, services, etc.]
 
-## Performance Considerations
-- **Bottlenecks**: [Known slow points]
-- **Optimizations**: [What we've optimized]
-- **Monitoring**: [How to measure]
+## Performance Guidelines
+- Lazy load heavy components
+- Memoize expensive computations
+- Optimize re-renders with React.memo
+- Use virtual scrolling for long lists
 
-## 🤖 AI Implementation Guide
-**For AI Coding Assistants - Step-by-Step Implementation:**
-
-### 🚀 Getting Started
-- **Entry Points**: Start with [main files - e.g., src/index.ts, src/App.tsx]
-- **Core Logic**: Located in [key modules - e.g., src/services/, src/components/]
-- **Extension Points**: Add features at [interfaces - e.g., src/types/, src/hooks/]
-- **Testing**: Run [test commands] when changing [specific modules]
-
-### 🔍 Code Discovery Strategy
-- **Search Patterns**: Use memory_engineering/search to find similar implementations
-- **Pattern Recognition**: Look for [consistent patterns - e.g., naming conventions, file structure]
-- **Dependencies**: Check [key dependencies - e.g., package.json, imports]
-- **Configuration**: Review [config files - e.g., tsconfig.json, webpack.config.js]
-
-### 🛠️ Development Workflow
-- **Before Coding**: Search existing patterns using hybrid search
-- **During Development**: Follow established conventions and patterns
-- **After Implementation**: Update this memory file with new patterns learned
-- **Testing**: Use [specific testing patterns - e.g., unit tests, integration tests]
-
-### 🚨 Critical Implementation Notes
-- **NEVER**: [Anti-patterns to avoid - e.g., direct DOM manipulation in React]
-- **ALWAYS**: [Best practices to follow - e.g., use TypeScript types, error boundaries]
-- **MEMORY INTEGRATION**: Document new patterns in Memory Engineering system
+## Security Patterns
+- Input validation on all user data
+- Sanitize HTML content
+- Use environment variables for secrets
+- Implement proper authentication checks
 `,
-  'techContext.md': `# Technical Context
+
+  'activeContext.md': `# Active Context
+
+## Current Sprint/Focus
+**Sprint**: [Current sprint number/name]
+**Duration**: [Start date - End date]
+**Goal**: [What we're accomplishing]
+
+## Active Tasks
+### In Progress
+- [ ] [Task 1 - Who's working on it]
+- [ ] [Task 2 - Who's working on it]
+
+### Up Next
+- [ ] [Next priority task]
+- [ ] [Following task]
+
+## Recent Changes
+### [Date]
+- **Changed**: [What was modified]
+- **Reason**: [Why it was changed]
+- **Impact**: [What this affects]
+
+## Current Blockers
+- **Blocker 1**: [Description] - [Who can help]
+- **Blocker 2**: [Description] - [Resolution strategy]
+
+## Key Decisions This Sprint
+- **Decision**: [What was decided]
+  - **Rationale**: [Why this choice]
+  - **Alternatives considered**: [Other options]
+
+## AI Assistant Focus Areas
+**🤖 Priority for AI assistance:**
+1. [Current feature needing implementation]
+2. [Bug that needs fixing]
+3. [Code that needs refactoring]
+
+**Context**: [Any special context AI should know for current work]
+`,
+
+  'techContext.md': `# Tech Context
 
 ## Technology Stack
-### Core
-- **Language**: [Language + version]
-- **Runtime**: [Node.js/Python/etc + version]
-- **Framework**: [Framework + why chosen]
-- **Database**: MongoDB Atlas (Vector Search enabled)
+### Frontend
+- **Framework**: [React/Vue/Angular/etc] v[X.X.X]
+- **State Management**: [Redux/Context/Zustand/etc]
+- **Styling**: [CSS Modules/Styled Components/Tailwind/etc]
+- **Build Tool**: [Vite/Webpack/etc]
 
-### Key Dependencies
+### Backend
+- **Runtime**: [Node.js/Deno/etc] v[X.X.X]
+- **Framework**: [Express/Fastify/Next.js/etc]
+- **Database**: [MongoDB/PostgreSQL/etc]
+- **ORM/ODM**: [Mongoose/Prisma/etc]
+
+### DevOps
+- **Hosting**: [AWS/Vercel/Netlify/etc]
+- **CI/CD**: [GitHub Actions/CircleCI/etc]
+- **Monitoring**: [Sentry/DataDog/etc]
+
+## Key Dependencies
 \`\`\`json
 {
   "critical": {
-    "[package]": "[version] - [why essential]"
+    "react": "^18.2.0",
+    "mongodb": "^6.17.0",
+    "[package]": "[version]"
   }
 }
 \`\`\`
 
 ## Development Environment
-### Prerequisites
-- [Requirement 1 with version]
-- [Requirement 2 with install command]
+### Required Tools
+- Node.js [version]
+- npm/yarn/pnpm [version]
+- [Other tool] [version]
 
-### Setup Steps
+### Environment Variables
 \`\`\`bash
-# 1. Clone and install
-git clone [repo]
-npm install
+# Required
+API_URL=
+DATABASE_URL=
+AUTH_SECRET=
 
-# 2. Environment variables
-cp .env.example .env.local
-# Edit: [Which vars to set]
-
-# 3. Run development
-npm run dev
+# Optional
+DEBUG_MODE=
+FEATURE_FLAGS=
 \`\`\`
 
-## Architecture Decisions
-### [Decision 1]
-- **Choice**: [What we chose]
-- **Alternatives**: [What we didn't choose]
-- **Rationale**: [Why this was best]
+## API Integrations
+### [Service Name]
+- **Purpose**: [What it's used for]
+- **Authentication**: [API key/OAuth/etc]
+- **Rate Limits**: [Requests per minute/hour]
+- **Documentation**: [Link to docs]
 
-## API/Interface Design
-### [Main API/Interface]
-\`\`\`typescript
-// Interface example
-interface Example {
-  // Key method signatures
-}
+## Performance Targets
+- **Page Load**: < [X]s
+- **API Response**: < [X]ms
+- **Bundle Size**: < [X]KB
+- **Lighthouse Score**: > [X]
+
+## Browser Support
+- Chrome/Edge: Last 2 versions
+- Firefox: Last 2 versions
+- Safari: Last 2 versions
+- Mobile: iOS 14+, Android 8+
+`,
+
+  'progress.md': `# Progress Log
+
+## Completed Features
+### [Date] - [Feature Name]
+- **What**: [Description of what was built]
+- **How**: [Key implementation details]
+- **Challenges**: [Problems encountered and solutions]
+- **Lessons**: [What we learned]
+- **Time**: [Estimated vs Actual]
+
+## Milestones Reached
+### [Date] - [Milestone Name]
+- **Achievement**: [What was accomplished]
+- **Impact**: [How this moves the project forward]
+- **Next Steps**: [What this enables]
+
+## Lessons Learned
+### Technical
+- **Learning**: [Technical insight gained]
+  - **Context**: [When/how discovered]
+  - **Application**: [How to use this knowledge]
+
+### Process
+- **Learning**: [Process improvement discovered]
+  - **Before**: [Old approach]
+  - **After**: [New approach]
+  - **Result**: [Impact of change]
+
+## Performance Improvements
+### [Date] - [Optimization Name]
+- **Metric**: [What was measured]
+- **Before**: [Original performance]
+- **After**: [Improved performance]
+- **Method**: [How it was achieved]
+
+## Refactoring Wins
+### [Date] - [Area Refactored]
+- **Reason**: [Why refactoring was needed]
+- **Changes**: [What was changed]
+- **Benefits**: [Improvements gained]
+
+## AI Assistant Effectiveness
+### Helpful Patterns
+- **Pattern**: [What worked well with AI]
+- **Example**: [Specific instance]
+
+### Areas for Improvement
+- **Challenge**: [Where AI struggled]
+- **Solution**: [How to improve]
+`,
+
+  'codebaseMap.md': `# Codebase Map
+
+## Directory Structure
+\`\`\`
+project-root/
+├── src/
+│   ├── components/    # UI components
+│   ├── pages/        # Page components
+│   ├── services/     # Business logic
+│   ├── utils/        # Helpers
+│   └── types/        # TypeScript types
+├── public/           # Static assets
+├── tests/           # Test files
+└── docs/            # Documentation
 \`\`\`
 
-## Performance Profile
-- **Load Time**: [Target metrics]
-- **Memory Usage**: [Constraints]
-- **Scalability**: [Considerations]
+## Key Files
+### Entry Points
+- \`src/index.ts\` - Application entry
+- \`src/app.ts\` - Main app component
+- \`src/router.ts\` - Route definitions
 
-## Security Considerations
-- **Authentication**: [Approach]
-- **Data Protection**: [Methods]
-- **Input Validation**: [Strategy]
+### Core Modules
+#### Authentication (\`src/services/auth/\`)
+- \`auth.service.ts\` - Auth logic
+- \`auth.middleware.ts\` - Route protection
+- \`auth.types.ts\` - Type definitions
 
-## Testing Strategy
-- **Unit Tests**: [Framework, coverage target]
-- **Integration**: [Key test scenarios]
-- **E2E**: [Critical paths]
+#### Data Layer (\`src/services/data/\`)
+- \`database.ts\` - DB connection
+- \`models/\` - Data models
+- \`repositories/\` - Data access
 
-## Deployment
-- **Environment**: [Where it runs]
-- **CI/CD**: [Pipeline details]
-- **Monitoring**: [What we track]
-`,
-  'progress.md': `# Progress
+### Configuration
+- \`.env.example\` - Environment template
+- \`config/\` - App configuration
+- \`scripts/\` - Build/deploy scripts
 
-## Project Timeline
-- **Started**: [Date]
-- **Target**: [Date]
-- **Phase**: [Current phase]
+## Component Hierarchy
+\`\`\`
+App
+├── Layout
+│   ├── Header
+│   ├── Navigation
+│   └── Footer
+├── Pages
+│   ├── Home
+│   ├── Dashboard
+│   └── Settings
+└── Shared
+    ├── Button
+    ├── Modal
+    └── Form
+\`\`\`
 
-## Completed ✅
-### [Week/Sprint]
-- [x] [Achievement with impact]
-  - Result: [What this enabled]
-  - Learning: [Key insight]
+## Data Flow
+1. **User Action** → Component
+2. **Component** → Service/Hook
+3. **Service** → API/Database
+4. **Response** → State Update
+5. **State** → Component Re-render
 
-## In Progress 🚧
-### [Current Task]
-- [ ] [Subtask 1] - [% complete]
-- [ ] [Subtask 2] - [Status]
+## Key Patterns Locations
+- **State Management**: \`src/store/\`
+- **API Calls**: \`src/services/api/\`
+- **Custom Hooks**: \`src/hooks/\`
+- **Utilities**: \`src/utils/\`
+- **Types**: \`src/types/\`
 
-## Upcoming 📋
-### Next Sprint
-- [ ] [Priority 1]
-- [ ] [Priority 2]
+## Testing Structure
+- **Unit Tests**: Alongside source files
+- **Integration**: \`tests/integration/\`
+- **E2E**: \`tests/e2e/\`
 
-## Issues & Solutions 🔧
-### [Issue Name]
-- **Problem**: [What went wrong]
-- **Solution**: [How we fixed it]
-- **Prevention**: [Avoiding in future]
-
-## Metrics 📊
-- **Coverage**: [Test %]
-- **Performance**: [Key metric]
-- **Progress**: [% to goal]
-
-## Lessons Learned 💡
-1. **[Topic]**: [Insight]
-2. **[Pattern]**: [What worked]
-
-## AI Notes
-- **Effective**: [Patterns that worked]
-- **Avoid**: [What slowed us down]
-- **Remember**: [Key context for AI]
-`,
+## Build Outputs
+- **Development**: \`dist/\`
+- **Production**: \`build/\`
+- **Types**: \`types/\`
+`
 };
 
 function generateProjectId(projectPath: string): string {
   // Create deterministic project ID from path
-  const hash = createHash('sha256').update(projectPath).digest('hex');
-  return `${hash.substring(0, 8)}-${hash.substring(8, 12)}-${hash.substring(12, 16)}-${hash.substring(16, 20)}-${hash.substring(20, 32)}`;
+  return createHash('md5').update(projectPath).digest('hex').substring(0, 8) + 
+         '-' + 
+         createHash('md5').update(projectPath).digest('hex').substring(8, 12) +
+         '-' +
+         createHash('md5').update(projectPath).digest('hex').substring(12, 16) +
+         '-' +
+         createHash('md5').update(projectPath).digest('hex').substring(16, 20) +
+         '-' +
+         createHash('md5').update(projectPath).digest('hex').substring(20, 32);
 }
 
-export async function initTool(args: unknown): Promise<CallToolResult> {
+export async function initTool(params: unknown): Promise<CallToolResult> {
   try {
-    const params = InitToolSchema.parse(args);
-    const projectPath = params.projectPath || process.cwd();
-    const projectName = params.projectName || basename(projectPath);
+    const validatedParams = InitToolSchema.parse(params);
+    const projectPath = validatedParams.projectPath || process.cwd();
+    const projectName = validatedParams.projectName || basename(projectPath);
+    
+    logger.info('Initializing Memory Engineering', { projectPath, projectName });
 
     // Create .memory-engineering directory
-    const memoryEngineeringPath = join(projectPath, MEMORY_ENGINEERING_DIR);
-    if (!existsSync(memoryEngineeringPath)) {
-      mkdirSync(memoryEngineeringPath, { recursive: true });
+    const memoryDir = join(projectPath, MEMORY_ENGINEERING_DIR);
+    if (!existsSync(memoryDir)) {
+      mkdirSync(memoryDir, { recursive: true });
     }
 
     // Check if already initialized
-    const configPath = join(memoryEngineeringPath, CONFIG_FILE);
+    const configPath = join(memoryDir, CONFIG_FILE);
+    let isNewProject = true;
+    let projectId: string;
+    
     if (existsSync(configPath)) {
-      return {
-        content: [
-          {
-            type: 'text',
-            text: 'Memory Engineering already initialized for this project. Use memory_engineering/read to access existing memories.',
-          },
-        ],
-      };
+      try {
+        const existingConfig = JSON.parse(require('fs').readFileSync(configPath, 'utf-8'));
+        projectId = existingConfig.projectId;
+        isNewProject = false;
+        logger.info('Found existing project configuration', { projectId });
+      } catch {
+        projectId = generateProjectId(projectPath);
+      }
+    } else {
+      projectId = generateProjectId(projectPath);
     }
 
-    // Generate project ID (deterministic from path)
-    const projectId = generateProjectId(projectPath);
-
-    // Create project config
+    // Create/update configuration
     const config: ProjectConfig = {
       projectId,
       projectPath,
       name: projectName,
-      createdAt: new Date().toISOString(),
+      createdAt: new Date(),
+      memoryVersion: '2.0'
     };
-
-    // Save config
+    
     writeFileSync(configPath, JSON.stringify(config, null, 2));
 
-    // Create initial memory files in MongoDB
+    // Initialize MongoDB collection
     const collection = getMemoryCollection();
-    const now = new Date();
-
-    const memoryDocuments = Object.entries(INITIAL_MEMORY_TEMPLATES).map(([fileName, content]) => ({
-      projectId,
-      fileName,
-      content,
-      metadata: {
-        lastUpdated: now,
-        version: 1,
-        type: fileName.replace('.md', '') as MemoryFileType,
-        fileSize: Buffer.byteLength(content, 'utf-8'),
-      },
-      references: [],
-      createdAt: now,
-      updatedAt: now,
-    }));
-
-    await collection.insertMany(memoryDocuments);
-
-    // Initialize Context Engineering templates
-    logger.info('Initializing Context Engineering templates...');
-    await initializeContextEngineeringTemplates();
-
-    // Create regular indexes if they don't exist
-    try {
-      await collection.createIndex({ projectId: 1, fileName: 1 }, { unique: true });
-    } catch (e) {
-      logger.debug('Index already exists:', e);
-    }
     
-    try {
-      await collection.createIndex({ projectId: 1, 'metadata.type': 1 });
-    } catch (e) {
-      logger.debug('Index already exists:', e);
-    }
+    // Create indexes for the new schema
+    await collection.createIndex({ projectId: 1, memoryClass: 1, 'metadata.freshness': -1 });
+    await collection.createIndex({ projectId: 1, 'metadata.importance': -1 });
+    await collection.createIndex({ 'metadata.autoExpire': 1 }, { expireAfterSeconds: 0 });
     
-    // Note: Text search now uses Atlas Search index created during sync
+    // Create vector search index
+    try {
+      await collection.createSearchIndex({
+        name: 'memory_vectors',
+        type: 'vectorSearch',
+        definition: {
+          fields: [{
+            type: 'vector',
+            path: 'contentVector',
+            numDimensions: 1024,
+            similarity: 'cosine'
+          }]
+        }
+      });
+    } catch (error) {
+      logger.warn('Vector search index might already exist or not supported', error);
+    }
 
-    logger.info(`Initialized memory bank for project: ${projectName} (${projectId})`);
+    // Create text search index
+    try {
+      await collection.createSearchIndex({
+        name: 'memory_text',
+        type: 'search',
+        definition: {
+          mappings: {
+            dynamic: false,
+            fields: {
+              searchableText: { type: 'string' },
+              'metadata.tags': { type: 'string' }
+            }
+          }
+        }
+      });
+    } catch (error) {
+      logger.warn('Text search index might already exist or not supported', error);
+    }
 
+    // Insert core memory files if new project
+    if (isNewProject) {
+      const coreMemories = CORE_MEMORY_FILES.map(fileName => {
+        const content = INITIAL_MEMORY_TEMPLATES[fileName] || `# ${fileName}\n\n[Content to be added]`;
+        return createCoreMemory(projectId, fileName, content);
+      });
+      
+      await collection.insertMany(coreMemories as any[]);
+      logger.info('Created core memory files', { count: coreMemories.length });
+    }
+
+    const statusMessage = isNewProject ? 'created' : 'already exists';
+    
     return {
       content: [
         {
           type: 'text',
-          text: `Memory Engineering initialized successfully!
+          text: `🧠 Memory Engineering 2.0 Initialized!
 
-Project: ${projectName}
-ID: ${projectId}
-Path: ${projectPath}
+${isNewProject ? '✨ Created new' : '📂 Found existing'} project memory system:
+- Project: ${projectName}
+- ID: ${projectId}
+- Location: ${memoryDir}
 
-Created files:
-${Object.keys(INITIAL_MEMORY_TEMPLATES).map((f) => `- ${f}`).join('\n')}
+📚 Core Memory Files ${statusMessage}:
+${CORE_MEMORY_FILES.map(f => `- ${f}`).join('\n')}
 
-Next steps:
-1. Update memory files with project-specific information
-2. Use memory_engineering/sync to generate embeddings
-3. Use memory_engineering/search to query your memories`,
-        },
-      ],
+🗄️ MongoDB Setup:
+- Collection: memory_engineering_documents
+- Indexes: Compound, Vector, Text, TTL
+- $rankFusion: Ready for hybrid search
+
+🎯 Next Steps:
+1. Update memory files with your project details
+2. Run memory_engineering/sync to generate embeddings
+3. Use memory_engineering/search for intelligent retrieval
+
+Your AI assistant now has a photographic memory! 🚀`
+        }
+      ]
     };
   } catch (error) {
     logger.error('Init tool error:', error);
-    
-    return {
-      isError: true,
-      content: [
-        {
-          type: 'text',
-          text: `Failed to initialize Memory Engineering: ${error instanceof Error ? error.message : 'Unknown error occurred'}`,
-        },
-      ],
-    };
+    throw error;
   }
 }
