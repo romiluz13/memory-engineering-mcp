@@ -472,27 +472,25 @@ export async function initTool(params: unknown): Promise<CallToolResult> {
       content: [
         {
           type: 'text',
-          text: `🧠 Memory Engineering 2.0 Initialized!
+          text: `Memory Engineering Initialized
 
-${isNewProject ? '✨ Created new' : '📂 Found existing'} project memory system:
-- Project: ${projectName}
-- ID: ${projectId}
-- Location: ${memoryDir}
+Project: ${projectName}
+ID: ${projectId}
+Status: ${isNewProject ? 'New project created' : 'Existing project found'}
+Location: ${memoryDir}
 
-📚 Core Memory Files ${statusMessage}:
+Core Memory Files (${statusMessage}):
 ${CORE_MEMORY_FILES.map(f => `- ${f}`).join('\n')}
 
-🗄️ MongoDB Setup:
+MongoDB Configuration:
 - Collection: memory_engineering_documents
-- Indexes: Compound, Vector, Text, TTL
-- $rankFusion: Ready for hybrid search
+- Indexes: compound, vector, text, TTL
+- Search: $rankFusion ready
 
-🎯 Next Steps:
-1. Update memory files with your project details
+Next steps:
+1. Update memory files with project details
 2. Run memory_engineering/sync to generate embeddings
-3. Use memory_engineering/search for intelligent retrieval
-
-Your AI assistant now has a photographic memory! 🚀`
+3. Use memory_engineering/search to query memories`
         }
       ]
     };

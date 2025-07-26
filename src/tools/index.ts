@@ -23,39 +23,7 @@ export function setupTools(server: Server): void {
       tools: [
         {
           name: 'memory_engineering/init',
-          description: `Initialize Memory Engineering system with intelligent project detection and MongoDB setup.
-
-AUTOMATIC INITIALIZATION: If Memory Engineering is not initialized when user requests features, automatically run this tool first before any other memory operations.
-
-AI ASSISTANT 5-STEPS-AHEAD WORKFLOW GUIDANCE:
-1. DETECTION: Run init → Creates 6 core memory files + MongoDB setup
-2. POPULATION: Use update tool → Fill memory files with real project data
-3. SYNCHRONIZATION: Run sync → Generate embeddings for hybrid search
-4. DISCOVERY: Use search → Find patterns and context across all memories
-5. EVOLUTION: Continue updating memories as project develops
-
-INTELLIGENT PROJECT SETUP:
-- Detects existing vs new projects automatically
-- Creates project-isolated MongoDB collections with deterministic IDs
-- Generates structured memory templates with smart defaults
-- Establishes vector and text search indexes for hybrid search
-- Configures autonomous context management
-
-THE 6 CORE MEMORY FILES CREATED:
-- projectbrief.md: Project goals, scope, success criteria, AI implementation guide
-- productContext.md: Problem statement, target users, competitive analysis
-- activeContext.md: Current tasks, recent changes, real-time development state
-- systemPatterns.md: Architecture, design patterns, AI implementation workflow
-- techContext.md: Technology stack, dependencies, development environment
-- progress.md: Timeline, completed work, lessons learned, AI effectiveness notes
-
-MONGODB ADVANTAGES:
-- Single database for operational + vector data
-- Native $rankFusion hybrid search (70% vector + 30% text)
-- Enterprise security and availability
-- No external vector database needed
-
-Creates persistent context storage that enables AI assistants to maintain project knowledge across sessions, eliminating context window limitations. This becomes the "brain" that makes AI coding assistants exponentially more effective.`,
+          description: 'Initialize memory system for a project. Creates MongoDB collection, indexes, and 6 core memory files.',
           inputSchema: {
             type: 'object',
             properties: {
@@ -69,141 +37,72 @@ Creates persistent context storage that enables AI assistants to maintain projec
               },
             },
           },
-          annotations: {
-            title: 'Initialize Memory Engineering',
-            readOnlyHint: false,
-            destructiveHint: false,
-            idempotentHint: true,
-            openWorldHint: true,
-          },
         },
         {
           name: 'memory_engineering/read',
-          description: `Read stored memory files from the project's MongoDB-powered context database.
-
-Retrieves core memory files (projectbrief.md, activeContext.md, systemPatterns.md, etc.), Context Engineering PRPs (prp_[name].md), and any file stored in the memory system.
-
-Provides access to persistent project knowledge with metadata including version history, file size, cross-references, and last access tracking.`,
+          description: 'Read memories from MongoDB. Supports reading by fileName for core memories or by memoryClass/memoryType.',
           inputSchema: {
             type: 'object',
             properties: {
               fileName: {
                 type: 'string',
-                description: 'Name of the memory file to read (e.g., projectbrief.md)',
+                description: 'Core memory file name (e.g., systemPatterns.md)',
                 pattern: '^[a-zA-Z0-9-_]+\\.md$'
+              },
+              memoryClass: {
+                type: 'string',
+                enum: ['core', 'working', 'insight', 'evolution'],
+                description: 'Memory class to filter by',
+              },
+              memoryType: {
+                type: 'string',
+                enum: ['pattern', 'context', 'event', 'learning', 'meta'],
+                description: 'Memory type to filter by',
               },
               projectPath: {
                 type: 'string',
                 description: 'Project directory path (defaults to current directory)',
               },
             },
-            required: ['fileName'],
-          },
-          annotations: {
-            title: 'Read Memory File',
-            readOnlyHint: true,
-            destructiveHint: false,
-            idempotentHint: true,
-            openWorldHint: true,
           },
         },
         {
           name: 'memory_engineering/update',
-          description: `Update memory files in the project's MongoDB-powered context database.
-
-INTELLIGENT UPDATE vs CREATE LOGIC:
-- UPDATES existing files: Increments version, preserves history, clears embeddings for regeneration
-- CREATES new files: Only if file doesn't exist, starts at version 1
-- NEVER duplicates: Always checks existence first
-
-THE 6-FILE MEMORY WORKFLOW FOR AI ASSISTANTS:
-1. projectbrief.md: UPDATE when project scope, goals, or requirements change
-2. productContext.md: UPDATE when understanding user needs or market context evolves  
-3. activeContext.md: UPDATE frequently with current tasks, recent changes, immediate focus
-4. systemPatterns.md: UPDATE when discovering new patterns, refactoring, or architectural changes
-5. techContext.md: UPDATE when adding dependencies, changing environment, or tech decisions
-6. progress.md: UPDATE after completing features, hitting milestones, or learning lessons
-
-WHEN TO UPDATE EACH FILE:
-- BEFORE coding: Update activeContext.md with current task details
-- DURING development: Update systemPatterns.md with new patterns discovered
-- AFTER implementation: Update progress.md with what was accomplished and learned
-- ON architecture changes: Update systemPatterns.md and techContext.md
-- ON scope changes: Update projectbrief.md and productContext.md
-
-Updates trigger embedding regeneration for hybrid search. Maintains version history and cross-references between memory files. This creates the evolving "brain" that makes AI assistants progressively smarter about your project.`,
+          description: 'Update core memory files or create new memories. For core memories, use fileName. For other classes, specify memoryClass and provide JSON content.',
           inputSchema: {
             type: 'object',
             properties: {
               fileName: {
                 type: 'string',
-                description: 'Name of the memory file to update',
+                description: 'Core memory file to update',
                 pattern: '^[a-zA-Z0-9-_]+\\.md$'
               },
               content: {
                 type: 'string',
-                description: 'New content for the memory file',
+                description: 'Content (markdown for core memories, JSON for others)',
                 minLength: 1
+              },
+              memoryClass: {
+                type: 'string',
+                enum: ['working', 'insight', 'evolution'],
+                description: 'Memory class for new memories',
+              },
+              memoryType: {
+                type: 'string',
+                enum: ['pattern', 'context', 'event', 'learning', 'meta'],
+                description: 'Memory type (optional)',
               },
               projectPath: {
                 type: 'string',
                 description: 'Project directory path (defaults to current directory)',
               },
             },
-            required: ['fileName', 'content'],
-          },
-          annotations: {
-            title: 'Update Memory File',
-            readOnlyHint: false,
-            destructiveHint: false,
-            idempotentHint: false,
-            openWorldHint: true,
+            required: ['content'],
           },
         },
         {
           name: 'memory_engineering/search',
-          description: `MongoDB $rankFusion Hybrid Search - Revolutionary unified search across project memories.
-
-Uses MongoDB 8.1+ native $rankFusion operator combining 70% Semantic Vector Search (Voyage AI embeddings) with 30% Full-Text Search (Atlas Search) using Reciprocal Rank Fusion algorithm for intelligent result ranking.
-
-20+ CREATIVE SEARCH PATTERN LIBRARY FOR AI ASSISTANTS:
-
-PERFORMANCE & OPTIMIZATION PATTERNS:
-- "performance optimization patterns" - Learn from speed improvements
-- "bottleneck optimization patterns" - Discover performance solutions
-- "scaling challenges faced" - Find scalability approaches
-- "performance metrics tracking" - Measurement strategies
-
-ERROR & DEBUGGING PATTERNS:
-- "debugging approaches used" - Troubleshooting methodologies
-- "error handling strategies" - Robust error management
-- "recovery patterns implemented" - Resilience approaches
-- "testing strategy precedents" - Quality assurance methods
-
-USER EXPERIENCE PATTERNS:
-- "user feedback incorporated" - Learn from user insights
-- "user experience enhancement" - UX improvement patterns
-- "user workflow optimization" - Journey enhancement techniques
-- "interface design decisions" - UI pattern discoveries
-
-ARCHITECTURE & DESIGN PATTERNS:
-- "similar complexity features" - Find comparable implementations
-- "trade-off decisions made" - Learn architectural choices
-- "design pattern applications" - Reusable design solutions
-- "cross-functional impact" - Understand system relationships
-
-CREATIVE DISCOVERY PATTERNS:
-- "unconventional solutions" - Find innovative approaches
-- "related business logic" - Discover connected functionality
-- "technical debt related" - Improvement opportunities
-- "lessons learned documented" - Implementation insights
-
-SEARCH TYPES:
-- hybrid: Vector + text with RRF (RECOMMENDED - MongoDB's revolutionary fusion)
-- vector: Pure semantic similarity (concepts, not exact words)
-- text: Keyword matching (exact terms)
-
-Returns ranked results with RRF scores, smart previews, relevance indicators, and contextual suggestions for deeper discovery.`,
+          description: 'Search memories using MongoDB $rankFusion or specific search types (vector, text, temporal).',
           inputSchema: {
             type: 'object',
             properties: {
@@ -218,35 +117,24 @@ Returns ranked results with RRF scores, smart previews, relevance indicators, an
               },
               limit: {
                 type: 'number',
-                description: 'Maximum number of results (default: 10, max: 50)',
+                description: 'Maximum results (default: 10, max: 50)',
                 default: 10,
                 minimum: 1,
                 maximum: 50
               },
               searchType: {
                 type: 'string',
-                enum: ['hybrid', 'vector', 'text'],
-                description: 'Type of search to perform (default: hybrid)',
-                default: 'hybrid',
+                enum: ['rankfusion', 'vector', 'text', 'temporal'],
+                description: 'Search type (default: rankfusion)',
+                default: 'rankfusion',
               },
             },
             required: ['query'],
           },
-          annotations: {
-            title: 'Search Memory Files',
-            readOnlyHint: true,
-            destructiveHint: false,
-            idempotentHint: true,
-            openWorldHint: true,
-          },
         },
         {
           name: 'memory_engineering/sync',
-          description: `Synchronize memory files with vector embeddings and MongoDB search indexes.
-
-Operations include generating Voyage AI embeddings (1024-dimension vectors), creating/updating MongoDB vector and text search indexes, updating cross-references between memory files, and enabling $rankFusion hybrid search functionality.
-
-Run after content updates to maintain search consistency. Required for search operations to function properly.`,
+          description: 'Generate vector embeddings and update search indexes for all memories without embeddings.',
           inputSchema: {
             type: 'object',
             properties: {
@@ -256,43 +144,30 @@ Run after content updates to maintain search consistency. Required for search op
               },
               forceRegenerate: {
                 type: 'boolean',
-                description: 'Force regeneration of all embeddings (default: false)',
+                description: 'Regenerate all embeddings (default: false)',
                 default: false,
               },
             },
-          },
-          annotations: {
-            title: 'Synchronize Memory System',
-            readOnlyHint: false,
-            destructiveHint: false,
-            idempotentHint: false,
-            openWorldHint: true,
           },
         },
       ],
     };
   });
 
-  // Register resources handlers for enhanced Claude Code compatibility
+  // Register resources handlers
   server.setRequestHandler(ListResourcesRequestSchema, async (_request: ListResourcesRequest) => {
     return {
       resources: [
         {
-          uri: 'memory://project-memories',
-          name: 'Project Memory Files',
-          description: 'Access to all core memory files and insights',
+          uri: 'memory://core',
+          name: 'Core Memory Files',
+          description: 'The 6 foundational memory files',
           mimeType: 'text/markdown',
         },
         {
-          uri: 'memory://prp-files',
-          name: 'Product Requirements Prompts',
-          description: 'Generated PRPs from Context Engineering research phase',
-          mimeType: 'text/markdown',
-        },
-        {
-          uri: 'memory://search-index',
-          name: 'Memory Search Index',
-          description: 'MongoDB hybrid search index status and statistics',
+          uri: 'memory://search',
+          name: 'Memory Search Status',
+          description: 'Search index configuration and statistics',
           mimeType: 'application/json',
         },
       ],
@@ -304,83 +179,52 @@ Run after content updates to maintain search consistency. Required for search op
     
     try {
       switch (uri) {
-        case 'memory://project-memories':
+        case 'memory://core':
           return {
             contents: [{
-              uri: 'memory://project-memories',
+              uri: 'memory://core',
               mimeType: 'text/markdown',
-              text: `# Project Memory Files
+              text: `# Core Memory Files
 
-This resource provides access to the 6 core memory files that store comprehensive project context:
+The 6 core memory files that form the foundation of the memory system:
 
-## Core Memory Structure
-1. **projectbrief.md** - Project goals, scope, success criteria
-2. **productContext.md** - Problem statement, target users, competitive analysis  
-3. **activeContext.md** - Current tasks, recent changes, development state
-4. **systemPatterns.md** - Architecture, design patterns, implementation workflow
-5. **techContext.md** - Technology stack, dependencies, development environment
-6. **progress.md** - Timeline, completed work, lessons learned
+1. **projectbrief.md** - Project goals, scope, and success criteria
+2. **systemPatterns.md** - Architecture patterns and code conventions
+3. **activeContext.md** - Current sprint and task focus
+4. **techContext.md** - Technology stack and dependencies
+5. **progress.md** - Completed work and lessons learned
+6. **codebaseMap.md** - File structure and key modules
 
-## Usage
-Use the memory_engineering/read tool to access specific memory files.
-Use the memory_engineering/search tool to find patterns across all memories.
-
-## Benefits
-- Persistent context across AI assistant sessions
-- Eliminates context window limitations  
-- Enables pattern discovery and reuse
-- Supports autonomous context management`,
+Use memory_engineering/read --fileName [name] to read a specific file.`,
             }],
           };
 
-        case 'memory://prp-files':
+        case 'memory://search':
           return {
             contents: [{
-              uri: 'memory://prp-files',
-              mimeType: 'text/markdown',
-              text: `# Product Requirements Prompts (PRPs)
-
-PRPs are comprehensive implementation blueprints generated through Context Engineering methodology.
-
-## What are PRPs?
-- Research-backed implementation specifications
-- Generated from memory system pattern analysis
-- Include validation gates and confidence scoring
-- Contain architectural guidance and gotchas
-
-## PRP Workflow
-1. **Research Phase**: memory_engineering/generate-prp
-2. **Implementation Phase**: memory_engineering/execute-prp
-
-## Benefits
-- Eliminates "blank page" problem for AI assistants
-- Provides complete implementation context
-- Reduces implementation errors through validation
-- Ensures consistency with existing patterns`,
-            }],
-          };
-
-        case 'memory://search-index':
-          return {
-            contents: [{
-              uri: 'memory://search-index',
+              uri: 'memory://search',
               mimeType: 'application/json',
               text: JSON.stringify({
-                searchType: 'MongoDB $rankFusion Hybrid Search',
-                algorithm: 'Reciprocal Rank Fusion',
-                vectorModel: 'Voyage AI voyage-3 (1024 dimensions)',
-                textSearch: 'MongoDB Atlas Search',
-                fusion: {
-                  vectorWeight: 0.7,
-                  textWeight: 0.3,
+                type: 'MongoDB Atlas Search',
+                indexes: {
+                  vector: {
+                    name: 'memory_vectors',
+                    dimensions: 1024,
+                    similarity: 'cosine',
+                    model: 'voyage-3-large'
+                  },
+                  text: {
+                    name: 'memory_text',
+                    analyzer: 'lucene.standard',
+                    fields: ['searchableText', 'metadata.tags']
+                  }
                 },
-                capabilities: [
-                  'Semantic similarity search',
-                  'Keyword matching',
-                  'Pattern discovery',
-                  'Cross-file context correlation',
-                ],
-                status: 'Active - Use memory_engineering/search tool',
+                searchTypes: {
+                  rankfusion: 'MongoDB $rankFusion combining vector, text, temporal, and evolution',
+                  vector: 'Semantic similarity search',
+                  text: 'Keyword matching with fuzzy search',
+                  temporal: 'Time-weighted relevance'
+                }
               }, null, 2),
             }],
           };
@@ -391,7 +235,7 @@ PRPs are comprehensive implementation blueprints generated through Context Engin
             contents: [{
               uri,
               mimeType: 'text/plain',
-              text: `Resource not found: ${uri}. Available resources: memory://project-memories, memory://prp-files, memory://search-index`,
+              text: `Unknown resource: ${uri}`,
             }],
           };
       }
@@ -402,7 +246,7 @@ PRPs are comprehensive implementation blueprints generated through Context Engin
         contents: [{
           uri,
           mimeType: 'text/plain',
-          text: `Error reading resource ${uri}: ${error instanceof Error ? error.message : 'Unknown error'}`,
+          text: `Error reading resource: ${error instanceof Error ? error.message : 'Unknown error'}`,
         }],
       };
     }
