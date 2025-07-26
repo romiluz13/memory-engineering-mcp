@@ -1,7 +1,7 @@
 import type { Db, Collection } from 'mongodb';
 import { MongoClient } from 'mongodb';
 import { logger } from '../utils/logger.js';
-import type { MemoryDocument } from '../types/memory.js';
+import type { MemoryDocument, ExecutionState } from '../types/memory.js';
 
 let client: MongoClient | null = null;
 let db: Db | null = null;
@@ -53,4 +53,9 @@ export function getDb(): Db {
 export function getMemoryCollection(): Collection<MemoryDocument> {
   const collectionName = process.env.MEMORY_ENGINEERING_COLLECTION || 'memory_engineering_documents';
   return getDb().collection<MemoryDocument>(collectionName);
+}
+
+export function getExecutionStateCollection(): Collection<ExecutionState> {
+  const collectionName = 'memory_engineering_execution_states';
+  return getDb().collection<ExecutionState>(collectionName);
 }

@@ -91,5 +91,63 @@ export const ExecutePRPSchema = z.object({
   prp: z.string().optional(),
   projectPath: z.string().optional(),
   force: z.boolean().default(false),
+  forceRefresh: z.boolean().default(false),
+  skipApproval: z.boolean().default(false),
+  executionMode: z.enum(['autonomous', 'guided']).default('autonomous'),
+});
+
+// Execution state tracking
+export interface ExecutionState {
+  _id?: ObjectId;
+  projectId: string;
+  prpName: string;
+  executionId: string;
+  status: 'planning' | 'executing' | 'validating' | 'complete' | 'failed';
+  currentStep: number;
+  totalSteps: number;
+  completedSteps: string[];
+  lastCalled: Date;
+  callCount: number;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+// Autonomous AI Command structures
+export interface AutonomousCommand {
+  step: number;
+  type: 'read_prp' | 'create_file' | 'edit_file' | 'run_command' | 'validation' | 'progress_update';
+  action: string;
+  purpose: string;
+  path?: string;
+  content?: string;
+  command?: string;
+  expectedOutcome?: string;
+  onFailure?: string;
+}
+
+export interface AutonomousExecutionPlan {
+  executionMode: 'autonomous';
+  executionId: string;
+  prpName: string;
+  totalSteps: number;
+  implementationPlan: AutonomousCommand[];
+  completionSignal: string;
+  progressTracking: {
+    updateOn: 'step_completion' | 'validation_pass' | 'final_complete';
+    progressFile: 'progress.md';
+  };
+}
+
+// Validation schemas for execution state
+export const ExecutionStateSchema = z.object({
+  projectId: z.string().uuid(),
+  prpName: z.string(),
+  executionId: z.string(),
+  status: z.enum(['planning', 'executing', 'validating', 'complete', 'failed']),
+  currentStep: z.number(),
+  totalSteps: z.number(),
+  completedSteps: z.array(z.string()),
+  lastCalled: z.date(),
+  callCount: z.number(),
 });
 

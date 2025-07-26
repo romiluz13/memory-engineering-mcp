@@ -1,6 +1,6 @@
 {
   "name": "memory-engineering-mcp",
-  "version": "1.4.4",
+  "version": "1.4.7",
   "description": "MongoDB-powered MCP server for autonomous context management and AI development workflows",
   "main": "dist/index.js",
   "type": "module",
@@ -62,6 +62,7 @@
     "@modelcontextprotocol/sdk": "^1.16.0",
     "dotenv": "^17.2.0",
     "mongodb": "^6.17.0",
+    "uuid": "^11.1.0",
     "voyageai": "^0.0.4",
     "zod": "^4.0.5"
   },
@@ -69,6 +70,7 @@
     "@eslint/js": "^9.31.0",
     "@types/node": "^24.0.15",
     "@types/node-fetch": "^2.6.12",
+    "@types/uuid": "^10.0.0",
     "@typescript-eslint/eslint-plugin": "^8.38.0",
     "@typescript-eslint/parser": "^8.38.0",
     "@vitest/coverage-v8": "^3.2.4",

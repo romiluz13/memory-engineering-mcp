@@ -25,6 +25,13 @@ export function setupTools(server: Server): void {
 
 AUTOMATIC INITIALIZATION: If Memory Engineering is not initialized when user requests features, automatically run this tool first before any other memory operations.
 
+AI ASSISTANT 5-STEPS-AHEAD WORKFLOW GUIDANCE:
+1. DETECTION: Run init → Creates 6 core memory files + MongoDB setup
+2. POPULATION: Use update tool → Fill memory files with real project data
+3. SYNCHRONIZATION: Run sync → Generate embeddings for hybrid search
+4. DISCOVERY: Use search → Find patterns and context across all memories
+5. EVOLUTION: Continue updating memories as project develops
+
 INTELLIGENT PROJECT SETUP:
 - Detects existing vs new projects automatically
 - Creates project-isolated MongoDB collections with deterministic IDs
@@ -32,13 +39,21 @@ INTELLIGENT PROJECT SETUP:
 - Establishes vector and text search indexes for hybrid search
 - Configures autonomous context management
 
+THE 6 CORE MEMORY FILES CREATED:
+- projectbrief.md: Project goals, scope, success criteria, AI implementation guide
+- productContext.md: Problem statement, target users, competitive analysis
+- activeContext.md: Current tasks, recent changes, real-time development state
+- systemPatterns.md: Architecture, design patterns, AI implementation workflow
+- techContext.md: Technology stack, dependencies, development environment
+- progress.md: Timeline, completed work, lessons learned, AI effectiveness notes
+
 MONGODB ADVANTAGES:
 - Single database for operational + vector data
 - Native $rankFusion hybrid search (70% vector + 30% text)
 - Enterprise security and availability
 - No external vector database needed
 
-Creates persistent context storage that enables AI assistants to maintain project knowledge across sessions, eliminating context window limitations.`,
+Creates persistent context storage that enables AI assistants to maintain project knowledge across sessions, eliminating context window limitations. This becomes the "brain" that makes AI coding assistants exponentially more effective.`,
           inputSchema: {
             type: 'object',
             properties: {
@@ -94,9 +109,27 @@ Provides access to persistent project knowledge with metadata including version 
           name: 'memory_engineering/update',
           description: `Update memory files in the project's MongoDB-powered context database.
 
-Core memory files include projectbrief.md (project goals and scope), productContext.md (problem domain and solution), activeContext.md (current development focus), systemPatterns.md (architecture and design decisions), techContext.md (technology stack and constraints), and progress.md (implementation status and next steps).
+INTELLIGENT UPDATE vs CREATE LOGIC:
+- UPDATES existing files: Increments version, preserves history, clears embeddings for regeneration
+- CREATES new files: Only if file doesn't exist, starts at version 1
+- NEVER duplicates: Always checks existence first
 
-Updates trigger embedding regeneration for hybrid search. Maintains version history and cross-references between memory files.`,
+THE 6-FILE MEMORY WORKFLOW FOR AI ASSISTANTS:
+1. projectbrief.md: UPDATE when project scope, goals, or requirements change
+2. productContext.md: UPDATE when understanding user needs or market context evolves  
+3. activeContext.md: UPDATE frequently with current tasks, recent changes, immediate focus
+4. systemPatterns.md: UPDATE when discovering new patterns, refactoring, or architectural changes
+5. techContext.md: UPDATE when adding dependencies, changing environment, or tech decisions
+6. progress.md: UPDATE after completing features, hitting milestones, or learning lessons
+
+WHEN TO UPDATE EACH FILE:
+- BEFORE coding: Update activeContext.md with current task details
+- DURING development: Update systemPatterns.md with new patterns discovered
+- AFTER implementation: Update progress.md with what was accomplished and learned
+- ON architecture changes: Update systemPatterns.md and techContext.md
+- ON scope changes: Update projectbrief.md and productContext.md
+
+Updates trigger embedding regeneration for hybrid search. Maintains version history and cross-references between memory files. This creates the evolving "brain" that makes AI assistants progressively smarter about your project.`,
           inputSchema: {
             type: 'object',
             properties: {
@@ -131,25 +164,44 @@ Updates trigger embedding regeneration for hybrid search. Maintains version hist
 
 Uses MongoDB 8.1+ native $rankFusion operator combining 70% Semantic Vector Search (Voyage AI embeddings) with 30% Full-Text Search (Atlas Search) using Reciprocal Rank Fusion algorithm for intelligent result ranking.
 
-SEARCH CAPABILITIES:
-- Semantic Pattern Discovery: "performance optimization patterns"
-- Context Correlation: "similar complexity features" 
-- Error Intelligence: "debugging approaches used"
-- Architecture Insights: "scaling challenges faced"
-- Creative Problem-Solving: "unconventional solutions"
+20+ CREATIVE SEARCH PATTERN LIBRARY FOR AI ASSISTANTS:
+
+PERFORMANCE & OPTIMIZATION PATTERNS:
+- "performance optimization patterns" - Learn from speed improvements
+- "bottleneck optimization patterns" - Discover performance solutions
+- "scaling challenges faced" - Find scalability approaches
+- "performance metrics tracking" - Measurement strategies
+
+ERROR & DEBUGGING PATTERNS:
+- "debugging approaches used" - Troubleshooting methodologies
+- "error handling strategies" - Robust error management
+- "recovery patterns implemented" - Resilience approaches
+- "testing strategy precedents" - Quality assurance methods
+
+USER EXPERIENCE PATTERNS:
+- "user feedback incorporated" - Learn from user insights
+- "user experience enhancement" - UX improvement patterns
+- "user workflow optimization" - Journey enhancement techniques
+- "interface design decisions" - UI pattern discoveries
+
+ARCHITECTURE & DESIGN PATTERNS:
+- "similar complexity features" - Find comparable implementations
+- "trade-off decisions made" - Learn architectural choices
+- "design pattern applications" - Reusable design solutions
+- "cross-functional impact" - Understand system relationships
+
+CREATIVE DISCOVERY PATTERNS:
+- "unconventional solutions" - Find innovative approaches
+- "related business logic" - Discover connected functionality
+- "technical debt related" - Improvement opportunities
+- "lessons learned documented" - Implementation insights
 
 SEARCH TYPES:
-- hybrid: Vector + text with RRF (RECOMMENDED - MongoDB's native hybrid search)
+- hybrid: Vector + text with RRF (RECOMMENDED - MongoDB's revolutionary fusion)
 - vector: Pure semantic similarity (concepts, not exact words)
 - text: Keyword matching (exact terms)
 
-ADVANCED QUERY EXAMPLES:
-- "user experience enhancement" - Finds UX patterns across all memories
-- "technical debt related" - Discovers improvement opportunities
-- "cross-functional impact" - Understands broader implications
-- "trade-off decisions made" - Learns from architectural choices
-
-Returns ranked results with RRF scores, smart previews, and relevance indicators.`,
+Returns ranked results with RRF scores, smart previews, relevance indicators, and contextual suggestions for deeper discovery.`,
           inputSchema: {
             type: 'object',
             properties: {
@@ -221,15 +273,26 @@ Run after content updates to maintain search consistency. Required for search op
 
 AI ASSISTANT AUTO-ACTIVATION: When users make requests for implementation (building/creating/adding specific features), automatically trigger this tool to start the Context Engineering workflow. DO NOT provide general coding advice - use this tool first!
 
+AI ASSISTANT 5-STEPS-AHEAD RESEARCH WORKFLOW:
+1. MEMORY ANALYSIS: Search existing memories for patterns and constraints
+2. PATTERN DISCOVERY: Use hybrid search to find similar implementations
+3. EXTERNAL RESEARCH: Gather documentation, best practices, gotchas
+4. ULTRATHINK SYNTHESIS: Deep analysis combining all research findings
+5. PRP GENERATION: Create comprehensive implementation blueprint
+
 AUTO-TRIGGER PATTERNS:
 - "I want to add [feature]" / "I want to create [thing]" / "I want to build [system]"
-- "Create a [component]" / "Build a [page]" / "Make a [feature]"
+- "Create a [component]" / "Build a [page]" / "Make a [feature]"  
 - "I need to implement [functionality]" / "I need to add [capability]"
 - "Help me build [system]" / "Help me create [component]" / "Help me add [feature]"
 
-Initiates the two-phase Context Engineering workflow for feature development. Guides systematic research including pattern discovery using hybrid search, external documentation research, synthesis of findings into comprehensive context, and generation of Product Requirements Prompt (PRP).
+RESEARCH METHODOLOGY:
+- Project Type Detection: Distinguish existing vs new projects
+- Memory-Driven Research: Use search patterns to discover existing approaches
+- Pattern Synthesis: Combine findings from multiple memory files
+- Validation Planning: Include testing and quality gates in PRP
 
-Creates research-backed implementation blueprint stored as prp_[name].md for execution phase.`,
+Creates research-backed implementation blueprint stored as prp_[name].md for execution phase. This ensures AI assistants never code blindly - they research first, then implement with complete context.`,
           inputSchema: {
             type: 'object',
             properties: {
@@ -258,9 +321,26 @@ Creates research-backed implementation blueprint stored as prp_[name].md for exe
 
 AI ASSISTANT AUTO-CONTINUATION: After Phase 1 (generate-prp) completes, AUTOMATICALLY proceed to this Phase 2 tool to implement the generated PRP. DO NOT stop after research - continue with implementation!
 
-Implements features using research-backed Product Requirements Prompts. Provides systematic execution workflow including loading PRP with complete implementation context, planning implementation strategy based on discovered patterns, executing following researched approaches, running validation gates (TypeScript, tests, integration), and self-correcting failures with retry loops.
+AI ASSISTANT 5-STEPS-AHEAD IMPLEMENTATION WORKFLOW:
+1. PRP LOADING: Load research-backed implementation blueprint with full context
+2. STRATEGY PLANNING: ULTRATHINK implementation approach based on discovered patterns
+3. PATTERN EXECUTION: Follow researched approaches and architectural decisions
+4. VALIDATION GATES: Run TypeScript, tests, integration checks with self-correction
+5. MEMORY UPDATES: Document new patterns learned in systemPatterns.md and progress.md
 
-Auto-detects latest PRP if not specified. Continues execution until all validation gates pass.`,
+SYSTEMATIC EXECUTION METHODOLOGY:
+- Context Transfer: Complete research findings from Phase 1 guide implementation
+- Pattern Adherence: Follow discovered patterns exactly, don't improvise
+- Validation Loops: Self-correct until ALL validation gates pass
+- Memory Evolution: Update memories with implementation learnings
+
+CROSS-TOOL INTEGRATION:
+- Reads PRP from memory_engineering/read
+- Uses memory_engineering/search for additional pattern discovery during implementation
+- Updates memory_engineering/update with new patterns and progress
+- Triggers memory_engineering/sync for search index updates
+
+Auto-detects latest PRP if not specified. Continues execution until all validation gates pass. This ensures AI assistants deliver production-ready features that integrate perfectly with existing codebase patterns.`,
           inputSchema: {
             type: 'object',
             properties: {
@@ -275,6 +355,11 @@ Auto-detects latest PRP if not specified. Continues execution until all validati
               force: {
                 type: 'boolean',
                 description: 'Force execution even with low confidence PRP',
+                default: false,
+              },
+              skipApproval: {
+                type: 'boolean',
+                description: 'Skip user approval prompt and proceed directly to execution',
                 default: false,
               },
             },
