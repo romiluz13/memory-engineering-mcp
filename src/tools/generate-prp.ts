@@ -69,12 +69,12 @@ ${systemPrompt}
 4. **Generate PRP**: Create comprehensive implementation blueprint
 5. **Store PRP**: Use \`memory_engineering/update --fileName "prp_[feature-name].md" --content "[PRP content]"\` to store the PRP
 
-**🔄 CRITICAL: AUTOMATIC PHASE 2 TRIGGER**
-After storing the PRP, you MUST IMMEDIATELY proceed to Phase 2 without waiting for user input:
+**🔄 PHASE 2 EXECUTION READY**
+After storing the PRP, the Context Engineering research phase is complete. You can now proceed to implementation:
 
-6. **Auto-Execute Phase 2**: \`memory_engineering/execute-prp\` - This will automatically detect and implement the PRP you just created
+6. **Proceed to Phase 2**: \`memory_engineering/execute-prp\` - This will load the PRP and provide structured implementation guidance
 
-**⚠️ DO NOT STOP after Phase 1! The Context Engineering workflow requires BOTH phases to complete successfully.**
+**📋 USER CHOICE**: You can proceed immediately to Phase 2, or review the PRP first using \`memory_engineering/read --fileName "prp_[feature-name].md"\` to understand the implementation plan.
 
 🚀 **Start your research NOW following the Context Engineering methodology above!**`,
       }],
