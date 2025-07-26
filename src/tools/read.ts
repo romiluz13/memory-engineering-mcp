@@ -213,9 +213,9 @@ function formatSingleMemory(doc: MemoryDocument): CallToolResult {
   // Add contextual hints based on what was read
   let hint = '';
   if (doc.memoryClass === 'core' && doc.content.fileName === 'activeContext.md') {
-    hint = '\n\n📝 Starting new work? Remember to update this file with: memory_engineering/update --fileName "activeContext.md"';
+    hint = '\n\n📝 Starting new work? Remember to update this file with: memory_engineering_update --fileName "activeContext.md"';
   } else if (doc.memoryClass === 'core' && doc.content.fileName === 'systemPatterns.md') {
-    hint = '\n\n💡 Found a new pattern? Add it with: memory_engineering/update --fileName "systemPatterns.md"';
+    hint = '\n\n💡 Found a new pattern? Add it with: memory_engineering_update --fileName "systemPatterns.md"';
   }
 
   return {

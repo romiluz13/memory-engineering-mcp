@@ -22,7 +22,7 @@ export function setupTools(server: Server): void {
     return {
       tools: [
         {
-          name: 'memory_engineering/init',
+          name: 'memory_engineering_init',
           description: 'Initialize AI memory system for your project. Run this once at project start. Creates 6 memory files that help AI remember everything about your project.',
           inputSchema: {
             type: 'object',
@@ -39,7 +39,7 @@ export function setupTools(server: Server): void {
           },
         },
         {
-          name: 'memory_engineering/read',
+          name: 'memory_engineering_read',
           description: 'Read project memories to understand context. Use this to: AT SESSION START - Always read activeContext.md first | BEFORE CODING - Read systemPatterns.md for conventions | FOR DETAILS - Read any of the 6 core memory files. Example: read --fileName "activeContext.md"',
           inputSchema: {
             type: 'object',
@@ -67,7 +67,7 @@ export function setupTools(server: Server): void {
           },
         },
         {
-          name: 'memory_engineering/update',
+          name: 'memory_engineering_update',
           description: 'Save important information for future sessions. Use IMMEDIATELY when: Starting new work → Update activeContext.md | Finding patterns → Update systemPatterns.md | Completing features → Update progress.md | Solving bugs → Create working memory. Example: update --fileName "activeContext.md" --content "Working on: auth system..."',
           inputSchema: {
             type: 'object',
@@ -101,7 +101,7 @@ export function setupTools(server: Server): void {
           },
         },
         {
-          name: 'memory_engineering/search',
+          name: 'memory_engineering_search',
           description: 'Find how similar problems were solved before. ALWAYS use when: Starting ANY new feature ("find authentication patterns") | Hitting errors ("find error handling") | Wondering "how did we..." ("find state management"). Uses AI to understand your search and finds relevant memories.',
           inputSchema: {
             type: 'object',
@@ -133,7 +133,7 @@ export function setupTools(server: Server): void {
           },
         },
         {
-          name: 'memory_engineering/sync',
+          name: 'memory_engineering_sync',
           description: 'Make memories searchable with AI embeddings. Run after adding new memories. This helps search understand context better.',
           inputSchema: {
             type: 'object',
@@ -195,7 +195,7 @@ The 6 core memory files that form the foundation of the memory system:
 5. **progress.md** - Completed work and lessons learned
 6. **codebaseMap.md** - File structure and key modules
 
-Use memory_engineering/read --fileName [name] to read a specific file.`,
+Use memory_engineering_read --fileName [name] to read a specific file.`,
             }],
           };
 
@@ -260,15 +260,15 @@ Use memory_engineering/read --fileName [name] to read a specific file.`,
       logger.info(`Tool called: ${name}`, args);
 
       switch (name) {
-        case 'memory_engineering/init':
+        case 'memory_engineering_init':
           return await initTool(args);
-        case 'memory_engineering/read':
+        case 'memory_engineering_read':
           return await readTool(args);
-        case 'memory_engineering/update':
+        case 'memory_engineering_update':
           return await updateTool(args);
-        case 'memory_engineering/search':
+        case 'memory_engineering_search':
           return await searchTool(args);
-        case 'memory_engineering/sync':
+        case 'memory_engineering_sync':
           return await syncTool(args);
         default:
           throw new Error(`Unknown tool: ${name}`);
