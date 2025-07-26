@@ -395,7 +395,10 @@ Try these search tips:
 - Try semantic search with concepts rather than exact terms
 - Check if memories have been synced (run memory_engineering/sync)
 
-Search type used: ${searchType}`,
+Search type used: ${searchType}
+
+🆕 First time implementing this? After you build it, save your solution with:
+memory_engineering/update --memoryClass "working" --content '{"action": "implement ${query}", "solution": "your approach"}'`,
         },
       ],
     };
@@ -458,11 +461,20 @@ Search type used: ${searchType}`,
   content += `- temporal: Time-weighted relevance\n\n`;
   content += `To view details: memory_engineering/read --fileName [name] or use memory ID`;
 
+  // Add contextual hints based on results
+  let hint = '\n\n';
+  if (results.some(r => r.memoryClass === 'working' || r.memoryClass === 'insight')) {
+    hint += '💡 Found useful patterns? Consider updating systemPatterns.md with improvements!\n';
+    hint += 'memory_engineering/update --fileName "systemPatterns.md"\n';
+  } else {
+    hint += '🔍 Found what you need? Great! If you discover improvements while implementing, remember to save them!\n';
+  }
+
   return {
     content: [
       {
         type: 'text',
-        text: content,
+        text: content + hint,
       },
     ],
   };
