@@ -148,7 +148,12 @@ Remember to run memory_engineering/sync to generate embeddings for search.`,
         text: `Updated core memory: ${fileName}
 Version: ${(existing.metadata.version || 0) + 1}
 
-Note: Embeddings cleared. Run memory_engineering/sync to regenerate for search.`,
+Note: Embeddings cleared. Run memory_engineering/sync to regenerate for search.
+
+🔄 Next steps based on what you updated:
+${fileName === 'activeContext.md' ? '- Continue updating this file as you progress through your work' : ''}
+${fileName === 'systemPatterns.md' ? '- Search for similar patterns to ensure consistency' : ''}
+${fileName === 'progress.md' ? '- Update activeContext.md for your next task' : ''}`,
       },
     ],
   };
@@ -265,7 +270,11 @@ ID: ${result.insertedId}
 Class: ${params.memoryClass}
 Type: ${params.memoryType || memory.memoryType}
 
-Run memory_engineering/sync to generate embeddings for search.`,
+Run memory_engineering/sync to generate embeddings for search.
+
+${params.memoryClass === 'working' ? '🐛 Great job saving this solution! Next time you hit similar issues, search for it!' : ''}
+${params.memoryClass === 'insight' ? '✨ Pattern discovered! This will help in future implementations.' : ''}
+${params.memoryClass === 'evolution' ? '📊 Search tracked! The system is learning from your usage.' : ''}`,
       },
     ],
   };

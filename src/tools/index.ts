@@ -23,7 +23,7 @@ export function setupTools(server: Server): void {
       tools: [
         {
           name: 'memory_engineering/init',
-          description: 'Initialize memory system for a project. Creates MongoDB collection, indexes, and 6 core memory files.',
+          description: 'Initialize AI memory system for your project. Run this once at project start. Creates 6 memory files that help AI remember everything about your project.',
           inputSchema: {
             type: 'object',
             properties: {
@@ -40,7 +40,7 @@ export function setupTools(server: Server): void {
         },
         {
           name: 'memory_engineering/read',
-          description: 'Read memories from MongoDB. Supports reading by fileName for core memories or by memoryClass/memoryType.',
+          description: 'Read project memories to understand context. Use this to: AT SESSION START - Always read activeContext.md first | BEFORE CODING - Read systemPatterns.md for conventions | FOR DETAILS - Read any of the 6 core memory files. Example: read --fileName "activeContext.md"',
           inputSchema: {
             type: 'object',
             properties: {
@@ -68,7 +68,7 @@ export function setupTools(server: Server): void {
         },
         {
           name: 'memory_engineering/update',
-          description: 'Update core memory files or create new memories. For core memories, use fileName. For other classes, specify memoryClass and provide JSON content.',
+          description: 'Save important information for future sessions. Use IMMEDIATELY when: Starting new work → Update activeContext.md | Finding patterns → Update systemPatterns.md | Completing features → Update progress.md | Solving bugs → Create working memory. Example: update --fileName "activeContext.md" --content "Working on: auth system..."',
           inputSchema: {
             type: 'object',
             properties: {
@@ -102,7 +102,7 @@ export function setupTools(server: Server): void {
         },
         {
           name: 'memory_engineering/search',
-          description: 'Search memories using MongoDB $rankFusion or specific search types (vector, text, temporal).',
+          description: 'Find how similar problems were solved before. ALWAYS use when: Starting ANY new feature ("find authentication patterns") | Hitting errors ("find error handling") | Wondering "how did we..." ("find state management"). Uses AI to understand your search and finds relevant memories.',
           inputSchema: {
             type: 'object',
             properties: {
@@ -134,7 +134,7 @@ export function setupTools(server: Server): void {
         },
         {
           name: 'memory_engineering/sync',
-          description: 'Generate vector embeddings and update search indexes for all memories without embeddings.',
+          description: 'Make memories searchable with AI embeddings. Run after adding new memories. This helps search understand context better.',
           inputSchema: {
             type: 'object',
             properties: {

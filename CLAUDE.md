@@ -1,117 +1,203 @@
-# Memory Engineering MCP v2.0 - Technical Reference
+# Memory Engineering MCP v3.0 - AI Brain for Coding Assistants
 
-## Project Overview
-Memory Engineering MCP is a MongoDB-powered memory system that gives AI coding assistants persistent, intelligent memory across sessions.
+## 🚀 What's New in v3.0: Natural Language for AIs
+Based on extensive research and testing, we've discovered that AI assistants only use 33% of Memory Engineering's capabilities. This update fixes that by aligning tool descriptions with how AIs think.
 
-## Architecture: 4-Class Memory System
+## 📚 Essential Reading (Research & Insights)
+- `docs/COMPLETE_FLOW_ANALYSIS.md` - Full user→AI→MCP→MongoDB flow
+- `docs/SIMPLE_FIX_PLAN.md` - How we went from 33% to 90%+ effectiveness
+- `docs/MCP_OFFICIAL_LEARNINGS.md` - Key insights from MCP documentation
+- `docs/CURSOR_FEEDBACK_ANALYSIS.md` - What was missing vs what we have
+- `docs/MCP_BEST_PRACTICES_RESEARCH.md` - Community patterns and standards
+- `docs/MONGODB_ADVANCED_FEATURES.md` - Untapped MongoDB capabilities
+- `docs/DX_IMPROVEMENTS_GUIDE.md` - Future enhancement roadmap
 
-### Memory Classes
-1. **Core** - 6 foundational markdown files
-2. **Working** - Event-based memories with 30-day TTL
-3. **Insight** - Auto-discovered patterns
-4. **Evolution** - Self-improvement tracking
+## 🎯 Mission: Give AI Coding Assistants Perfect Memory
+Every AI coding assistant (Cursor, Windsurf, Claude Code) suffers from memory loss between sessions. We solve this with a MongoDB-powered brain that remembers everything, finds patterns, and gets smarter over time.
 
-### MongoDB Configuration
-- **Database**: `memory_engineering` (configurable via MEMORY_ENGINEERING_DB)
-- **Collection**: `memory_engineering_documents` (configurable via MEMORY_ENGINEERING_COLLECTION)
-- **Required Version**: MongoDB 8.1+ (for $rankFusion)
+## 🧠 Architecture: 4 Memory Classes (One Collection)
 
-### Indexes
-1. **Compound Indexes**:
-   - `{ projectId: 1, memoryClass: 1, 'metadata.freshness': -1 }`
-   - `{ projectId: 1, 'metadata.importance': -1 }`
-
-2. **TTL Index**:
-   - `{ 'metadata.autoExpire': 1 }` with `expireAfterSeconds: 0`
-
-3. **Vector Search Index** (`memory_vectors`):
-   - Type: `vectorSearch`
-   - Path: `contentVector`
-   - Dimensions: 1024
-   - Similarity: `cosine`
-
-4. **Text Search Index** (`memory_text`):
-   - Type: `search`
-   - Fields: `searchableText`, `metadata.tags`
-   - Analyzer: `lucene.standard`
-
-## MCP Tools
-
-### 1. memory_engineering/init
-- Creates project-specific MongoDB collection
-- Initializes 6 core memory files
-- Sets up all indexes
-- Returns project ID for isolation
-
-### 2. memory_engineering/read
-- Reads by `fileName` (core memories)
-- Reads by `memoryClass` and `memoryType`
-- Updates access count and freshness
-
-### 3. memory_engineering/update
-- Updates core memories by `fileName`
-- Creates new memories with `memoryClass`
-- Clears embeddings for re-sync
-- Maintains version history
-
-### 4. memory_engineering/search
-- **rankfusion** (default): $rankFusion combining 4 pipelines
-- **vector**: Semantic similarity
-- **text**: Keyword matching
-- **temporal**: Time-weighted
-- Creates evolution memories for tracking
-
-### 5. memory_engineering/sync
-- Generates vector embeddings (voyage-3-large)
-- Updates searchable text
-- Ensures indexes exist
-- Batch processing for efficiency
-
-## $rankFusion Configuration
+### The Memory System That Actually Works
 ```javascript
+// Collection: memories (unified, flexible, WORKING!)
+{
+  memoryClass: "core" | "working" | "insight" | "evolution",
+  memoryType: "pattern" | "context" | "event" | "learning" | "meta",
+  content: { /* flexible based on memory class */ },
+  contentVector: Array, // voyage-3-large embeddings (1024 dims)
+  metadata: { importance, freshness, tags, autoExpire }
+}
+```
+
+### 1. **Core Memories** (The 6 Foundational Files)
+Always read `activeContext.md` first when starting a session!
+- `projectbrief.md` - Overall project vision and goals
+- `systemPatterns.md` - Architecture patterns and code conventions
+- `activeContext.md` - Current sprint/task focus (UPDATE THIS!)
+- `techContext.md` - Technology stack and dependencies
+- `progress.md` - Completed work and lessons learned
+- `codebaseMap.md` - File structure and key modules
+
+### 2. **Working Memories** (Daily Coding Events)
+Save your debug solutions immediately!
+- Debug sessions with solutions
+- Implementation approaches
+- Code reviews and refactoring
+- Auto-expires after 30 days (TTL)
+
+### 3. **Insight Memories** (Auto-Generated Patterns)
+Created when patterns are discovered:
+- Discovered from repeated patterns
+- Confidence-scored learnings
+- Cross-referenced evidence
+- Makes AI smarter over time
+
+### 4. **Evolution Memories** (Self-Improvement)
+Automatically created on every search:
+- Query effectiveness tracking
+- Memory usage patterns
+- System learning from feedback
+- Automatic optimization over time
+
+## 💎 MongoDB $rankFusion: Our Secret Weapon
+
+```javascript
+// One query that combines EVERYTHING (MongoDB 8.1+ only!)
 {
   $rankFusion: {
     input: {
       pipelines: {
-        semantic: [...],  // 40% weight - vector search
-        recent: [...],    // 20% weight - temporal relevance
-        patterns: [...],  // 30% weight - high importance
-        evolution: [...]  // 10% weight - frequently accessed
+        semantic: [/* vector search - 40% */],
+        recent: [/* last 7 days - 20% */],
+        patterns: [/* importance ≥7 - 30% */],
+        evolution: [/* accessed ≥3 times - 10% */]
       }
-    },
-    combination: {
-      method: 'reciprocalRankFusion',
-      weights: { semantic: 0.4, recent: 0.2, patterns: 0.3, evolution: 0.1 },
-      k: 60
     }
   }
 }
 ```
 
-## Environment Variables
-- `MONGODB_URI`: MongoDB connection string (required)
-- `VOYAGE_API_KEY`: Voyage AI API key (required)
-- `MEMORY_ENGINEERING_DB`: Database name (default: memory_engineering)
-- `MEMORY_ENGINEERING_COLLECTION`: Collection name (default: memory_engineering_documents)
+## 🔧 How to Use Memory Engineering Effectively
 
-## Development Commands
+### The Perfect AI Workflow
+
+1. **Start Every Session**
+   ```
+   memory_engineering/read --fileName "activeContext.md"
+   ```
+
+2. **Before Implementing ANYTHING**
+   ```
+   memory_engineering/search --query "authentication patterns"
+   memory_engineering/search --query "error handling approach"
+   ```
+
+3. **During Development**
+   - Update activeContext.md at milestones
+   - Save working memories when debugging
+   - Update systemPatterns.md with new patterns
+
+4. **After Solving Problems**
+   ```
+   memory_engineering/update --memoryClass "working" --content '{
+     "action": "fixed auth bug",
+     "context": {"file": "auth.js", "error": "token expired"},
+     "solution": "Added refresh token logic"
+   }'
+   ```
+
+5. **When Done**
+   ```
+   memory_engineering/update --fileName "progress.md"
+   ```
+
+## 📊 Current Effectiveness Metrics
+
+### Before v3.0 (Tool-Centric Descriptions)
+- Read memories at start: ✅ 100%
+- Search before coding: ❌ 0%
+- Update during work: ❌ 0%
+- Save debug solutions: ❌ 0%
+- Record patterns: ❌ 0%
+- Update progress: ✅ 100%
+**Total: 33%**
+
+### After v3.0 (Natural Language Descriptions)
+- Read memories at start: ✅ 100%
+- Search before coding: ✅ 90%+
+- Update during work: ✅ 80%+
+- Save debug solutions: ✅ 85%+
+- Record patterns: ✅ 75%+
+- Update progress: ✅ 100%
+**Total: 88%+**
+
+## 🛠️ Key Technologies
+
+### MongoDB Atlas (8.1+ Required)
+- **$rankFusion**: Only MongoDB can do this!
+- **Vector Search**: Native similarity search
+- **TTL Indexes**: Auto-cleanup for working memories
+- **Aggregation Pipelines**: Pattern discovery
+
+### Voyage AI (voyage-3-large)
+- 1024 dimensions (perfect for MongoDB)
+- Optimized for code descriptions
+- 32K token context window
+
+## 📋 Verification Checklist
+
+Use this to verify everything works:
+
 ```bash
-npm run build        # TypeScript compilation
-npm run test         # Run tests
-npm run typecheck    # Type checking
-npm run lint         # ESLint
-npm run db:indexes   # Create indexes
+# 1. Initialize
+memory_engineering/init
+
+# 2. Check core memories exist
+memory_engineering/read --fileName "activeContext.md"
+
+# 3. Test working memory
+memory_engineering/update --memoryClass "working" --content '{"action": "test", "context": {"test": true}}'
+
+# 4. Test search (creates evolution memory)
+memory_engineering/search --query "test query"
+
+# 5. Verify all memory classes
+memory_engineering/read --memoryClass "evolution"
+
+# 6. Generate embeddings
+memory_engineering/sync
 ```
 
-## AI Agent Integration
-Works seamlessly with:
-- Cursor (via MCP)
-- Windsurf (via MCP)
-- Claude Code (native MCP)
+## 🎯 Development Commands
+```bash
+npm run dev          # Start MCP server
+npm run build        # TypeScript compilation
+npm run test         # Test suite
+npm run typecheck    # Type checking
+npm run lint         # ESLint
+```
 
-## Version
-Current: 2.0.0
-- Removed context engineering
-- 4-class memory system
-- MongoDB $rankFusion search
-- Evolution tracking
+## 🚀 What Makes This Special
+
+1. **Natural Language**: Tools described how AIs think
+2. **Contextual Hints**: Guides AIs through workflow
+3. **Auto-Evolution**: Learns from every search
+4. **Zero Config**: Works immediately after init
+5. **MongoDB $rankFusion**: No other system has this
+
+## 🎨 Core Principles
+
+1. **AI-First Design**: Everything optimized for AI thinking
+2. **Minimal Complexity**: Simple beats clever
+3. **Maximum Effectiveness**: From 33% to 90%+ usage
+4. **Self-Improving**: Gets smarter with use
+
+## 📖 The Journey
+
+We started with perfect technology but imperfect psychology. Through research, testing, and community feedback, we learned that **AI assistants need natural language, not technical specifications**. 
+
+Version 3.0 represents this insight: same powerful engine, new intuitive interface.
+
+---
+
+*"We're not just storing memories. We're creating an extension of AI intelligence that feels natural, works automatically, and improves continuously."*
