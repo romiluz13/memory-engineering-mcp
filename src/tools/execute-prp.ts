@@ -5,13 +5,14 @@ import { ExecutePRPSchema, type ProjectConfig } from '../types/memory.js';
 import type { z } from 'zod';
 import { getMemoryCollection } from '../db/connection.js';
 import { logger } from '../utils/logger.js';
-import { getContextEngineeringTemplate } from '../services/context-engineering.js';
+import { isRepeatedCall, createExecutionState } from '../utils/execution-state.js';
+import { generateAutonomousExecutionPlan } from '../utils/command-generator.js';
 
 type ExecutePRPParams = z.infer<typeof ExecutePRPSchema>;
 
 /**
- * Context Engineering Phase 2: Execute PRP with validation loops
- * Fetches the original /execute-prp system prompt from MongoDB
+ * Context Engineering Phase 2: Generate Autonomous AI Execution Plan
+ * Returns structured commands that autonomous AI assistants can execute directly
  */
 export async function executePRPTool(args: unknown): Promise<CallToolResult> {
   try {
@@ -42,7 +43,7 @@ export async function executePRPTool(args: unknown): Promise<CallToolResult> {
           content: [{
             type: 'text',
             text: `No PRP found to execute. Either:
-1. Generate a PRP first: memory_engineering/generate-prp --request "your request"
+1. Generate a PRP first: memory_engineering/generate-prp --request "your request"  
 2. Specify PRP: memory_engineering/execute-prp --prp "prp-name"
 
 Available PRPs can be found via: memory_engineering/search --query "prp_"`,
@@ -51,82 +52,140 @@ Available PRPs can be found via: memory_engineering/search --query "prp_"`,
       }
     }
 
-    logger.info('Fetching Context Engineering /execute-prp template...');
-    
-    // Fetch the exact original /execute-prp system prompt from MongoDB
-    const systemPrompt = await getContextEngineeringTemplate('execute-prp');
+    // Check for repeated calls to prevent loops
+    if (!params.forceRefresh) {
+      const callCheck = await isRepeatedCall(prpName, config.projectId);
+      if (callCheck.isRepeated) {
+        return {
+          content: [{
+            type: 'text',
+            text: `⚠️ **EXECUTION PLAN ALREADY PROVIDED** for "${prpName}" (called ${callCheck.callCount} times)
 
-    logger.info(`🚀 Context Engineering Phase 2: Implementation & Validation`);
+**This prevents infinite loops!** The implementation plan was provided in the previous response.
+
+**What you should do now:**
+1. **If you haven't started**: Follow the execution plan from the previous response
+2. **If you've started**: Continue with the remaining steps  
+3. **If you've completed**: Update progress with: \`memory_engineering/update --fileName "progress.md" --content "✅ Completed ${prpName}"\`
+4. **If you need fresh instructions**: Use \`--forceRefresh true\`
+
+**Last provided**: ${callCheck.lastCalled?.toISOString() || 'Unknown'}`,
+          }],
+        };
+      }
+    }
+
+    // User approval gate for autonomous execution
+    if (!params.skipApproval) {
+      return {
+        content: [{
+          type: 'text',
+          text: `🚨 **EXECUTION APPROVAL REQUIRED**
+
+Ready to execute PRP "${prpName}" with autonomous AI implementation.
+
+**📋 WHAT HAPPENS NEXT:**
+The system will generate a structured, step-by-step execution plan that guides AI assistants through:
+- Loading the comprehensive implementation blueprint
+- Following researched patterns and architectural decisions  
+- Running validation gates (TypeScript, tests, linting)
+- Updating memory files with new patterns learned
+
+**🎯 YOUR OPTIONS:**
+1. **✅ PROCEED**: Call again with \`--skipApproval true\` to execute
+2. **📖 REVIEW FIRST**: \`memory_engineering/read --fileName "prp_${prpName}.md"\`
+3. **🔧 POWER USER**: Use \`--skipApproval true\` in future calls to bypass this prompt
+
+**🛡️ SAFETY FEATURES:**
+- Loop prevention: Execution state tracking prevents infinite calls
+- Validation gates: All implementations must pass TypeScript + tests
+- Memory persistence: All changes tracked in project memory system
+
+This one-time approval ensures you maintain control while preserving the system's autonomous capabilities.`,
+        }],
+      };
+    }
+
+    // Get PRP content for command generation
+    const collection = getMemoryCollection();
+    const prpDoc = await collection.findOne({
+      projectId: config.projectId,
+      fileName: `prp_${prpName}.md`
+    });
+
+    if (!prpDoc) {
+      return {
+        content: [{
+          type: 'text',
+          text: `PRP "${prpName}" not found in memory system. Generate it first with memory_engineering/generate-prp.`,
+        }],
+      };
+    }
+
+    // Create execution state for tracking
+    const executionId = await createExecutionState(config.projectId, prpName, 5); // Estimated steps
+
+    // Generate autonomous execution plan
+    const executionPlan = await generateAutonomousExecutionPlan(
+      prpName,
+      prpDoc.content,
+      config.projectId,
+      executionId,
+      projectPath
+    );
+
+    logger.info(`🚀 Generated autonomous execution plan for ${prpName}: ${executionId}`);
 
     return {
       content: [{
         type: 'text',
-        text: `🚀 **Context Engineering Phase 2: Implementation & Validation**
+        text: `🤖 **AUTONOMOUS AI EXECUTION PLAN GENERATED**
 
-**PRP to Execute**: ${prpName}
-**Project**: ${config.projectId}
-
----
-
-## 🤖 AI Assistant Instructions
-
-You are now in Context Engineering Phase 2. Follow these instructions EXACTLY:
-
-${systemPrompt}
+**PRP**: ${prpName}
+**Project**: ${config.projectId}  
+**Execution ID**: ${executionId}
+**Mode**: ${executionPlan.executionMode}
+**Total Steps**: ${executionPlan.totalSteps}
 
 ---
 
-## 🎯 Your Task
+## 🎯 STRUCTURED EXECUTION COMMANDS
 
-**PRP File**: ${prpName}
+${executionPlan.implementationPlan.map(cmd => `
+**STEP ${cmd.step}**: ${cmd.purpose}
+- **Type**: ${cmd.type}
+- **Action**: ${cmd.action}
+${cmd.path ? `- **Path**: ${cmd.path}` : ''}
+${cmd.command ? `- **Command**: \`${cmd.command}\`` : ''}
+${cmd.expectedOutcome ? `- **Expected**: ${cmd.expectedOutcome}` : ''}
+${cmd.onFailure ? `- **On Failure**: ${cmd.onFailure}` : ''}
+`).join('\n')}
 
-**🔄 CONTEXT ENGINEERING PHASE 2 - MANDATORY STEPS (DO NOT SKIP ANY!):**
+---
 
-1. **Load PRP**: Use \`memory_engineering/read --fileName "prp_${prpName}.md"\` to load the PRP
-   - This contains ALL research from Phase 1 including patterns, constraints, and validation gates
-   - The PRP is your complete implementation blueprint - follow it EXACTLY
+## 🚨 AUTONOMOUS AI INSTRUCTIONS
 
-2. **ULTRATHINK**: Plan implementation strategy based on PRP content
-   - Analyze the comprehensive research findings embedded in the PRP
-   - Plan step-by-step implementation following discovered patterns
-   - Identify potential issues and mitigation strategies
+**${executionPlan.completionSignal}**
 
-3. **Execute Implementation**: Follow the PRP blueprint exactly
-   - Use patterns and approaches discovered in Phase 1 research
-   - Reference code examples and architectural decisions from memory files
-   - Follow validation approaches discovered in research
+1. **Execute each step sequentially** - do not skip or reorder
+2. **Follow the structured commands** - these are researched and validated
+3. **Handle failures** using the provided guidance for each step
+4. **Track progress** by updating memory files as specified
+5. **DO NOT call this tool again** - you have everything needed
 
-4. **Run Validation Gates**: Execute each validation command from the PRP
-   - TypeScript compilation: \`npm run typecheck\`
-   - Linting: \`npm run lint\`
-   - Testing: \`npm run test\`
-   - Build process: \`npm run build\`
-   - Any custom validation specified in the PRP
+**Completion Criteria**: When all ${executionPlan.totalSteps} steps pass validation, the implementation is complete.
 
-5. **Self-Correction**: Fix failures and retry until all gates pass
-   - If validation fails, analyze error against PRP guidance
-   - Apply fixes based on patterns and solutions in PRP
-   - Re-run validation gates until all pass
+**Memory Updates**: The final step includes comprehensive updates to ALL 6 core memory files:
+- **progress.md**: Detailed completion status and achievements  
+- **systemPatterns.md**: New patterns learned during implementation
+- **activeContext.md**: Updated current state and next priorities
+- **techContext.md**: Technical learnings and development process validation
+- **projectbrief.md**: Implementation milestone and AI workflow validation
+- **productContext.md**: Product development insights and methodology validation
 
-6. **Update Progress**: \`memory_engineering/update --fileName "progress.md"\`
-   - Document what was implemented
-   - Note any issues encountered and solutions applied
-   - Update project status for future reference
+**Progress Tracking**: ${executionPlan.progressTracking.updateOn} → ${executionPlan.progressTracking.progressFile}
 
-**🚨 CRITICAL REMINDER - CONTEXT ENGINEERING METHODOLOGY:**
-- You are implementing a researched solution, not improvising
-- All patterns, constraints, and approaches were discovered in Phase 1
-- The PRP contains comprehensive context - use it as your guide
-- Do not deviate from discovered patterns without validation
-- Complete validation is mandatory - no shortcuts
-
-**Available Tools**:
-- \`memory_engineering/read\` - Read PRP and memory files
-- \`memory_engineering/search\` - Find additional implementation patterns if needed
-- \`memory_engineering/update\` - Update progress and memory files
-- Standard coding tools (bash, file operations, etc.)
-
-🚀 **Start implementation NOW following the Context Engineering methodology above!**`,
+🚀 **BEGIN AUTONOMOUS EXECUTION NOW**`,
       }],
     };
 
@@ -137,7 +196,7 @@ ${systemPrompt}
       isError: true,
       content: [{
         type: 'text',
-        text: `Error fetching Context Engineering template: ${error instanceof Error ? error.message : 'Unknown error occurred'}`,
+        text: `Error generating execution plan: ${error instanceof Error ? error.message : 'Unknown error occurred'}`,
       }],
     };
   }
