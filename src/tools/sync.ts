@@ -1,7 +1,7 @@
 import { join } from 'path';
 import { readFileSync, existsSync } from 'fs';
 import type { CallToolResult } from '@modelcontextprotocol/sdk/types.js';
-import { SyncToolSchema, type ProjectConfig } from '../types/memory.js';
+import { SyncToolSchema, type ProjectConfig, type MemoryDocument } from '../types/memory.js';
 import { getMemoryCollection } from '../db/connection.js';
 import { generateEmbeddings } from '../embeddings/voyage.js';
 import { logger } from '../utils/logger.js';
@@ -27,12 +27,15 @@ export async function syncTool(args: unknown): Promise<CallToolResult> {
     const config: ProjectConfig = JSON.parse(readFileSync(configPath, 'utf-8'));
     const collection = getMemoryCollection();
 
-    // Find documents that need embedding generation
+    // Find documents that need embedding generation or searchable text
     const query = params.forceRegenerate
       ? { projectId: config.projectId }
       : {
           projectId: config.projectId,
-          contentVector: { $exists: false },
+          $or: [
+            { contentVector: { $exists: false } },
+            { searchableText: { $exists: false } }
+          ]
         };
 
     const documents = await collection.find(query).toArray();
@@ -42,38 +45,37 @@ export async function syncTool(args: unknown): Promise<CallToolResult> {
         content: [
           {
             type: 'text',
-            text: `✅ All memory files are already synced!
+            text: `✅ All memories are already synced!
 
-Your MongoDB-powered Memory Engineering system is READY for action:
-- 🔍 Hybrid search is active
-- 🧠 Vector embeddings are current
-- 📝 Text indexes are built
+🧠 Memory Engineering 2.0 Status:
+- Vector embeddings: Current
+- Text search: Indexed
+- $rankFusion: Ready
 
-💡 QUICK ACTIONS:
-1. Search your knowledge: memory_engineering/search --query "any topic"
-2. Find patterns: memory_engineering/search --query "pattern"
-3. Update memories: memory_engineering/update --fileName "activeContext.md"
-
-🔄 Force regeneration? Use: memory_engineering/sync --forceRegenerate true`,
+Use memory_engineering/search to query your memories.
+Force regeneration? Use: memory_engineering/sync --forceRegenerate true`,
           },
         ],
       };
     }
 
-    logger.info(`Syncing ${documents.length} memory files for project: ${config.projectId}`);
+    logger.info(`Syncing ${documents.length} memories for project: ${config.projectId}`);
 
-    // Batch generate embeddings
-    const contents = documents.map((doc) => doc.content);
+    // Prepare content for embedding generation
+    const contents = documents.map((doc) => extractContentForEmbedding(doc));
+    
+    // Generate embeddings
     const embeddings = await generateEmbeddings(contents);
 
-    // Update documents with embeddings
+    // Update documents with embeddings and searchable text
     const bulkOps = documents.map((doc, index) => ({
       updateOne: {
         filter: { _id: doc._id },
         update: {
           $set: {
             contentVector: embeddings[index],
-            'metadata.lastUpdated': new Date(),
+            searchableText: extractSearchableText(doc),
+            'metadata.freshness': new Date(),
           },
         },
       },
@@ -84,108 +86,50 @@ Your MongoDB-powered Memory Engineering system is READY for action:
     logger.info(`Sync completed: ${result.modifiedCount} documents updated`);
 
     // Ensure search indexes exist
-    try {
-      // Check for vector search index
-      const vectorIndexes = await collection.listSearchIndexes('memory_vector_index').toArray();
-      
-      if (vectorIndexes.length === 0) {
-        await collection.createSearchIndex({
-          name: 'memory_vector_index',
-          type: 'vectorSearch',
-          definition: {
-            fields: [
-              {
-                type: 'vector',
-                numDimensions: 1024,
-                path: 'contentVector',
-                similarity: 'cosine',
-              },
-              {
-                type: 'filter',
-                path: 'projectId',
-              },
-            ],
-          },
-        });
-        logger.info('Vector search index created');
-      }
+    await ensureSearchIndexes(collection);
 
-      // Check for Atlas Search index for text search
-      const textIndexes = await collection.listSearchIndexes('memory_text_index').toArray();
-      
-      if (textIndexes.length === 0) {
-        await collection.createSearchIndex({
-          name: 'memory_text_index',
-          type: 'search',
-          definition: {
-            mappings: {
-              dynamic: true,
-              fields: {
-                content: {
-                  type: 'string',
-                  analyzer: 'lucene.standard',
-                },
-                fileName: {
-                  type: 'string',
-                  analyzer: 'lucene.standard',
-                },
-                projectId: {
-                  type: 'string',
-                },
-              },
-            },
-          },
-        });
-        logger.info('Atlas Search index for text search created');
-      }
-    } catch (error) {
-      logger.debug('Search index creation error (may already exist):', error);
-    }
+    // Generate summary by memory class
+    const memorySummary = await collection.aggregate([
+      { $match: { projectId: config.projectId } },
+      { 
+        $group: { 
+          _id: '$memoryClass',
+          count: { $sum: 1 },
+          avgImportance: { $avg: '$metadata.importance' }
+        } 
+      },
+      { $sort: { _id: 1 } }
+    ]).toArray();
 
     return {
       content: [
         {
           type: 'text',
-          text: `✨ Memory Engineering Synchronized - MongoDB Magic Activated!
+          text: `🧠 Memory Engineering 2.0 Synchronized!
 
-📊 SYNC STATISTICS:
-- Files synced: ${documents.length}
+📊 Sync Results:
+- Memories synced: ${documents.length}
 - Embeddings generated: ${result.modifiedCount}
-- Vector model: Voyage AI 'voyage-3' (1024 dimensions)
-- Storage: MongoDB Atlas with native vector support
+- Model: voyage-3-large (1024 dimensions)
 
-🎉 YOUR KNOWLEDGE IS NOW SUPERCHARGED!
+📈 Memory Distribution:
+${memorySummary.map(m => 
+  `- ${m._id}: ${m.count} memories (avg importance: ${m.avgImportance.toFixed(1)}/10)`
+).join('\n')}
 
-💎 MongoDB $rankFusion Hybrid Search - The CROWN JEWEL:
-- 🧠 70% Semantic Understanding (what concepts mean)
-- 📝 30% Keyword Matching (exact words you type)
-- 🔄 Reciprocal Rank Fusion combines both intelligently!
+💎 MongoDB $rankFusion Ready!
+The revolutionary search that combines:
+- 🧠 40% Semantic search (concepts)
+- 📝 30% Pattern matching (proven solutions) 
+- ⏰ 20% Temporal relevance (recent context)
+- 📈 10% Evolution tracking (frequently helpful)
 
-🚀 WHAT YOU CAN DO NOW:
+🚀 Try These Searches:
+1. memory_engineering/search --query "error handling patterns"
+2. memory_engineering/search --query "performance optimization"
+3. memory_engineering/search --query "recent changes" --searchType "temporal"
 
-1. 🔍 DISCOVER PATTERNS:
-   memory_engineering/search --query "authentication" --searchType "hybrid"
-   → Finds BOTH similar concepts AND exact matches!
-
-2. 🎯 FIND PATTERNS:
-   memory_engineering/search --query "user"
-   → Discovers all user-related patterns instantly!
-
-3. 📊 EXPLORE YOUR KNOWLEDGE:
-   memory_engineering/search --query "validation gates"
-   → See how Context Engineering patterns connect!
-
-🏆 MONGODB ADVANTAGE - ONE Database for EVERYTHING:
-- 📁 Operational data (your memory files)
-- 🧠 Vector embeddings (semantic understanding)
-- 📝 Full-text search (keyword matching)
-- 🔄 Version history (track changes)
-- 🔗 References (auto-discovered connections)
-
-💡 PRO TIP: The more you use Memory Engineering, the smarter it gets!
-Every search, every blueprint, every update makes future development FASTER!
-
-🎉 NO EXTERNAL VECTOR DB NEEDED - MongoDB does it ALL!`,
+Your AI assistant now has perfect memory recall! 🎯`,
         },
       ],
     };
@@ -197,9 +141,130 @@ Every search, every blueprint, every update makes future development FASTER!
       content: [
         {
           type: 'text',
-          text: `Failed to synchronize memory files: ${error instanceof Error ? error.message : 'Unknown error occurred'}`,
+          text: `Failed to sync memories: ${error instanceof Error ? error.message : 'Unknown error occurred'}`,
         },
       ],
     };
+  }
+}
+
+function extractContentForEmbedding(doc: MemoryDocument): string {
+  let content = '';
+
+  // Extract based on memory class
+  switch (doc.memoryClass) {
+    case 'core':
+      content = `${doc.content.fileName || ''} ${doc.content.markdown || ''}`;
+      break;
+    case 'working':
+      if (doc.content.event) {
+        content = `${doc.content.event.action} ${doc.content.event.solution || ''} ${JSON.stringify(doc.content.event.context || {})}`;
+      }
+      break;
+    case 'insight':
+      if (doc.content.insight) {
+        content = doc.content.insight.pattern;
+      }
+      break;
+    case 'evolution':
+      if (doc.content.evolution) {
+        content = `${doc.content.evolution.query} results: ${doc.content.evolution.resultCount}`;
+      }
+      break;
+  }
+
+  // Add metadata context
+  content += ` ${doc.metadata.tags.join(' ')}`;
+
+  return content.trim();
+}
+
+function extractSearchableText(doc: MemoryDocument): string {
+  let text = '';
+
+  // Extract text based on memory class
+  switch (doc.memoryClass) {
+    case 'core':
+      text = doc.content.markdown || '';
+      break;
+    case 'working':
+      if (doc.content.event) {
+        text = `${doc.content.event.action} ${doc.content.event.solution || ''} ${JSON.stringify(doc.content.event.context || {})}`;
+      }
+      break;
+    case 'insight':
+      if (doc.content.insight) {
+        text = doc.content.insight.pattern;
+      }
+      break;
+    case 'evolution':
+      if (doc.content.evolution) {
+        text = `${doc.content.evolution.query} ${doc.content.evolution.improvements?.join(' ') || ''}`;
+      }
+      break;
+  }
+
+  // Clean up for search
+  return text
+    .replace(/#{1,6}\s/g, '') // Remove headers
+    .replace(/\*\*([^*]+)\*\*/g, '$1') // Remove bold
+    .replace(/\*([^*]+)\*/g, '$1') // Remove italic
+    .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1') // Remove links
+    .replace(/```[^`]*```/g, '') // Remove code blocks
+    .replace(/`([^`]+)`/g, '$1') // Remove inline code
+    .replace(/\n{3,}/g, '\n\n') // Normalize newlines
+    .trim();
+}
+
+async function ensureSearchIndexes(collection: any): Promise<void> {
+  try {
+    // Check for vector search index
+    const vectorIndexes = await collection.listSearchIndexes('memory_vectors').toArray();
+    
+    if (vectorIndexes.length === 0) {
+      await collection.createSearchIndex({
+        name: 'memory_vectors',
+        type: 'vectorSearch',
+        definition: {
+          fields: [
+            {
+              type: 'vector',
+              numDimensions: 1024,
+              path: 'contentVector',
+              similarity: 'cosine',
+            }
+          ],
+        },
+      });
+      logger.info('Vector search index created');
+    }
+
+    // Check for text search index
+    const textIndexes = await collection.listSearchIndexes('memory_text').toArray();
+    
+    if (textIndexes.length === 0) {
+      await collection.createSearchIndex({
+        name: 'memory_text',
+        type: 'search',
+        definition: {
+          mappings: {
+            dynamic: false,
+            fields: {
+              searchableText: {
+                type: 'string',
+                analyzer: 'lucene.standard',
+              },
+              'metadata.tags': {
+                type: 'string',
+                analyzer: 'lucene.keyword',
+              },
+            },
+          },
+        },
+      });
+      logger.info('Text search index created');
+    }
+  } catch (error) {
+    logger.debug('Search index check/creation:', error);
   }
 }

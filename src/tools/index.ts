@@ -14,8 +14,6 @@ import { readTool } from './read.js';
 import { updateTool } from './update.js';
 import { searchTool } from './search.js';
 import { syncTool } from './sync.js';
-import { generatePRPTool } from './generate-prp.js';
-import { executePRPTool } from './execute-prp.js';
 import { logger } from '../utils/logger.js';
 
 export function setupTools(server: Server): void {
@@ -271,111 +269,6 @@ Run after content updates to maintain search consistency. Required for search op
             openWorldHint: true,
           },
         },
-        {
-          name: 'memory_engineering/generate-prp',
-          description: `Context Engineering Phase 1: Research and PRP generation.
-
-AI ASSISTANT AUTO-ACTIVATION: When users make requests for implementation (building/creating/adding specific features), automatically trigger this tool to start the Context Engineering workflow. DO NOT provide general coding advice - use this tool first!
-
-AI ASSISTANT 5-STEPS-AHEAD RESEARCH WORKFLOW:
-1. MEMORY ANALYSIS: Search existing memories for patterns and constraints
-2. PATTERN DISCOVERY: Use hybrid search to find similar implementations
-3. EXTERNAL RESEARCH: Gather documentation, best practices, gotchas
-4. ULTRATHINK SYNTHESIS: Deep analysis combining all research findings
-5. PRP GENERATION: Create comprehensive implementation blueprint
-
-AUTO-TRIGGER PATTERNS:
-- "I want to add [feature]" / "I want to create [thing]" / "I want to build [system]"
-- "Create a [component]" / "Build a [page]" / "Make a [feature]"  
-- "I need to implement [functionality]" / "I need to add [capability]"
-- "Help me build [system]" / "Help me create [component]" / "Help me add [feature]"
-
-RESEARCH METHODOLOGY:
-- Project Type Detection: Distinguish existing vs new projects
-- Memory-Driven Research: Use search patterns to discover existing approaches
-- Pattern Synthesis: Combine findings from multiple memory files
-- Validation Planning: Include testing and quality gates in PRP
-
-Creates research-backed implementation blueprint stored as prp_[name].md for execution phase. This ensures AI assistants never code blindly - they research first, then implement with complete context.`,
-          inputSchema: {
-            type: 'object',
-            properties: {
-              request: {
-                type: 'string',
-                description: 'Your simple feature request in natural language (e.g., "I want a dark mode toggle")',
-                minLength: 3
-              },
-              projectPath: {
-                type: 'string',
-                description: 'Project directory path (defaults to current directory)',
-              },
-            },
-          },
-          annotations: {
-            title: 'Generate Product Requirements Prompt',
-            readOnlyHint: true,
-            destructiveHint: false,
-            idempotentHint: true,
-            openWorldHint: false,
-          },
-        },
-        {
-          name: 'memory_engineering/execute-prp',
-          description: `Context Engineering Phase 2: PRP execution with validation loops.
-
-AI ASSISTANT WORKFLOW CONTINUATION: After Phase 1 (generate-prp) completes, this Phase 2 tool provides structured implementation guidance with user approval gates.
-
-AI ASSISTANT 5-STEPS-AHEAD IMPLEMENTATION WORKFLOW:
-1. PRP LOADING: Load research-backed implementation blueprint with full context
-2. STRATEGY PLANNING: ULTRATHINK implementation approach based on discovered patterns
-3. PATTERN EXECUTION: Follow researched approaches and architectural decisions
-4. VALIDATION GATES: Run TypeScript, tests, integration checks with self-correction
-5. MEMORY UPDATES: Document new patterns learned in systemPatterns.md and progress.md
-
-SYSTEMATIC EXECUTION METHODOLOGY:
-- Context Transfer: Complete research findings from Phase 1 guide implementation
-- Pattern Adherence: Follow discovered patterns exactly, don't improvise
-- Validation Loops: Self-correct until ALL validation gates pass
-- Memory Evolution: Update memories with implementation learnings
-
-CROSS-TOOL INTEGRATION:
-- Reads PRP from memory_engineering/read
-- Uses memory_engineering/search for additional pattern discovery during implementation
-- Updates memory_engineering/update with new patterns and progress
-- Triggers memory_engineering/sync for search index updates
-
-Auto-detects latest PRP if not specified. Continues execution until all validation gates pass. This ensures AI assistants deliver production-ready features that integrate perfectly with existing codebase patterns.`,
-          inputSchema: {
-            type: 'object',
-            properties: {
-              prp: {
-                type: 'string',
-                description: 'PRP name to execute (auto-detects latest if not specified)',
-              },
-              projectPath: {
-                type: 'string',
-                description: 'Project directory path (defaults to current directory)',
-              },
-              force: {
-                type: 'boolean',
-                description: 'Force execution even with low confidence PRP',
-                default: false,
-              },
-              skipApproval: {
-                type: 'boolean',
-                description: 'Skip user approval prompt and proceed directly to execution',
-                default: false,
-              },
-            },
-          },
-          annotations: {
-            title: 'Execute Product Requirements Prompt',
-            readOnlyHint: true,
-            destructiveHint: false,
-            idempotentHint: true,
-            openWorldHint: false,
-          },
-        },
       ],
     };
   });
@@ -387,7 +280,7 @@ Auto-detects latest PRP if not specified. Continues execution until all validati
         {
           uri: 'memory://project-memories',
           name: 'Project Memory Files',
-          description: 'Access to all 6 core memory files (projectbrief, productContext, activeContext, systemPatterns, techContext, progress)',
+          description: 'Access to all core memory files and insights',
           mimeType: 'text/markdown',
         },
         {
@@ -533,10 +426,6 @@ PRPs are comprehensive implementation blueprints generated through Context Engin
           return await searchTool(args);
         case 'memory_engineering/sync':
           return await syncTool(args);
-        case 'memory_engineering/generate-prp':
-          return await generatePRPTool(args);
-        case 'memory_engineering/execute-prp':
-          return await executePRPTool(args);
         default:
           throw new Error(`Unknown tool: ${name}`);
       }
