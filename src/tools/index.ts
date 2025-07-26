@@ -2,8 +2,12 @@ import type { Server } from '@modelcontextprotocol/sdk/server/index.js';
 import {
   CallToolRequestSchema,
   ListToolsRequestSchema,
+  ListResourcesRequestSchema,
+  ReadResourceRequestSchema,
   type CallToolRequest,
   type ListToolsRequest,
+  type ListResourcesRequest,
+  type ReadResourceRequest,
 } from '@modelcontextprotocol/sdk/types.js';
 import { initTool } from './init.js';
 import { readTool } from './read.js';
@@ -374,6 +378,141 @@ Auto-detects latest PRP if not specified. Continues execution until all validati
         },
       ],
     };
+  });
+
+  // Register resources handlers for enhanced Claude Code compatibility
+  server.setRequestHandler(ListResourcesRequestSchema, async (_request: ListResourcesRequest) => {
+    return {
+      resources: [
+        {
+          uri: 'memory://project-memories',
+          name: 'Project Memory Files',
+          description: 'Access to all 6 core memory files (projectbrief, productContext, activeContext, systemPatterns, techContext, progress)',
+          mimeType: 'text/markdown',
+        },
+        {
+          uri: 'memory://prp-files',
+          name: 'Product Requirements Prompts',
+          description: 'Generated PRPs from Context Engineering research phase',
+          mimeType: 'text/markdown',
+        },
+        {
+          uri: 'memory://search-index',
+          name: 'Memory Search Index',
+          description: 'MongoDB hybrid search index status and statistics',
+          mimeType: 'application/json',
+        },
+      ],
+    };
+  });
+
+  server.setRequestHandler(ReadResourceRequestSchema, async (request: ReadResourceRequest) => {
+    const { uri } = request.params;
+    
+    try {
+      switch (uri) {
+        case 'memory://project-memories':
+          return {
+            contents: [{
+              uri: 'memory://project-memories',
+              mimeType: 'text/markdown',
+              text: `# Project Memory Files
+
+This resource provides access to the 6 core memory files that store comprehensive project context:
+
+## Core Memory Structure
+1. **projectbrief.md** - Project goals, scope, success criteria
+2. **productContext.md** - Problem statement, target users, competitive analysis  
+3. **activeContext.md** - Current tasks, recent changes, development state
+4. **systemPatterns.md** - Architecture, design patterns, implementation workflow
+5. **techContext.md** - Technology stack, dependencies, development environment
+6. **progress.md** - Timeline, completed work, lessons learned
+
+## Usage
+Use the memory_engineering/read tool to access specific memory files.
+Use the memory_engineering/search tool to find patterns across all memories.
+
+## Benefits
+- Persistent context across AI assistant sessions
+- Eliminates context window limitations  
+- Enables pattern discovery and reuse
+- Supports autonomous context management`,
+            }],
+          };
+
+        case 'memory://prp-files':
+          return {
+            contents: [{
+              uri: 'memory://prp-files',
+              mimeType: 'text/markdown',
+              text: `# Product Requirements Prompts (PRPs)
+
+PRPs are comprehensive implementation blueprints generated through Context Engineering methodology.
+
+## What are PRPs?
+- Research-backed implementation specifications
+- Generated from memory system pattern analysis
+- Include validation gates and confidence scoring
+- Contain architectural guidance and gotchas
+
+## PRP Workflow
+1. **Research Phase**: memory_engineering/generate-prp
+2. **Implementation Phase**: memory_engineering/execute-prp
+
+## Benefits
+- Eliminates "blank page" problem for AI assistants
+- Provides complete implementation context
+- Reduces implementation errors through validation
+- Ensures consistency with existing patterns`,
+            }],
+          };
+
+        case 'memory://search-index':
+          return {
+            contents: [{
+              uri: 'memory://search-index',
+              mimeType: 'application/json',
+              text: JSON.stringify({
+                searchType: 'MongoDB $rankFusion Hybrid Search',
+                algorithm: 'Reciprocal Rank Fusion',
+                vectorModel: 'Voyage AI voyage-3 (1024 dimensions)',
+                textSearch: 'MongoDB Atlas Search',
+                fusion: {
+                  vectorWeight: 0.7,
+                  textWeight: 0.3,
+                },
+                capabilities: [
+                  'Semantic similarity search',
+                  'Keyword matching',
+                  'Pattern discovery',
+                  'Cross-file context correlation',
+                ],
+                status: 'Active - Use memory_engineering/search tool',
+              }, null, 2),
+            }],
+          };
+
+        default:
+          return {
+            isError: true,
+            contents: [{
+              uri,
+              mimeType: 'text/plain',
+              text: `Resource not found: ${uri}. Available resources: memory://project-memories, memory://prp-files, memory://search-index`,
+            }],
+          };
+      }
+    } catch (error) {
+      logger.error('Resource read error:', error);
+      return {
+        isError: true,
+        contents: [{
+          uri,
+          mimeType: 'text/plain',
+          text: `Error reading resource ${uri}: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        }],
+      };
+    }
   });
 
   // Register call tool handler
