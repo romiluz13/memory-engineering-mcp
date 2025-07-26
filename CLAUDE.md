@@ -3,6 +3,10 @@
 ## 🚀 What's New in v3.0: Natural Language for AIs
 Based on extensive research and testing, we've discovered that AI assistants only use 33% of Memory Engineering's capabilities. This update fixes that by aligning tool descriptions with how AIs think.
 
+### v3.0.1 Hotfix: Claude Code Compatibility
+- Changed tool names from `memory_engineering/action` to `memory_engineering_action` format
+- Claude Code requires strict naming pattern: `^[a-zA-Z0-9_-]{1,128}$`
+
 ## 📚 Essential Reading (Research & Insights)
 - `docs/COMPLETE_FLOW_ANALYSIS.md` - Full user→AI→MCP→MongoDB flow
 - `docs/SIMPLE_FIX_PLAN.md` - How we went from 33% to 90%+ effectiveness
@@ -83,13 +87,13 @@ Automatically created on every search:
 
 1. **Start Every Session**
    ```
-   memory_engineering/read --fileName "activeContext.md"
+   memory_engineering_read --fileName "activeContext.md"
    ```
 
 2. **Before Implementing ANYTHING**
    ```
-   memory_engineering/search --query "authentication patterns"
-   memory_engineering/search --query "error handling approach"
+   memory_engineering_search --query "authentication patterns"
+   memory_engineering_search --query "error handling approach"
    ```
 
 3. **During Development**
@@ -99,7 +103,7 @@ Automatically created on every search:
 
 4. **After Solving Problems**
    ```
-   memory_engineering/update --memoryClass "working" --content '{
+   memory_engineering_update --memoryClass "working" --content '{
      "action": "fixed auth bug",
      "context": {"file": "auth.js", "error": "token expired"},
      "solution": "Added refresh token logic"
@@ -108,7 +112,7 @@ Automatically created on every search:
 
 5. **When Done**
    ```
-   memory_engineering/update --fileName "progress.md"
+   memory_engineering_update --fileName "progress.md"
    ```
 
 ## 📊 Current Effectiveness Metrics
@@ -150,22 +154,22 @@ Use this to verify everything works:
 
 ```bash
 # 1. Initialize
-memory_engineering/init
+memory_engineering_init
 
 # 2. Check core memories exist
-memory_engineering/read --fileName "activeContext.md"
+memory_engineering_read --fileName "activeContext.md"
 
 # 3. Test working memory
-memory_engineering/update --memoryClass "working" --content '{"action": "test", "context": {"test": true}}'
+memory_engineering_update --memoryClass "working" --content '{"action": "test", "context": {"test": true}}'
 
 # 4. Test search (creates evolution memory)
-memory_engineering/search --query "test query"
+memory_engineering_search --query "test query"
 
 # 5. Verify all memory classes
-memory_engineering/read --memoryClass "evolution"
+memory_engineering_read --memoryClass "evolution"
 
 # 6. Generate embeddings
-memory_engineering/sync
+memory_engineering_sync
 ```
 
 ## 🎯 Development Commands

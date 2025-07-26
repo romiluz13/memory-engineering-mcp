@@ -1,6 +1,6 @@
 {
   "name": "memory-engineering-mcp",
-  "version": "3.0.0",
+  "version": "3.0.1",
   "description": "AI-first memory system for coding assistants. Natural language interface, MongoDB $rankFusion search, self-improving design.",
   "main": "dist/index.js",
   "type": "module",

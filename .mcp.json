@@ -1,24 +1,3 @@
 {
-  "name": "memory-engineering-mcp",
-  "version": "2.0.0",
-  "description": "MongoDB-powered memory system for AI assistants with 4-class memory architecture",
-  "author": "romiluz13",
-  "license": "MIT",
-  "scope": "project",
-  "command": "node",
-  "args": ["dist/index.js"],
-  "env": {
-    "MONGODB_URI": "${MONGODB_URI}",
-    "VOYAGE_API_KEY": "${VOYAGE_API_KEY}",
-    "MEMORY_ENGINEERING_DB": "${MEMORY_ENGINEERING_DB:-memory_engineering}",
-    "MEMORY_ENGINEERING_COLLECTION": "${MEMORY_ENGINEERING_COLLECTION:-memory_engineering_documents}"
-  },
-  "features": {
-    "tools": true,
-    "resources": true
-  },
-  "requirements": {
-    "node": ">=18.0.0",
-    "mongodb": ">=8.1.0"
-  }
+  "mcpServers": {}
 }

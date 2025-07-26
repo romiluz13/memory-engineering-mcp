@@ -393,12 +393,12 @@ Try these search tips:
 - Use different keywords or synonyms
 - Search for patterns like "error handling" or "performance optimization"
 - Try semantic search with concepts rather than exact terms
-- Check if memories have been synced (run memory_engineering/sync)
+- Check if memories have been synced (run memory_engineering_sync)
 
 Search type used: ${searchType}
 
 🆕 First time implementing this? After you build it, save your solution with:
-memory_engineering/update --memoryClass "working" --content '{"action": "implement ${query}", "solution": "your approach"}'`,
+memory_engineering_update --memoryClass "working" --content '{"action": "implement ${query}", "solution": "your approach"}'`,
         },
       ],
     };
@@ -465,7 +465,7 @@ memory_engineering/update --memoryClass "working" --content '{"action": "impleme
   let hint = '\n\n';
   if (results.some(r => r.memoryClass === 'working' || r.memoryClass === 'insight')) {
     hint += '💡 Found useful patterns? Consider updating systemPatterns.md with improvements!\n';
-    hint += 'memory_engineering/update --fileName "systemPatterns.md"\n';
+    hint += 'memory_engineering_update --fileName "systemPatterns.md"\n';
   } else {
     hint += '🔍 Found what you need? Great! If you discover improvements while implementing, remember to save them!\n';
   }
