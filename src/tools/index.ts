@@ -319,7 +319,7 @@ Creates research-backed implementation blueprint stored as prp_[name].md for exe
           name: 'memory_engineering/execute-prp',
           description: `Context Engineering Phase 2: PRP execution with validation loops.
 
-AI ASSISTANT AUTO-CONTINUATION: After Phase 1 (generate-prp) completes, AUTOMATICALLY proceed to this Phase 2 tool to implement the generated PRP. DO NOT stop after research - continue with implementation!
+AI ASSISTANT WORKFLOW CONTINUATION: After Phase 1 (generate-prp) completes, this Phase 2 tool provides structured implementation guidance with user approval gates.
 
 AI ASSISTANT 5-STEPS-AHEAD IMPLEMENTATION WORKFLOW:
 1. PRP LOADING: Load research-backed implementation blueprint with full context
