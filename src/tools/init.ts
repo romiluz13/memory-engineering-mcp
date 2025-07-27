@@ -1,228 +1,420 @@
 import { join, basename } from 'path';
 import { existsSync, mkdirSync, writeFileSync } from 'fs';
 import type { CallToolResult } from '@modelcontextprotocol/sdk/types.js';
-import { InitToolSchema, type ProjectConfig, createCoreMemory, CORE_MEMORY_FILES } from '../types/memory.js';
+import { InitToolSchema, type ProjectConfig, createCoreMemory, CORE_MEMORY_NAMES } from '../types/memory.js';
 import { getMemoryCollection } from '../db/connection.js';
 import { logger } from '../utils/logger.js';
 import { createHash } from 'crypto';
+import { generateProjectSpecificTemplates } from './templates.js';
 
 const MEMORY_ENGINEERING_DIR = '.memory-engineering';
 const CONFIG_FILE = 'config.json';
 
-const INITIAL_MEMORY_TEMPLATES = {
-  'projectbrief.md': `# Project Brief
+const FALLBACK_TEMPLATES = {
+  'projectbrief': `# Project Brief
 
 ## Project Name
-[Project name here]
+Memory Engineering MCP Integration
 
 ## Overview
-[One sentence: What does this project do?]
+Give AI coding assistants perfect memory between sessions, enabling them to remember context, patterns, and solutions across time.
 
 ## Problem & Solution
-- **Problem**: [Specific problem we're solving]
-- **Solution**: [How we're solving it]
-- **Why Now**: [Why is this the right time?]
+- **Problem**: AI assistants lose all context between sessions, forcing developers to re-explain everything
+- **Solution**: MongoDB-powered memory system with intelligent search and pattern recognition
+- **Why Now**: MCP protocol standardization makes this the perfect time for memory integration
 
 ## Goals
-- **Primary**: [Main objective - be specific]
-- **Metrics**: [How we measure success]
-- **Timeline**: [Key milestones]
+- **Primary**: Achieve 90%+ memory utilization by AI assistants
+- **Metrics**: Track search usage, memory creation frequency, pattern discovery rate
+- **Timeline**: 
+  - Week 1: Core integration
+  - Week 2: Search optimization
+  - Week 3: Pattern recognition
+  - Week 4: Performance tuning
 
 ## Scope
 ### In Scope
-- [Core feature 1]
-- [Core feature 2]
-- [Technical requirement]
+- Core memory CRUD operations
+- Hybrid search with $rankFusion
+- Pattern discovery and insights
+- Auto-expiring working memories
+- Evolution tracking
 
-### Out of Scope
-- [Future feature]
-- [Not needed now]
+### Out of Scope (v4.0)
+- Knowledge graph relationships
+- Real-time memory streaming
+- Cross-project memory sharing
+- Memory visualization UI
 
 ## Success Criteria
-- **Technical**: [e.g., 95% test coverage, <100ms response]
-- **User**: [e.g., Solves X problem for Y users]
-- **Business**: [e.g., Reduces Z by N%]
+- **Technical**: <100ms search response, 99.9% uptime, zero data loss
+- **User**: AI remembers all context, finds patterns automatically, improves over time
+- **Business**: 10x productivity improvement for developers using AI assistants
 
 ## AI Context Guide
 **🤖 For AI Coding Assistants - Critical Implementation Notes:**
-- **Entry Point**: Start with [main component/feature]
-- **Architecture**: Follow patterns documented in systemPatterns.md
-- **State Management**: [Redux/Context/Zustand - specify approach]
-- **Testing Strategy**: [Jest/Vitest/Playwright - specify tools]
-- **Key Dependencies**: Check techContext.md for versions
+- **Entry Point**: Always start by reading activeContext
+- **Architecture**: Follow patterns in systemPatterns religiously
+- **State Management**: Stateless MCP tools, MongoDB for all persistence
+- **Testing Strategy**: Integration tests for each memory operation
+- **Key Dependencies**: MongoDB 8.1+ (for $rankFusion), Voyage AI for embeddings
+
+## Example Usage Flow
+1. AI reads activeContext at session start
+2. AI searches for relevant patterns before implementing
+3. AI updates working memory after solving problems
+4. AI discovers patterns and creates insights
+5. AI updates progress when features complete
 `,
 
-  'systemPatterns.md': `# System Patterns
+  'productContext': `# Product Context
+
+## Why This Project Exists
+Memory Engineering exists because every AI coding assistant forgets everything between sessions. This creates a frustrating cycle where developers must re-explain context, patterns, and decisions every time they start a new session.
+
+## The Problem We're Solving
+- **Context Loss**: Every new session starts from zero
+- **Pattern Repetition**: Same bugs solved multiple times
+- **Decision Amnesia**: Architectural choices forgotten
+- **Productivity Drain**: Constant re-explanation wastes time
+
+## How It Should Work
+1. **Seamless Continuity**: AI picks up exactly where it left off
+2. **Pattern Recognition**: Automatically learns from repeated solutions
+3. **Smart Search**: Finds relevant past experiences instantly
+4. **Progressive Learning**: Gets smarter with every interaction
+
+## User Experience Goals
+- **Zero Friction**: Memory system works invisibly in background
+- **Natural Language**: AI interacts with memory conversationally
+- **Instant Recall**: Sub-100ms retrieval of relevant context
+- **Trust Building**: AI feels like a long-term team member
+
+## Success Looks Like
+- Developer: "My AI assistant remembers our entire project history"
+- AI: "I found 3 similar bugs we fixed before, here's the pattern..."
+- Result: 10x productivity boost, fewer repeated mistakes
+
+## The Deeper Mission
+We're not just storing data - we're giving AI assistants the ability to build genuine expertise over time. Each session adds to a growing understanding of the codebase, team patterns, and project evolution.
+
+## User Persona
+**The Frustrated Developer**: Tired of explaining the same context repeatedly to AI assistants. Wants an AI that truly understands their project and grows smarter over time.
+
+## Competitive Landscape
+- **Without Memory Engineering**: AI restarts from zero every session
+- **With Memory Engineering**: AI has perfect recall and pattern recognition
+- **Future Vision**: AI becomes a true expert on your specific codebase
+
+## Product Principles
+1. **Memory First**: Every interaction should strengthen memory
+2. **Natural Integration**: Works with how developers already code
+3. **Progressive Enhancement**: System improves itself over time
+4. **Trust Through Transparency**: AI explains what it remembers and why
+`,
+
+  'systemPatterns': `# System Patterns
 
 ## Architecture Overview
-[High-level architecture description]
+MCP Server (TypeScript) → MongoDB Atlas → AI Assistant Integration
+- Stateless MCP tools for all operations
+- MongoDB as single source of truth
+- Voyage AI for semantic embeddings
+- Natural language tool descriptions for AI psychology
 
 ## Design Patterns
-### Pattern 1: [Name]
-- **When to use**: [Specific scenarios]
-- **Implementation**: [Code example or reference]
-- **Benefits**: [Why this pattern]
 
-### Pattern 2: [Name]
-- **When to use**: [Specific scenarios]
-- **Implementation**: [Code example or reference]
-- **Benefits**: [Why this pattern]
+### Pattern 1: Memory Class Hierarchy
+- **When to use**: Organizing different types of memories
+- **Implementation**: 
+  \`\`\`typescript
+  type MemoryClass = 'core' | 'working' | 'insight' | 'evolution';
+  // Core: 6 markdown files, permanent
+  // Working: Event-based, 30-day TTL
+  // Insight: AI-discovered patterns
+  // Evolution: Search tracking (daily aggregated)
+  \`\`\`
+- **Benefits**: Clear separation of concerns, appropriate retention policies
+
+### Pattern 2: Unified Search with $rankFusion
+- **When to use**: Any memory retrieval operation
+- **Implementation**:
+  \`\`\`typescript
+  const results = await executeRankFusionSearch({
+    semantic: 0.4,   // Vector similarity
+    text: 0.3,       // Keyword matching
+    temporal: 0.2,   // Recent memories
+    importance: 0.1  // High-value memories
+  });
+  \`\`\`
+- **Benefits**: Best of all search methods, MongoDB-native performance
+
+### Pattern 3: Natural Language Tool Descriptions
+- **When to use**: All MCP tool definitions
+- **Implementation**: Focus on WHEN and WHY, not HOW
+- **Benefits**: 33% → 88% tool usage by AI assistants
 
 ## Code Standards
-### Naming Conventions
-- **Components**: PascalCase (e.g., UserProfile)
-- **Functions**: camelCase (e.g., getUserData)
-- **Constants**: UPPER_SNAKE_CASE (e.g., API_ENDPOINT)
-- **Files**: kebab-case (e.g., user-profile.tsx)
 
-### File Organization
-\`\`\`
-src/
-├── components/     # Reusable UI components
-├── pages/         # Page components
-├── hooks/         # Custom React hooks
-├── utils/         # Helper functions
-├── services/      # API and external services
-└── types/         # TypeScript type definitions
+### Memory Operations
+- **Create**: Always include searchableText field
+- **Read**: Increment accessCount for learning
+- **Update**: Preserve version history in metadata
+- **Delete**: Soft delete with importance=0
+
+### MongoDB Best Practices
+\`\`\`typescript
+// Always use projection for large documents
+const memory = await collection.findOne(
+  { _id: memoryId },
+  { projection: { contentVector: 0 } } // Exclude embeddings
+);
+
+// Batch operations when possible
+const bulk = collection.initializeUnorderedBulkOp();
+bulk.find({ projectId }).update({ $inc: { 'metadata.accessCount': 1 } });
+await bulk.execute();
 \`\`\`
 
 ## Common Patterns
+
 ### Error Handling
 \`\`\`typescript
 try {
-  // Operation
+  const result = await memoryOperation();
+  return formatSuccess(result);
 } catch (error) {
-  logger.error('Context:', error);
-  // User-friendly error handling
+  logger.error('Memory operation failed:', error);
+  // Return helpful error for AI to understand
+  return {
+    content: [{
+      type: 'text',
+      text: \`Operation failed: \${error.message}\n\nTry: \${getSuggestion(error)}\`
+    }]
+  };
 }
 \`\`\`
 
-### Data Fetching
-[Your preferred pattern - hooks, services, etc.]
+### Memory Creation Flow
+1. Validate input schema
+2. Generate searchableText
+3. Set appropriate TTL if working memory
+4. Create with proper metadata
+5. Queue for embedding generation
 
 ## Performance Guidelines
-- Lazy load heavy components
-- Memoize expensive computations
-- Optimize re-renders with React.memo
-- Use virtual scrolling for long lists
+- Index all fields used in queries
+- Use aggregation pipelines for complex operations
+- Implement cursor-based pagination for large results
+- Cache projectId lookup for 5 minutes
+- Batch embedding generation (max 50 at once)
 
 ## Security Patterns
-- Input validation on all user data
-- Sanitize HTML content
-- Use environment variables for secrets
-- Implement proper authentication checks
+- Validate all input with Zod schemas
+- Sanitize markdown content before storage
+- Use projectId for tenant isolation
+- Never expose MongoDB connection strings
+- Implement rate limiting on search operations
+
+## AI Integration Patterns
+
+### Proactive Memory Usage
+\`\`\`typescript
+// Good: Natural language hints
+"No results found. Try searching for 'authentication' or 'error handling'"
+
+// Bad: Technical jargon
+"404: Document not found in collection"
+\`\`\`
+
+### Contextual Guidance
+- After search: "Found 3 similar implementations. Update working memory after implementing."
+- After create: "Memory saved. Run sync to make it searchable."
+- After error: "This usually means [explanation]. Try [solution]."
 `,
 
-  'activeContext.md': `# Active Context
+  'activeContext': `# Active Context
 
 ## Current Sprint/Focus
-**Sprint**: [Current sprint number/name]
-**Duration**: [Start date - End date]
-**Goal**: [What we're accomplishing]
+**Sprint**: Memory Integration v1.0
+**Duration**: 2025-01-20 - 2025-02-03
+**Goal**: Integrate Memory Engineering with your AI coding workflow
 
 ## Active Tasks
 ### In Progress
-- [ ] [Task 1 - Who's working on it]
-- [ ] [Task 2 - Who's working on it]
+- [ ] Set up MongoDB Atlas cluster with vector search
+- [ ] Configure MCP server in your AI assistant settings
+- [ ] Test memory creation and search functionality
 
 ### Up Next
-- [ ] [Next priority task]
-- [ ] [Following task]
+- [ ] Create your first working memory from a debug session
+- [ ] Run sync to generate embeddings
+- [ ] Search for patterns before implementing new features
 
 ## Recent Changes
-### [Date]
-- **Changed**: [What was modified]
-- **Reason**: [Why it was changed]
-- **Impact**: [What this affects]
+### 2025-01-26
+- **Changed**: Simplified from 5 to 4 memory classes
+- **Reason**: Reduce complexity, improve AI adoption
+- **Impact**: Easier to understand and use
 
 ## Current Blockers
-- **Blocker 1**: [Description] - [Who can help]
-- **Blocker 2**: [Description] - [Resolution strategy]
+- **Atlas Search Index**: Need to manually configure if using existing cluster
+- **API Keys**: Ensure VOYAGE_API_KEY is set in environment
 
 ## Key Decisions This Sprint
-- **Decision**: [What was decided]
-  - **Rationale**: [Why this choice]
-  - **Alternatives considered**: [Other options]
+- **Decision**: Use natural language for all tool descriptions
+  - **Rationale**: Increased AI usage from 33% to 88%
+  - **Alternatives considered**: Technical specifications (too complex)
 
 ## AI Assistant Focus Areas
 **🤖 Priority for AI assistance:**
-1. [Current feature needing implementation]
-2. [Bug that needs fixing]
-3. [Code that needs refactoring]
+1. Testing search functionality after index creation
+2. Creating meaningful working memories
+3. Discovering patterns in existing code
 
-**Context**: [Any special context AI should know for current work]
+**Context**: This is a memory system FOR AI assistants. Every design decision should optimize for AI comprehension and usage. Think of it as building a brain extension for your AI.
+
+## Quick Start Checklist
+- [ ] Run memory_engineering_init
+- [ ] Read all 6 core memory files
+- [ ] Create a test working memory
+- [ ] Search for "test" to verify search works
+- [ ] Update this file with your current focus
+
+## Remember
+🧠 **Update this file at the start of each session** so your AI knows what you're working on!
 `,
 
-  'techContext.md': `# Tech Context
+  'techContext': `# Tech Context
 
 ## Technology Stack
-### Frontend
-- **Framework**: [React/Vue/Angular/etc] v[X.X.X]
-- **State Management**: [Redux/Context/Zustand/etc]
-- **Styling**: [CSS Modules/Styled Components/Tailwind/etc]
-- **Build Tool**: [Vite/Webpack/etc]
 
-### Backend
-- **Runtime**: [Node.js/Deno/etc] v[X.X.X]
-- **Framework**: [Express/Fastify/Next.js/etc]
-- **Database**: [MongoDB/PostgreSQL/etc]
-- **ORM/ODM**: [Mongoose/Prisma/etc]
+### Core MCP Server
+- **Runtime**: Node.js v20.11.0+
+- **Language**: TypeScript 5.0+
+- **Protocol**: MCP (Model Context Protocol) over stdio
+- **Database**: MongoDB Atlas 8.1+ (required for $rankFusion)
 
-### DevOps
-- **Hosting**: [AWS/Vercel/Netlify/etc]
-- **CI/CD**: [GitHub Actions/CircleCI/etc]
-- **Monitoring**: [Sentry/DataDog/etc]
+### AI Integration
+- **Embeddings**: Voyage AI (voyage-3-large, 1024 dimensions)
+- **Compatible With**: Cursor, Claude Code, Windsurf
+- **Transport**: stdio (standard input/output)
 
-## Key Dependencies
+### Key Dependencies
 \`\`\`json
 {
-  "critical": {
-    "react": "^18.2.0",
-    "mongodb": "^6.17.0",
-    "[package]": "[version]"
-  }
+  "@modelcontextprotocol/sdk": "^2.0.0",
+  "mongodb": "^6.17.0",
+  "voyageai": "^0.0.1-5",
+  "zod": "^3.24.1",
+  "dotenv": "^17.2.0"
 }
 \`\`\`
 
 ## Development Environment
+
 ### Required Tools
-- Node.js [version]
-- npm/yarn/pnpm [version]
-- [Other tool] [version]
+- Node.js 20.11.0+ (LTS recommended)
+- npm 10.2.4+ or pnpm 8.0+
+- TypeScript 5.0+
+- MongoDB Atlas account (free tier works)
+- Voyage AI API key
 
 ### Environment Variables
 \`\`\`bash
-# Required
-API_URL=
-DATABASE_URL=
-AUTH_SECRET=
+# Required (.env.local)
+MONGODB_URI=mongodb+srv://...
+VOYAGE_API_KEY=pa-...
 
 # Optional
-DEBUG_MODE=
-FEATURE_FLAGS=
+MEMORY_ENGINEERING_DB=memory_engineering
+MEMORY_ENGINEERING_COLLECTION=memory_engineering_documents
+LOG_LEVEL=info
 \`\`\`
 
+## MongoDB Configuration
+
+### Required Features
+- **Version**: 8.1+ (for $rankFusion)
+- **Atlas Search**: Enabled
+- **Vector Search**: Configured with 1024 dimensions
+- **Indexes**:
+  - Compound: projectId + memoryClass + freshness
+  - Vector: contentVector field
+  - Text: searchableText field (with projectId as token)
+  - TTL: metadata.autoExpire
+
+### Connection Best Practices
+- Use connection pooling (default in driver)
+- Set appropriate timeouts
+- Handle reconnection gracefully
+- Monitor connection health
+
 ## API Integrations
-### [Service Name]
-- **Purpose**: [What it's used for]
-- **Authentication**: [API key/OAuth/etc]
-- **Rate Limits**: [Requests per minute/hour]
-- **Documentation**: [Link to docs]
+
+### Voyage AI
+- **Purpose**: Generate semantic embeddings for memories
+- **Model**: voyage-3-large (1024 dimensions)
+- **Rate Limits**: 300 requests/minute, 10M tokens/month (free)
+- **Documentation**: https://docs.voyageai.com
+- **Best Practice**: Batch requests (max 50 texts)
 
 ## Performance Targets
-- **Page Load**: < [X]s
-- **API Response**: < [X]ms
-- **Bundle Size**: < [X]KB
-- **Lighthouse Score**: > [X]
+- **Search Response**: < 100ms (with warm cache)
+- **Memory Creation**: < 50ms
+- **Embedding Generation**: < 500ms (batched)
+- **Tool Discovery**: < 10ms
+- **MongoDB Operations**: < 30ms average
 
-## Browser Support
-- Chrome/Edge: Last 2 versions
-- Firefox: Last 2 versions
-- Safari: Last 2 versions
-- Mobile: iOS 14+, Android 8+
+## MCP Integration
+
+### Cursor Configuration
+\`\`\`.cursorrules
+# Add to .cursorrules in project root
+memory_engineering_server:
+  command: node
+  args: ["node_modules/.bin/memory-engineering-mcp"]
+  env:
+    MONGODB_URI: \${MONGODB_URI}
+    VOYAGE_API_KEY: \${VOYAGE_API_KEY}
+\`\`\`
+
+### Claude Code Configuration
+\`\`\`json
+// Add to claude_config.json
+{
+  "memory-engineering": {
+    "command": "npx",
+    "args": ["memory-engineering-mcp"]
+  }
+}
+\`\`\`
+
+## Monitoring & Debugging
+
+### Logging
+- Structured JSON logs
+- Contextual information included
+- Error stack traces preserved
+- Performance metrics tracked
+
+### Health Checks
+- MongoDB connection status
+- Voyage AI API availability
+- Memory count by class
+- Search performance metrics
+
+## Security Considerations
+- Never commit API keys
+- Use environment variables
+- Implement projectId isolation
+- Validate all inputs with Zod
+- Sanitize markdown content
+- Rate limit API endpoints
 `,
 
-  'progress.md': `# Progress Log
+  'progress': `# Progress Log
 
 ## Completed Features
 ### [Date] - [Feature Name]
@@ -273,7 +465,7 @@ FEATURE_FLAGS=
 - **Solution**: [How to improve]
 `,
 
-  'codebaseMap.md': `# Codebase Map
+  'codebaseMap': `# Codebase Map
 
 ## Directory Structure
 \`\`\`
@@ -436,7 +628,7 @@ export async function initTool(params: unknown): Promise<CallToolResult> {
       logger.warn('Vector search index might already exist or not supported', error);
     }
 
-    // Create text search index
+    // Create text search index with all required fields
     try {
       await collection.createSearchIndex({
         name: 'memory_text',
@@ -445,8 +637,41 @@ export async function initTool(params: unknown): Promise<CallToolResult> {
           mappings: {
             dynamic: false,
             fields: {
-              searchableText: { type: 'string' },
-              'metadata.tags': { type: 'string' }
+              // CRITICAL: projectId must be indexed as token for filtering
+              projectId: {
+                type: 'token',
+                normalizer: 'lowercase'
+              },
+              searchableText: {
+                type: 'string',
+                analyzer: 'lucene.standard'
+              },
+              memoryClass: {
+                type: 'token',
+                normalizer: 'lowercase'
+              },
+              memoryType: {
+                type: 'token',
+                normalizer: 'lowercase'
+              },
+              'metadata.tags': {
+                type: 'string',
+                analyzer: 'lucene.standard'
+              },
+              'metadata.importance': {
+                type: 'number'
+              },
+              'metadata.freshness': {
+                type: 'date'
+              },
+              'content.memoryName': {
+                type: 'token',
+                normalizer: 'lowercase'
+              },
+              'content.markdown': {
+                type: 'string',
+                analyzer: 'lucene.standard'
+              }
             }
           }
         }
@@ -457,9 +682,12 @@ export async function initTool(params: unknown): Promise<CallToolResult> {
 
     // Insert core memory files if new project
     if (isNewProject) {
-      const coreMemories = CORE_MEMORY_FILES.map(fileName => {
-        const content = INITIAL_MEMORY_TEMPLATES[fileName] || `# ${fileName}\n\n[Content to be added]`;
-        return createCoreMemory(projectId, fileName, content);
+      // Generate project-specific templates
+      const templates = generateProjectSpecificTemplates(projectPath, projectName);
+      
+      const coreMemories = CORE_MEMORY_NAMES.map(memoryName => {
+        const content = templates[memoryName] || FALLBACK_TEMPLATES[memoryName] || `# ${memoryName}\n\n[Content to be added]`;
+        return createCoreMemory(projectId, memoryName, content);
       });
       
       await collection.insertMany(coreMemories as any[]);
@@ -479,8 +707,8 @@ ID: ${projectId}
 Status: ${isNewProject ? 'New project created' : 'Existing project found'}
 Location: ${memoryDir}
 
-Core Memory Files (${statusMessage}):
-${CORE_MEMORY_FILES.map(f => `- ${f}`).join('\n')}
+Core Memory Documents (${statusMessage}):
+${CORE_MEMORY_NAMES.map(name => `- ${name}`).join('\n')}
 
 MongoDB Configuration:
 - Collection: memory_engineering_documents
@@ -488,9 +716,9 @@ MongoDB Configuration:
 - Search: $rankFusion ready
 
 Next steps:
-1. Update memory files with project details
-2. Run memory_engineering/sync to generate embeddings
-3. Use memory_engineering/search to query memories`
+1. Update core memory documents with project details
+2. Run memory_engineering_sync to generate embeddings
+3. Use memory_engineering_search to query memories`
         }
       ]
     };

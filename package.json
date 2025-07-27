@@ -1,7 +1,7 @@
 {
   "name": "memory-engineering-mcp",
-  "version": "3.0.1",
-  "description": "AI-first memory system for coding assistants. Natural language interface, MongoDB $rankFusion search, self-improving design.",
+  "version": "3.2.0",
+  "description": "Persistent memory for AI coding assistants. Mandatory session discipline, MongoDB storage, and hybrid $rankFusion search.",
   "main": "dist/index.js",
   "type": "module",
   "repository": {
@@ -22,7 +22,9 @@
     "prepublishOnly": "pnpm build && pnpm test",
     "mcp:inspect": "npx @modelcontextprotocol/inspector dist/index.js",
     "db:indexes": "tsx scripts/create-indexes.ts",
-    "db:check": "tsx scripts/check-indexes.ts"
+    "db:check": "tsx scripts/check-indexes.ts",
+    "db:migrate": "tsx scripts/migrate-evolution-fix.ts",
+    "migrate:filename": "tsx scripts/migrate-filename-to-memoryname.ts"
   },
   "bin": {
     "memory-engineering-mcp": "./bin/memory-engineering-mcp.js"

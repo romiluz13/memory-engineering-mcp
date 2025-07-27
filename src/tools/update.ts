@@ -7,8 +7,7 @@ import {
   type MemoryDocument,
   createCoreMemory,
   createWorkingMemory,
-  createInsightMemory,
-  createEvolutionMemory,
+  // Removed insight and evolution - simplified to 2 classes
   CORE_MEMORY_FILES
 } from '../types/memory.js';
 import { getMemoryCollection } from '../db/connection.js';
@@ -75,42 +74,46 @@ async function updateCoreMemoryByFileName(
   fileName: string,
   content: string
 ): Promise<CallToolResult> {
-  // Check if it's a known core memory file
-  if (!CORE_MEMORY_FILES.includes(fileName as any)) {
+  // Strip .md extension if provided - we don't use file extensions in MongoDB
+  const memoryName = fileName.replace(/\.md$/, '');
+  
+  // Check if it's a known core memory
+  const validNames = CORE_MEMORY_FILES.map(f => f.replace(/\.md$/, ''));
+  if (!validNames.includes(memoryName)) {
     return {
       isError: true,
       content: [
         {
           type: 'text',
-          text: `Unknown core memory file: ${fileName}. Valid files: ${CORE_MEMORY_FILES.join(', ')}`,
+          text: `Unknown core memory: ${memoryName}\n\nValid core memories:\n${validNames.join('\n')}\n\nExample: memory_engineering_update --fileName "activeContext" --content "..."`,
         },
       ],
     };
   }
 
-  // Find existing core memory
+  // Find existing core memory by memoryName (not fileName)
   const existing = await collection.findOne({
     projectId,
     memoryClass: 'core',
-    'content.fileName': fileName,
+    'content.memoryName': memoryName,
   });
 
   const now = new Date();
 
   if (!existing) {
-    // Create new core memory
-    const memory = createCoreMemory(projectId, fileName, content);
+    // Create new core memory with memoryName (no .md)
+    const memory = createCoreMemory(projectId, memoryName, content);
     await collection.insertOne(memory);
 
-    logger.info(`Created new core memory: ${fileName} for project: ${projectId}`);
+    logger.info(`Created new core memory: ${memoryName} for project: ${projectId}`);
 
     return {
       content: [
         {
           type: 'text',
-          text: `Created new core memory file: ${fileName}
+          text: `Created new core memory: ${memoryName}
 
-Remember to run memory_engineering/sync to generate embeddings for search.`,
+Remember to run memory_engineering_sync to generate embeddings for search.`,
         },
       ],
     };
@@ -139,21 +142,21 @@ Remember to run memory_engineering/sync to generate embeddings for search.`,
     throw new Error('Failed to update core memory');
   }
 
-  logger.info(`Updated core memory: ${fileName} for project: ${projectId}`);
+  logger.info(`Updated core memory: ${memoryName} for project: ${projectId}`);
 
   return {
     content: [
       {
         type: 'text',
-        text: `Updated core memory: ${fileName}
+        text: `Updated core memory: ${memoryName}
 Version: ${(existing.metadata.version || 0) + 1}
 
-Note: Embeddings cleared. Run memory_engineering/sync to regenerate for search.
+Note: Embeddings cleared. Run memory_engineering_sync to regenerate for search.
 
-🔄 Next steps based on what you updated:
-${fileName === 'activeContext.md' ? '- Continue updating this file as you progress through your work' : ''}
-${fileName === 'systemPatterns.md' ? '- Search for similar patterns to ensure consistency' : ''}
-${fileName === 'progress.md' ? '- Update activeContext.md for your next task' : ''}`,
+Next steps:
+${memoryName === 'activeContext' ? '- Continue updating this memory as you progress through your work' : ''}
+${memoryName === 'systemPatterns' ? '- Search for similar patterns to ensure consistency' : ''}
+${memoryName === 'progress' ? '- Update activeContext for your next task' : ''}`,
       },
     ],
   };
@@ -194,60 +197,13 @@ async function createNewMemory(
       }
       break;
 
-    case 'insight':
-      try {
-        const insightData = JSON.parse(params.content);
-        memory = createInsightMemory(projectId, {
-          pattern: insightData.pattern,
-          confidence: insightData.confidence || 5,
-          evidence: insightData.evidence || [],
-          discovered: new Date(),
-        });
-        description = `Created insight memory: ${insightData.pattern}`;
-      } catch (e) {
-        return {
-          isError: true,
-          content: [
-            {
-              type: 'text',
-              text: 'Insight memory content must be valid JSON with pattern and confidence',
-            },
-          ],
-        };
-      }
-      break;
-
-    case 'evolution':
-      try {
-        const evolutionData = JSON.parse(params.content);
-        memory = createEvolutionMemory(projectId, {
-          query: evolutionData.query,
-          resultCount: evolutionData.resultCount || 0,
-          feedback: evolutionData.feedback,
-          timestamp: new Date(),
-          improvements: evolutionData.improvements,
-        });
-        description = `Created evolution memory for query: ${evolutionData.query}`;
-      } catch (e) {
-        return {
-          isError: true,
-          content: [
-            {
-              type: 'text',
-              text: 'Evolution memory content must be valid JSON with query and optional feedback',
-            },
-          ],
-        };
-      }
-      break;
-
     default:
       return {
         isError: true,
         content: [
           {
             type: 'text',
-            text: `Invalid memory class: ${params.memoryClass}. Valid: core, working, insight, evolution`,
+            text: `Invalid memory class: ${params.memoryClass}. Valid: working (core memories use fileName parameter)`,
           },
         ],
       };
@@ -270,11 +226,9 @@ ID: ${result.insertedId}
 Class: ${params.memoryClass}
 Type: ${params.memoryType || memory.memoryType}
 
-Run memory_engineering/sync to generate embeddings for search.
+Run memory_engineering_sync to generate embeddings for search.
 
-${params.memoryClass === 'working' ? '🐛 Great job saving this solution! Next time you hit similar issues, search for it!' : ''}
-${params.memoryClass === 'insight' ? '✨ Pattern discovered! This will help in future implementations.' : ''}
-${params.memoryClass === 'evolution' ? '📊 Search tracked! The system is learning from your usage.' : ''}`,
+${params.memoryClass === 'working' ? 'Working memory saved with 30-day TTL. Search for it when you encounter similar issues.' : ''}`,
       },
     ],
   };

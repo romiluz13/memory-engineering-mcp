@@ -10,8 +10,10 @@ import {
   type ReadResourceRequest,
 } from '@modelcontextprotocol/sdk/types.js';
 import { initTool } from './init.js';
+import { startSessionTool } from './startSession.js';
 import { readTool } from './read.js';
 import { updateTool } from './update.js';
+import { memoryBankUpdateTool } from './memoryBankUpdate.js';
 import { searchTool } from './search.js';
 import { syncTool } from './sync.js';
 import { logger } from '../utils/logger.js';
@@ -22,8 +24,21 @@ export function setupTools(server: Server): void {
     return {
       tools: [
         {
+          name: 'memory_engineering_start_session',
+          description: 'MANDATORY: Start every session with this command. Reads all 7 core memories to give you full project context. Must be run before any other memory operations.',
+          inputSchema: {
+            type: 'object',
+            properties: {
+              projectPath: {
+                type: 'string',
+                description: 'Project directory path (defaults to current directory)',
+              },
+            },
+          },
+        },
+        {
           name: 'memory_engineering_init',
-          description: 'Initialize AI memory system for your project. Run this once at project start. Creates 6 memory files that help AI remember everything about your project.',
+          description: 'Initialize memory system for your project. Run once at project start. Creates 7 core memory documents in MongoDB and sets up search indexes. If indexes fail, run npm run create-indexes manually.',
           inputSchema: {
             type: 'object',
             properties: {
@@ -40,23 +55,22 @@ export function setupTools(server: Server): void {
         },
         {
           name: 'memory_engineering_read',
-          description: 'Read project memories to understand context. Use this to: AT SESSION START - Always read activeContext.md first | BEFORE CODING - Read systemPatterns.md for conventions | FOR DETAILS - Read any of the 6 core memory files. Example: read --fileName "activeContext.md"',
+          description: 'Read specific memory document. Use after start_session for details. Valid core memories: projectbrief, productContext, activeContext, systemPatterns, techContext, progress, codebaseMap. Example: memory_engineering_read --fileName "activeContext" (no .md needed)',
           inputSchema: {
             type: 'object',
             properties: {
               fileName: {
                 type: 'string',
-                description: 'Core memory file name (e.g., systemPatterns.md)',
-                pattern: '^[a-zA-Z0-9-_]+\\.md$'
+                description: 'Core memory name WITHOUT .md extension (e.g., activeContext, systemPatterns, progress)'
               },
               memoryClass: {
                 type: 'string',
-                enum: ['core', 'working', 'insight', 'evolution'],
+                enum: ['core', 'working'],
                 description: 'Memory class to filter by',
               },
               memoryType: {
                 type: 'string',
-                enum: ['pattern', 'context', 'event', 'learning', 'meta'],
+                enum: ['context', 'event'],
                 description: 'Memory type to filter by',
               },
               projectPath: {
@@ -68,14 +82,13 @@ export function setupTools(server: Server): void {
         },
         {
           name: 'memory_engineering_update',
-          description: 'Save important information for future sessions. Use IMMEDIATELY when: Starting new work → Update activeContext.md | Finding patterns → Update systemPatterns.md | Completing features → Update progress.md | Solving bugs → Create working memory. Example: update --fileName "activeContext.md" --content "Working on: auth system..."',
+          description: 'Update a memory document. For core memories use fileName (no .md). For working memories use memoryClass="working" with JSON content. Examples: memory_engineering_update --fileName "activeContext" --content "Working on: auth system" OR memory_engineering_update --memoryClass "working" --content \'{"action": "fixed bug", "solution": "..."}\'',
           inputSchema: {
             type: 'object',
             properties: {
               fileName: {
                 type: 'string',
-                description: 'Core memory file to update',
-                pattern: '^[a-zA-Z0-9-_]+\\.md$'
+                description: 'Core memory name WITHOUT .md extension (e.g., activeContext, progress, systemPatterns)'
               },
               content: {
                 type: 'string',
@@ -84,12 +97,12 @@ export function setupTools(server: Server): void {
               },
               memoryClass: {
                 type: 'string',
-                enum: ['working', 'insight', 'evolution'],
+                enum: ['working'],
                 description: 'Memory class for new memories',
               },
               memoryType: {
                 type: 'string',
-                enum: ['pattern', 'context', 'event', 'learning', 'meta'],
+                enum: ['context', 'event'],
                 description: 'Memory type (optional)',
               },
               projectPath: {
@@ -102,7 +115,7 @@ export function setupTools(server: Server): void {
         },
         {
           name: 'memory_engineering_search',
-          description: 'Find how similar problems were solved before. ALWAYS use when: Starting ANY new feature ("find authentication patterns") | Hitting errors ("find error handling") | Wondering "how did we..." ("find state management"). Uses AI to understand your search and finds relevant memories.',
+          description: 'Search memories using MongoDB $rankFusion (hybrid of vector, text, temporal). Use before implementing features or when debugging. If search fails with "Path projectId needs to be indexed", run npm run create-indexes. Example: memory_engineering_search --query "authentication patterns"',
           inputSchema: {
             type: 'object',
             properties: {
@@ -134,7 +147,7 @@ export function setupTools(server: Server): void {
         },
         {
           name: 'memory_engineering_sync',
-          description: 'Make memories searchable with AI embeddings. Run after adding new memories. This helps search understand context better.',
+          description: 'Generate vector embeddings for memories to enable semantic search. Run after creating/updating memories. Uses Voyage AI to create 1024-dimensional embeddings. Required before search will work properly.',
           inputSchema: {
             type: 'object',
             properties: {
@@ -150,6 +163,33 @@ export function setupTools(server: Server): void {
             },
           },
         },
+        {
+          name: 'memory_engineering_memory_bank_update',
+          description: 'Update multiple core memories in one command. Useful for systematic updates. Memory names do NOT need .md extension. Example uses JSON object with memory names as keys and content as values.',
+          inputSchema: {
+            type: 'object',
+            properties: {
+              updates: {
+                type: 'object',
+                description: 'Object with memory names as keys and markdown content as values',
+                properties: {
+                  activeContext: { type: 'string' },
+                  systemPatterns: { type: 'string' },
+                  progress: { type: 'string' },
+                  techContext: { type: 'string' },
+                  projectbrief: { type: 'string' },
+                  productContext: { type: 'string' },
+                  codebaseMap: { type: 'string' },
+                },
+              },
+              projectPath: {
+                type: 'string',
+                description: 'Project directory path (defaults to current directory)',
+              },
+            },
+            required: ['updates'],
+          },
+        },
       ],
     };
   });
@@ -160,8 +200,8 @@ export function setupTools(server: Server): void {
       resources: [
         {
           uri: 'memory://core',
-          name: 'Core Memory Files',
-          description: 'The 6 foundational memory files',
+          name: 'Core Memory Documents',
+          description: 'The 7 core memory documents stored in MongoDB',
           mimeType: 'text/markdown',
         },
         {
@@ -184,18 +224,18 @@ export function setupTools(server: Server): void {
             contents: [{
               uri: 'memory://core',
               mimeType: 'text/markdown',
-              text: `# Core Memory Files
+              text: `# Core Memory Documents
 
-The 6 core memory files that form the foundation of the memory system:
+The 7 core memory documents that form the foundation of the memory system:
 
-1. **projectbrief.md** - Project goals, scope, and success criteria
-2. **systemPatterns.md** - Architecture patterns and code conventions
-3. **activeContext.md** - Current sprint and task focus
-4. **techContext.md** - Technology stack and dependencies
-5. **progress.md** - Completed work and lessons learned
-6. **codebaseMap.md** - File structure and key modules
+1. **projectbrief** - Project goals, scope, and success criteria
+2. **systemPatterns** - Architecture patterns and code conventions
+3. **activeContext** - Current sprint and task focus
+4. **techContext** - Technology stack and dependencies
+5. **progress** - Completed work and lessons learned
+6. **codebaseMap** - File structure and key modules
 
-Use memory_engineering_read --fileName [name] to read a specific file.`,
+Use memory_engineering_read --fileName [name] to read a specific document.`,
             }],
           };
 
@@ -262,6 +302,8 @@ Use memory_engineering_read --fileName [name] to read a specific file.`,
       switch (name) {
         case 'memory_engineering_init':
           return await initTool(args);
+        case 'memory_engineering_start_session':
+          return await startSessionTool(args);
         case 'memory_engineering_read':
           return await readTool(args);
         case 'memory_engineering_update':
@@ -270,6 +312,8 @@ Use memory_engineering_read --fileName [name] to read a specific file.`,
           return await searchTool(args);
         case 'memory_engineering_sync':
           return await syncTool(args);
+        case 'memory_engineering_memory_bank_update':
+          return await memoryBankUpdateTool(args);
         default:
           throw new Error(`Unknown tool: ${name}`);
       }

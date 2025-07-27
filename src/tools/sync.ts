@@ -149,23 +149,15 @@ function extractContentForEmbedding(doc: MemoryDocument): string {
   // Extract based on memory class
   switch (doc.memoryClass) {
     case 'core':
-      content = `${doc.content.fileName || ''} ${doc.content.markdown || ''}`;
+      const memoryName = doc.content.memoryName || doc.content.fileName?.replace(/\.md$/, '') || '';
+      content = `${memoryName} ${doc.content.markdown || ''}`;
       break;
     case 'working':
       if (doc.content.event) {
         content = `${doc.content.event.action} ${doc.content.event.solution || ''} ${JSON.stringify(doc.content.event.context || {})}`;
       }
       break;
-    case 'insight':
-      if (doc.content.insight) {
-        content = doc.content.insight.pattern;
-      }
-      break;
-    case 'evolution':
-      if (doc.content.evolution) {
-        content = `${doc.content.evolution.query} results: ${doc.content.evolution.resultCount}`;
-      }
-      break;
+    // Insight and evolution cases removed - simplified to 2 classes
   }
 
   // Add metadata context
@@ -187,16 +179,7 @@ function extractSearchableText(doc: MemoryDocument): string {
         text = `${doc.content.event.action} ${doc.content.event.solution || ''} ${JSON.stringify(doc.content.event.context || {})}`;
       }
       break;
-    case 'insight':
-      if (doc.content.insight) {
-        text = doc.content.insight.pattern;
-      }
-      break;
-    case 'evolution':
-      if (doc.content.evolution) {
-        text = `${doc.content.evolution.query} ${doc.content.evolution.improvements?.join(' ') || ''}`;
-      }
-      break;
+    // Insight and evolution cases removed - simplified to 2 classes
   }
 
   // Clean up for search

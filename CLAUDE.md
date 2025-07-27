@@ -1,207 +1,130 @@
-# Memory Engineering MCP v3.0 - AI Brain for Coding Assistants
+# Memory Engineering MCP - AI Assistant Instructions
 
-## 🚀 What's New in v3.0: Natural Language for AIs
-Based on extensive research and testing, we've discovered that AI assistants only use 33% of Memory Engineering's capabilities. This update fixes that by aligning tool descriptions with how AIs think.
-
-### v3.0.1 Hotfix: Claude Code Compatibility
-- Changed tool names from `memory_engineering/action` to `memory_engineering_action` format
-- Claude Code requires strict naming pattern: `^[a-zA-Z0-9_-]{1,128}$`
-
-## 📚 Essential Reading (Research & Insights)
-- `docs/COMPLETE_FLOW_ANALYSIS.md` - Full user→AI→MCP→MongoDB flow
-- `docs/SIMPLE_FIX_PLAN.md` - How we went from 33% to 90%+ effectiveness
-- `docs/MCP_OFFICIAL_LEARNINGS.md` - Key insights from MCP documentation
-- `docs/CURSOR_FEEDBACK_ANALYSIS.md` - What was missing vs what we have
-- `docs/MCP_BEST_PRACTICES_RESEARCH.md` - Community patterns and standards
-- `docs/MONGODB_ADVANCED_FEATURES.md` - Untapped MongoDB capabilities
-- `docs/DX_IMPROVEMENTS_GUIDE.md` - Future enhancement roadmap
-
-## 🎯 Mission: Give AI Coding Assistants Perfect Memory
-Every AI coding assistant (Cursor, Windsurf, Claude Code) suffers from memory loss between sessions. We solve this with a MongoDB-powered brain that remembers everything, finds patterns, and gets smarter over time.
-
-## 🧠 Architecture: 4 Memory Classes (One Collection)
-
-### The Memory System That Actually Works
-```javascript
-// Collection: memories (unified, flexible, WORKING!)
-{
-  memoryClass: "core" | "working" | "insight" | "evolution",
-  memoryType: "pattern" | "context" | "event" | "learning" | "meta",
-  content: { /* flexible based on memory class */ },
-  contentVector: Array, // voyage-3-large embeddings (1024 dims)
-  metadata: { importance, freshness, tags, autoExpire }
-}
+## Required Session Start
 ```
-
-### 1. **Core Memories** (The 6 Foundational Files)
-Always read `activeContext.md` first when starting a session!
-- `projectbrief.md` - Overall project vision and goals
-- `systemPatterns.md` - Architecture patterns and code conventions
-- `activeContext.md` - Current sprint/task focus (UPDATE THIS!)
-- `techContext.md` - Technology stack and dependencies
-- `progress.md` - Completed work and lessons learned
-- `codebaseMap.md` - File structure and key modules
-
-### 2. **Working Memories** (Daily Coding Events)
-Save your debug solutions immediately!
-- Debug sessions with solutions
-- Implementation approaches
-- Code reviews and refactoring
-- Auto-expires after 30 days (TTL)
-
-### 3. **Insight Memories** (Auto-Generated Patterns)
-Created when patterns are discovered:
-- Discovered from repeated patterns
-- Confidence-scored learnings
-- Cross-referenced evidence
-- Makes AI smarter over time
-
-### 4. **Evolution Memories** (Self-Improvement)
-Automatically created on every search:
-- Query effectiveness tracking
-- Memory usage patterns
-- System learning from feedback
-- Automatic optimization over time
-
-## 💎 MongoDB $rankFusion: Our Secret Weapon
-
-```javascript
-// One query that combines EVERYTHING (MongoDB 8.1+ only!)
-{
-  $rankFusion: {
-    input: {
-      pipelines: {
-        semantic: [/* vector search - 40% */],
-        recent: [/* last 7 days - 20% */],
-        patterns: [/* importance ≥7 - 30% */],
-        evolution: [/* accessed ≥3 times - 10% */]
-      }
-    }
-  }
-}
+memory_engineering_start_session
 ```
+This command MUST be run at the start of every session to load all core memories.
 
-## 🔧 How to Use Memory Engineering Effectively
+## Memory System Architecture
 
-### The Perfect AI Workflow
+### Core Memories (7 documents)
+1. **projectbrief** - Project goals, scope, and requirements
+2. **productContext** - Product rationale and user needs  
+3. **activeContext** - Current work items and focus
+4. **systemPatterns** - Architecture patterns and conventions
+5. **techContext** - Technology stack and dependencies
+6. **progress** - Completed work and learnings
+7. **codebaseMap** - File structure and module organization
 
-1. **Start Every Session**
-   ```
-   memory_engineering_read --fileName "activeContext.md"
-   ```
+### Working Memories
+- Event-based debug sessions and solutions
+- 30-day TTL (Time To Live)
+- JSON format for structured data
 
-2. **Before Implementing ANYTHING**
-   ```
-   memory_engineering_search --query "authentication patterns"
-   memory_engineering_search --query "error handling approach"
-   ```
+## Tool Reference
 
-3. **During Development**
-   - Update activeContext.md at milestones
-   - Save working memories when debugging
-   - Update systemPatterns.md with new patterns
-
-4. **After Solving Problems**
-   ```
-   memory_engineering_update --memoryClass "working" --content '{
-     "action": "fixed auth bug",
-     "context": {"file": "auth.js", "error": "token expired"},
-     "solution": "Added refresh token logic"
-   }'
-   ```
-
-5. **When Done**
-   ```
-   memory_engineering_update --fileName "progress.md"
-   ```
-
-## 📊 Current Effectiveness Metrics
-
-### Before v3.0 (Tool-Centric Descriptions)
-- Read memories at start: ✅ 100%
-- Search before coding: ❌ 0%
-- Update during work: ❌ 0%
-- Save debug solutions: ❌ 0%
-- Record patterns: ❌ 0%
-- Update progress: ✅ 100%
-**Total: 33%**
-
-### After v3.0 (Natural Language Descriptions)
-- Read memories at start: ✅ 100%
-- Search before coding: ✅ 90%+
-- Update during work: ✅ 80%+
-- Save debug solutions: ✅ 85%+
-- Record patterns: ✅ 75%+
-- Update progress: ✅ 100%
-**Total: 88%+**
-
-## 🛠️ Key Technologies
-
-### MongoDB Atlas (8.1+ Required)
-- **$rankFusion**: Only MongoDB can do this!
-- **Vector Search**: Native similarity search
-- **TTL Indexes**: Auto-cleanup for working memories
-- **Aggregation Pipelines**: Pattern discovery
-
-### Voyage AI (voyage-3-large)
-- 1024 dimensions (perfect for MongoDB)
-- Optimized for code descriptions
-- 32K token context window
-
-## 📋 Verification Checklist
-
-Use this to verify everything works:
-
+### 1. `memory_engineering_init`
+Initialize project memory system. Creates core memories and MongoDB indexes.
 ```bash
-# 1. Initialize
-memory_engineering_init
-
-# 2. Check core memories exist
-memory_engineering_read --fileName "activeContext.md"
-
-# 3. Test working memory
-memory_engineering_update --memoryClass "working" --content '{"action": "test", "context": {"test": true}}'
-
-# 4. Test search (creates evolution memory)
-memory_engineering_search --query "test query"
-
-# 5. Verify all memory classes
-memory_engineering_read --memoryClass "evolution"
-
-# 6. Generate embeddings
-memory_engineering_sync
+memory_engineering_init --projectName "myproject"
 ```
 
-## 🎯 Development Commands
+### 2. `memory_engineering_start_session` 
+Load all core memories. Required at session start.
 ```bash
-npm run dev          # Start MCP server
-npm run build        # TypeScript compilation
-npm run test         # Test suite
-npm run typecheck    # Type checking
-npm run lint         # ESLint
+memory_engineering_start_session
 ```
 
-## 🚀 What Makes This Special
+### 3. `memory_engineering_read`
+Read specific memory document. No .md extension needed.
+```bash
+memory_engineering_read --fileName "systemPatterns"
+```
 
-1. **Natural Language**: Tools described how AIs think
-2. **Contextual Hints**: Guides AIs through workflow
-3. **Auto-Evolution**: Learns from every search
-4. **Zero Config**: Works immediately after init
-5. **MongoDB $rankFusion**: No other system has this
+### 4. `memory_engineering_update`
+Update memory content. Use fileName for core, memoryClass for working.
+```bash
+# Core memory update
+memory_engineering_update --fileName "activeContext" --content "Working on: authentication"
 
-## 🎨 Core Principles
+# Working memory creation
+memory_engineering_update --memoryClass "working" --content '{"action": "debugged login", "solution": "..."}'
+```
 
-1. **AI-First Design**: Everything optimized for AI thinking
-2. **Minimal Complexity**: Simple beats clever
-3. **Maximum Effectiveness**: From 33% to 90%+ usage
-4. **Self-Improving**: Gets smarter with use
+### 5. `memory_engineering_memory_bank_update`
+Update multiple core memories simultaneously.
+```bash
+memory_engineering_memory_bank_update --updates '{
+  "activeContext": "Completed: basic auth",
+  "progress": "Authentication module working"
+}'
+```
 
-## 📖 The Journey
+### 6. `memory_engineering_search`
+Search memories using MongoDB $rankFusion (hybrid search).
+```bash
+memory_engineering_search --query "authentication patterns"
+```
 
-We started with perfect technology but imperfect psychology. Through research, testing, and community feedback, we learned that **AI assistants need natural language, not technical specifications**. 
+## Workflows
 
-Version 3.0 represents this insight: same powerful engine, new intuitive interface.
+### Starting New Feature
+1. `memory_engineering_start_session` - Load context
+2. `memory_engineering_search --query "similar feature"` - Find patterns
+3. Implement based on existing patterns
+4. `memory_engineering_update --fileName "progress"` - Document completion
 
----
+### Debugging Issue
+1. `memory_engineering_start_session` - Load context
+2. `memory_engineering_search --query "error type"` - Find similar issues
+3. Fix the bug
+4. `memory_engineering_update --memoryClass "working"` - Save solution
 
-*"We're not just storing memories. We're creating an extension of AI intelligence that feels natural, works automatically, and improves continuously."*
+### End of Session
+1. `memory_engineering_update --fileName "activeContext"` - Update current state
+2. `memory_engineering_update --fileName "progress"` - Document completed work
+3. `memory_engineering_sync` - Generate embeddings for search
+
+## Technical Details
+
+### MongoDB Configuration
+- Database: `memory_engineering`
+- Collection: `memory_engineering_documents`
+- Indexes: compound, vector (1024d), text, TTL
+
+### Search Types
+- **rankfusion** (default): Combines vector, text, temporal, and importance
+- **vector**: Semantic similarity using Voyage AI embeddings
+- **text**: Keyword matching with fuzzy search
+- **temporal**: Time-weighted relevance
+
+### Error Handling
+- If search fails: "Path projectId needs to be indexed" → Run `npm run db:indexes`
+- If sync fails: Check VOYAGE_API_KEY environment variable
+- If init fails: Verify MongoDB connection string
+
+## Development Commands
+```bash
+npm run build          # TypeScript compilation
+npm run test           # Test suite
+npm run typecheck      # Type checking
+npm run lint           # ESLint
+npm run db:indexes     # Create MongoDB search indexes manually
+```
+
+## Key Principles
+
+1. **Mandatory Reading** - Always start with `memory_engineering_start_session`
+2. **Deliberate Updates** - Manual documentation of progress and patterns  
+3. **Hybrid Search** - Combines vector embeddings with text search
+4. **Working Memory** - Temporary storage for debug solutions
+5. **Atomic Operations** - Updates either succeed completely or fail with clear errors
+
+## Implementation Notes
+
+- Memory names do NOT require .md extension
+- All operations use projectId for isolation
+- Vector embeddings use voyage-3-large (1024 dimensions)
+- Search indexes must be created in MongoDB Atlas
+- Working memories expire automatically after 30 days

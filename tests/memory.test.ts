@@ -15,32 +15,28 @@ describe('Memory Types', () => {
     it('should have all expected memory classes', () => {
       expect(MEMORY_CLASSES).toContain('core');
       expect(MEMORY_CLASSES).toContain('working');
-      expect(MEMORY_CLASSES).toContain('insight');
-      expect(MEMORY_CLASSES).toContain('evolution');
-      expect(MEMORY_CLASSES).toHaveLength(4);
+      expect(MEMORY_CLASSES).toHaveLength(2); // Simplified to 2 classes
     });
   });
 
   describe('Memory Types', () => {
     it('should have all expected memory types', () => {
-      expect(MEMORY_TYPES).toContain('pattern');
       expect(MEMORY_TYPES).toContain('context');
       expect(MEMORY_TYPES).toContain('event');
-      expect(MEMORY_TYPES).toContain('learning');
-      expect(MEMORY_TYPES).toContain('meta');
-      expect(MEMORY_TYPES).toHaveLength(5);
+      expect(MEMORY_TYPES).toHaveLength(2); // Simplified to 2 types
     });
   });
 
   describe('Core Memory Files', () => {
-    it('should have all 6 core memory files', () => {
+    it('should have all 7 core memory files', () => {
       expect(CORE_MEMORY_FILES).toContain('projectbrief.md');
+      expect(CORE_MEMORY_FILES).toContain('productContext.md');
       expect(CORE_MEMORY_FILES).toContain('systemPatterns.md');
       expect(CORE_MEMORY_FILES).toContain('activeContext.md');
       expect(CORE_MEMORY_FILES).toContain('techContext.md');
       expect(CORE_MEMORY_FILES).toContain('progress.md');
       expect(CORE_MEMORY_FILES).toContain('codebaseMap.md');
-      expect(CORE_MEMORY_FILES).toHaveLength(6);
+      expect(CORE_MEMORY_FILES).toHaveLength(7);
     });
   });
 

@@ -1,7 +1,7 @@
 import { join } from 'path';
 import { readFileSync, existsSync } from 'fs';
 import type { CallToolResult } from '@modelcontextprotocol/sdk/types.js';
-import { SearchToolSchema, type ProjectConfig, type MemoryDocument, createEvolutionMemory } from '../types/memory.js';
+import { SearchToolSchema, type ProjectConfig, type MemoryDocument } from '../types/memory.js';
 import { getMemoryCollection } from '../db/connection.js';
 import { generateEmbedding } from '../embeddings/voyage.js';
 import { logger } from '../utils/logger.js';
@@ -28,7 +28,7 @@ export async function searchTool(args: unknown): Promise<CallToolResult> {
     const collection = getMemoryCollection();
 
     // Track query for evolution memory
-    const queryStartTime = Date.now();
+    // const queryStartTime = Date.now(); // Removed - was used for evolution tracking
 
     let results: MemoryDocument[] = [];
 
@@ -51,9 +51,7 @@ export async function searchTool(args: unknown): Promise<CallToolResult> {
         results = await executeRankFusionSearch(collection, config.projectId, params.query, params.limit);
     }
 
-    // Track search effectiveness for evolution
-    const queryDuration = Date.now() - queryStartTime;
-    await trackSearchEvolution(collection, config.projectId, params.query, results.length, queryDuration);
+    // Evolution tracking removed in v3.1
 
     // Update access counts for returned memories
     if (results.length > 0) {
@@ -355,27 +353,7 @@ async function executeTemporalSearch(
   ]).toArray();
 }
 
-async function trackSearchEvolution(
-  collection: any,
-  projectId: string,
-  query: string,
-  resultCount: number,
-  _duration: number
-): Promise<void> {
-  try {
-    // Create evolution memory for this search
-    const evolutionMemory = createEvolutionMemory(projectId, {
-      query,
-      resultCount,
-      timestamp: new Date(),
-      improvements: []
-    });
-    
-    await collection.insertOne(evolutionMemory);
-  } catch (error) {
-    logger.warn('Failed to track search evolution', error);
-  }
-}
+// Removed trackSearchEvolution function - simplified in v3.1
 
 function formatSearchResults(
   query: string,
@@ -397,7 +375,7 @@ Try these search tips:
 
 Search type used: ${searchType}
 
-🆕 First time implementing this? After you build it, save your solution with:
+First time implementing this? After you build it, save your solution with:
 memory_engineering_update --memoryClass "working" --content '{"action": "implement ${query}", "solution": "your approach"}'`,
         },
       ],
@@ -413,17 +391,13 @@ memory_engineering_update --memoryClass "working" --content '{"action": "impleme
     // Title based on memory class
     switch (doc.memoryClass) {
       case 'core':
-        content += `[Core] ${doc.content.fileName || 'Memory'}`;
+        const memoryName = doc.content.memoryName || doc.content.fileName?.replace(/\.md$/, '') || 'Memory';
+        content += `[Core] ${memoryName}`;
         break;
       case 'working':
         content += `[Working] ${doc.content.event?.action || 'Event'}`;
         break;
-      case 'insight':
-        content += `[Insight] ${doc.content.insight?.pattern || 'Pattern'}`;
-        break;
-      case 'evolution':
-        content += `[Evolution] Query: ${doc.content.evolution?.query || 'unknown'}`;
-        break;
+      // Insight and evolution cases removed - simplified to 2 classes
       default:
         content += `[${doc.memoryClass}] ${doc.memoryType}`;
     }
@@ -440,12 +414,7 @@ memory_engineering_update --memoryClass "working" --content '{"action": "impleme
       case 'working':
         preview = doc.content.event?.solution || JSON.stringify(doc.content.event?.context || {}).substring(0, 200);
         break;
-      case 'insight':
-        preview = `Confidence: ${doc.content.insight?.confidence}/10`;
-        break;
-      case 'evolution':
-        preview = `Results: ${doc.content.evolution?.resultCount}`;
-        break;
+      // Insight and evolution cases removed - simplified to 2 classes
     }
     
     if (preview) {
@@ -463,11 +432,11 @@ memory_engineering_update --memoryClass "working" --content '{"action": "impleme
 
   // Add contextual hints based on results
   let hint = '\n\n';
-  if (results.some(r => r.memoryClass === 'working' || r.memoryClass === 'insight')) {
-    hint += '💡 Found useful patterns? Consider updating systemPatterns.md with improvements!\n';
-    hint += 'memory_engineering_update --fileName "systemPatterns.md"\n';
+  if (results.some(r => r.memoryClass === 'working')) {
+    hint += 'Found useful patterns? Consider updating systemPatterns with improvements:\n';
+    hint += 'memory_engineering_update --fileName "systemPatterns"\n';
   } else {
-    hint += '🔍 Found what you need? Great! If you discover improvements while implementing, remember to save them!\n';
+    hint += 'Found what you need? If you discover improvements while implementing, remember to save them.\n';
   }
 
   return {

@@ -1,0 +1,59 @@
+[
+  {
+    "name": "memory_text",
+    "type": "search",
+    "definition": {
+      "mappings": {
+        "dynamic": false,
+        "fields": {
+          "projectId": {
+            "type": "token",
+            "normalizer": "lowercase"
+          },
+          "searchableText": {
+            "type": "string",
+            "analyzer": "lucene.standard"
+          },
+          "memoryClass": {
+            "type": "token",
+            "normalizer": "lowercase"
+          },
+          "memoryType": {
+            "type": "token",
+            "normalizer": "lowercase"
+          },
+          "metadata.tags": {
+            "type": "string",
+            "analyzer": "lucene.standard"
+          },
+          "metadata.importance": {
+            "type": "number"
+          },
+          "metadata.freshness": {
+            "type": "date"
+          },
+          "content.fileName": {
+            "type": "token",
+            "normalizer": "lowercase"
+          },
+          "content.markdown": {
+            "type": "string",
+            "analyzer": "lucene.standard"
+          }
+        }
+      }
+    }
+  },
+  {
+    "name": "memory_vectors",
+    "type": "vectorSearch",
+    "definition": {
+      "fields": [{
+        "type": "vector",
+        "path": "contentVector",
+        "numDimensions": 1024,
+        "similarity": "cosine"
+      }]
+    }
+  }
+]

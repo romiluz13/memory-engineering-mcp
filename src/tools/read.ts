@@ -29,8 +29,13 @@ export async function readTool(args: unknown): Promise<CallToolResult> {
     const query: any = { projectId: config.projectId };
     
     if (params.fileName) {
-      // Legacy support: read by fileName for core memories
-      query['content.fileName'] = params.fileName;
+      // Support both old and new field names during transition
+      const cleanName = params.fileName.replace(/\.md$/, '');
+      query.$or = [
+        { 'content.fileName': params.fileName },     // Old field (with .md)
+        { 'content.memoryName': cleanName },         // New field (no .md)
+        { 'content.memoryName': params.fileName }    // In case someone passes with .md
+      ];
     } else if (params.memoryClass) {
       query.memoryClass = params.memoryClass;
       if (params.memoryType) {
@@ -53,7 +58,7 @@ export async function readTool(args: unknown): Promise<CallToolResult> {
       // List available options
       const availableCore = await collection
         .find({ projectId: config.projectId, memoryClass: 'core' })
-        .project({ 'content.fileName': 1 })
+        .project({ 'content.fileName': 1, 'content.memoryName': 1 })
         .toArray();
 
       const memoryCounts = await collection.aggregate([
@@ -69,13 +74,16 @@ export async function readTool(args: unknown): Promise<CallToolResult> {
             text: `No memories found matching your query.
 
 Available core memory files:
-${availableCore.map((f) => `- ${f.content?.fileName || 'unnamed'}`).join('\n')}
+${availableCore.map((f) => {
+  const name = f.content?.memoryName || f.content?.fileName || 'unnamed';
+  return `- ${name}`;
+}).join('\n')}
 
 Memory distribution:
 ${memoryCounts.map(c => `- ${c._id.class}/${c._id.type}: ${c.count} memories`).join('\n')}
 
 Examples:
-- memory_engineering/read --fileName "systemPatterns.md"
+- memory_engineering/read --fileName "systemPatterns"
 - memory_engineering/read --memoryClass "working"
 - memory_engineering/read --memoryClass "insight" --memoryType "pattern"`,
           },
@@ -140,9 +148,9 @@ function formatSingleMemory(doc: MemoryDocument): CallToolResult {
   // Content based on memory class
   switch (doc.memoryClass) {
     case 'core':
-      if (doc.content.fileName) {
-        content += `## ${doc.content.fileName}\n\n`;
-      }
+      // Support both old fileName and new memoryName
+      const memoryDisplayName = doc.content.memoryName || doc.content.fileName || 'unnamed';
+      content += `## ${memoryDisplayName}\n\n`;
       content += doc.content.markdown || '[No content]';
       break;
       
@@ -171,51 +179,19 @@ function formatSingleMemory(doc: MemoryDocument): CallToolResult {
       }
       break;
       
-    case 'insight':
-      if (doc.content.insight) {
-        const insight = doc.content.insight;
-        content += `## Insight: ${insight.pattern}\n\n`;
-        content += `**Confidence**: ${insight.confidence}/10\n`;
-        content += `**Discovered**: ${insight.discovered}\n`;
-        content += `**Evidence Count**: ${insight.evidence.length}\n`;
-      }
-      break;
-      
-    case 'evolution':
-      if (doc.content.evolution) {
-        const evolution = doc.content.evolution;
-        content += `## Query: "${evolution.query}"\n\n`;
-        content += `**Results**: ${evolution.resultCount}\n`;
-        content += `**Feedback**: ${evolution.feedback || 'none'}\n`;
-        content += `**Time**: ${evolution.timestamp}\n`;
-        
-        if (evolution.improvements && evolution.improvements.length > 0) {
-          content += `\n### Improvements\n`;
-          evolution.improvements.forEach(imp => {
-            content += `- ${imp}\n`;
-          });
-        }
-      }
-      break;
+    // Removed insight case - not needed in back-to-basics
+    // Removed evolution case - not needed in back-to-basics
   }
   
-  // Add code references if any
-  if (doc.metadata.codeReferences && doc.metadata.codeReferences.length > 0) {
-    content += `\n\n## Code References\n`;
-    doc.metadata.codeReferences.forEach(ref => {
-      content += `- ${ref.file}:${ref.line}\n`;
-      if (ref.snippet) {
-        content += `  \`\`\`\n  ${ref.snippet}\n  \`\`\`\n`;
-      }
-    });
-  }
+  // Removed code references section - not needed in back-to-basics
   
   // Add contextual hints based on what was read
   let hint = '';
-  if (doc.memoryClass === 'core' && doc.content.fileName === 'activeContext.md') {
-    hint = '\n\n📝 Starting new work? Remember to update this file with: memory_engineering_update --fileName "activeContext.md"';
-  } else if (doc.memoryClass === 'core' && doc.content.fileName === 'systemPatterns.md') {
-    hint = '\n\n💡 Found a new pattern? Add it with: memory_engineering_update --fileName "systemPatterns.md"';
+  const memoryName = doc.content.memoryName || doc.content.fileName?.replace(/\.md$/, '');
+  if (doc.memoryClass === 'core' && memoryName === 'activeContext') {
+    hint = '\n\n📝 Starting new work? Remember to update this file with: memory_engineering_update --fileName "activeContext"';
+  } else if (doc.memoryClass === 'core' && memoryName === 'systemPatterns') {
+    hint = '\n\n💡 Found a new pattern? Add it with: memory_engineering_update --fileName "systemPatterns"';
   }
 
   return {
@@ -248,17 +224,12 @@ function formatMultipleMemories(docs: MemoryDocument[]): CallToolResult {
       // Title based on content
       switch (doc.memoryClass) {
         case 'core':
-          content += doc.content.fileName || 'Unnamed';
+          content += doc.content.memoryName || doc.content.fileName?.replace(/\.md$/, '') || 'Unnamed';
           break;
         case 'working':
           content += doc.content.event?.action || 'Event';
           break;
-        case 'insight':
-          content += doc.content.insight?.pattern || 'Pattern';
-          break;
-        case 'evolution':
-          content += `Query: "${doc.content.evolution?.query || 'unknown'}"`;
-          break;
+        // Removed insight and evolution cases
       }
       
       content += `\n`;

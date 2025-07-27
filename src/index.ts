@@ -11,7 +11,7 @@ import { logger } from './utils/logger.js';
 config({ path: '.env.local' });
 
 const SERVER_NAME = 'memory-engineering-mcp';
-const SERVER_VERSION = '1.4.9';
+const SERVER_VERSION = '3.1.0';
 
 async function main(): Promise<void> {
   // Create server instance

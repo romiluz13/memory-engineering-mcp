@@ -1,23 +1,27 @@
 import { z } from 'zod';
 import type { ObjectId } from 'mongodb';
 
-// Memory classes for the new 4-class system
-export const MEMORY_CLASSES = ['core', 'working', 'insight', 'evolution'] as const;
+// Memory classes (2 types)
+export const MEMORY_CLASSES = ['core', 'working'] as const;
 export type MemoryClass = typeof MEMORY_CLASSES[number];
 
-// Memory types within each class
-export const MEMORY_TYPES = ['pattern', 'context', 'event', 'learning', 'meta'] as const;
+// Memory types - simplified
+export const MEMORY_TYPES = ['context', 'event'] as const;
 export type MemoryType = typeof MEMORY_TYPES[number];
 
-// Core memory file names (for backward compatibility)
-export const CORE_MEMORY_FILES = [
-  'projectbrief.md',
-  'systemPatterns.md', 
-  'activeContext.md',
-  'techContext.md',
-  'progress.md',
-  'codebaseMap.md'
+// Core memory names (NOT files - these are MongoDB documents!)
+export const CORE_MEMORY_NAMES = [
+  'projectbrief',
+  'productContext',  // WHY the project exists (was missing!)
+  'systemPatterns', 
+  'activeContext',
+  'techContext',
+  'progress',
+  'codebaseMap'      // We added this as bonus
 ] as const;
+
+// Legacy .md support for backwards compatibility
+export const CORE_MEMORY_FILES = CORE_MEMORY_NAMES.map(name => `${name}.md`);
 
 // MongoDB document schema for unified memory collection
 export interface MemoryDocument {
@@ -30,9 +34,10 @@ export interface MemoryDocument {
   
   // Flexible content based on class
   content: {
-    // For core memories (markdown files)
-    fileName?: string;
-    markdown?: string;
+    // For core memories (stored as MongoDB documents, not files!)
+    memoryName?: string;  // e.g., "projectbrief" (no .md extension!)
+    fileName?: string;    // DEPRECATED: Legacy field for backward compatibility
+    markdown?: string;    // The markdown content
     
     // For working memories (events)
     event?: {
@@ -45,23 +50,6 @@ export interface MemoryDocument {
         success: boolean;
         errors?: Array<{ type: string; message: string }>;
       };
-    };
-    
-    // For insights (patterns)
-    insight?: {
-      pattern: string;
-      confidence: number;
-      evidence: ObjectId[];
-      discovered: Date;
-    };
-    
-    // For evolution (self-improvement)
-    evolution?: {
-      query: string;
-      resultCount: number;
-      feedback?: 'helpful' | 'not_helpful';
-      timestamp: Date;
-      improvements?: string[];
     };
   };
   
@@ -76,11 +64,6 @@ export interface MemoryDocument {
     accessCount: number;
     autoExpire?: Date;          // TTL for working memories
     tags: string[];
-    codeReferences?: Array<{
-      file: string;
-      line: number;
-      snippet: string;
-    }>;
     version?: number;           // For core memories
   };
   
@@ -142,22 +125,25 @@ export const SyncToolSchema = z.object({
 // Memory creation helpers
 export function createCoreMemory(
   projectId: string,
-  fileName: string,
+  memoryName: string,  // No .md extension!
   content: string
 ): Partial<MemoryDocument> {
+  // Strip .md if provided for backward compatibility
+  const cleanName = memoryName.replace(/\.md$/, '');
+  
   return {
     projectId,
     memoryClass: 'core',
     memoryType: 'context',
     content: {
-      fileName,
+      memoryName: cleanName,  // Store without .md
       markdown: content,
     },
     metadata: {
       importance: 10,
       freshness: new Date(),
       accessCount: 0,
-      tags: ['core', fileName.replace('.md', '')],
+      tags: ['core', cleanName],
       version: 1,
     },
     createdAt: new Date(),
@@ -189,42 +175,5 @@ export function createWorkingMemory(
   };
 }
 
-export function createInsightMemory(
-  projectId: string,
-  insight: MemoryDocument['content']['insight']
-): Partial<MemoryDocument> {
-  return {
-    projectId,
-    memoryClass: 'insight',
-    memoryType: 'pattern',
-    content: { insight },
-    metadata: {
-      importance: Math.round(insight?.confidence || 5),
-      freshness: new Date(),
-      accessCount: 0,
-      tags: ['insight', 'pattern'],
-    },
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  };
-}
-
-export function createEvolutionMemory(
-  projectId: string,
-  evolution: MemoryDocument['content']['evolution']
-): Partial<MemoryDocument> {
-  return {
-    projectId,
-    memoryClass: 'evolution',
-    memoryType: 'meta',
-    content: { evolution },
-    metadata: {
-      importance: 3,
-      freshness: new Date(),
-      accessCount: 0,
-      tags: ['evolution', 'meta', 'learning'],
-    },
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  };
-}
+// Removed createInsightMemory - simplified to 2 classes
+// Removed createEvolutionMemory - simplified to 2 classes
