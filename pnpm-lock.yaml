@@ -14,6 +14,9 @@ importers:
       dotenv:
         specifier: ^17.2.0
         version: 17.2.0
+      glob:
+        specifier: ^10.3.10
+        version: 10.4.5
       mongodb:
         specifier: ^6.17.0
         version: 6.17.0
@@ -21,8 +24,8 @@ importers:
         specifier: ^11.1.0
         version: 11.1.0
       voyageai:
-        specifier: ^0.0.4
-        version: 0.0.4
+        specifier: ^0.0.5
+        version: 0.0.5
       zod:
         specifier: ^4.0.5
         version: 4.0.5
@@ -1644,8 +1647,8 @@ packages:
       jsdom:
         optional: true
 
-  voyageai@0.0.4:
-    resolution: {integrity: sha512-eHSwflQdhByXpudW49LNEjJr1cpz9GmTFADiGr+b5TgwNgewiRjJrgDS3X/s1wExCdAUXW+az1DrF9pfHrPyyA==}
+  voyageai@0.0.5:
+    resolution: {integrity: sha512-eXYblqc6ZezgjDGn7LbA3nXXVOHH8rXZQBl5JuLiaxL0NTYvMVXdt/M2MTVXeiL3WOxXrqRv4TWgAfxaVqzDNg==}
 
   webidl-conversions@3.0.1:
     resolution: {integrity: sha512-2JAn3z8AR6rjK8Sm8orRC0h/bcl/DqL7tRPdGZ4I1CjdF+EaMLmYxBHyXuKL849eucPFhvBoxMsflfOb8kxaeQ==}
@@ -3236,7 +3239,7 @@ snapshots:
       - tsx
       - yaml
 
-  voyageai@0.0.4:
+  voyageai@0.0.5:
     dependencies:
       form-data: 4.0.4
       formdata-node: 6.0.3

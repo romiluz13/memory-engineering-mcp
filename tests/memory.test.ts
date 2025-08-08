@@ -1,44 +1,36 @@
 import { describe, it, expect } from 'vitest';
-import { 
-  MEMORY_CLASSES,
-  MEMORY_TYPES,
-  CORE_MEMORY_FILES,
+import {
+  CORE_MEMORY_NAMES,
+  MEMORY_HIERARCHY,
   InitToolSchema,
   ReadToolSchema,
   UpdateToolSchema,
   SearchToolSchema,
-  SyncToolSchema,
-} from '../src/types/memory.js';
+} from '../src/types/memory-v5.js';
 
-describe('Memory Types', () => {
-  describe('Memory Classes', () => {
-    it('should have all expected memory classes', () => {
-      expect(MEMORY_CLASSES).toContain('core');
-      expect(MEMORY_CLASSES).toContain('working');
-      expect(MEMORY_CLASSES).toHaveLength(2); // Simplified to 2 classes
+describe('Memory Types v5', () => {
+  describe('Core Memory Names', () => {
+    it('should have all 7 core memory names', () => {
+      expect(CORE_MEMORY_NAMES).toContain('projectbrief');
+      expect(CORE_MEMORY_NAMES).toContain('productContext');
+      expect(CORE_MEMORY_NAMES).toContain('activeContext');
+      expect(CORE_MEMORY_NAMES).toContain('systemPatterns');
+      expect(CORE_MEMORY_NAMES).toContain('techContext');
+      expect(CORE_MEMORY_NAMES).toContain('progress');
+      expect(CORE_MEMORY_NAMES).toContain('codebaseMap');
+      expect(CORE_MEMORY_NAMES).toHaveLength(7); // Cline's 7 core memories
     });
   });
 
-  describe('Memory Types', () => {
-    it('should have all expected memory types', () => {
-      expect(MEMORY_TYPES).toContain('context');
-      expect(MEMORY_TYPES).toContain('event');
-      expect(MEMORY_TYPES).toHaveLength(2); // Simplified to 2 types
+  describe('Memory Hierarchy', () => {
+    it('should have proper dependency structure', () => {
+      expect(MEMORY_HIERARCHY.projectbrief.dependsOn).toEqual([]);
+      expect(MEMORY_HIERARCHY.productContext.dependsOn).toContain('projectbrief');
+      expect(MEMORY_HIERARCHY.activeContext.dependsOn).toContain('productContext');
     });
   });
 
-  describe('Core Memory Files', () => {
-    it('should have all 7 core memory files', () => {
-      expect(CORE_MEMORY_FILES).toContain('projectbrief.md');
-      expect(CORE_MEMORY_FILES).toContain('productContext.md');
-      expect(CORE_MEMORY_FILES).toContain('systemPatterns.md');
-      expect(CORE_MEMORY_FILES).toContain('activeContext.md');
-      expect(CORE_MEMORY_FILES).toContain('techContext.md');
-      expect(CORE_MEMORY_FILES).toContain('progress.md');
-      expect(CORE_MEMORY_FILES).toContain('codebaseMap.md');
-      expect(CORE_MEMORY_FILES).toHaveLength(7);
-    });
-  });
+
 
   describe('Schema Validation', () => {
     it('should validate init tool schema', () => {
@@ -52,52 +44,47 @@ describe('Memory Types', () => {
     });
 
     it('should validate read tool schema', () => {
-      const validRead1 = {
-        fileName: 'projectbrief.md',
+      const validRead = {
+        memoryName: 'projectbrief',
+        projectPath: '/test/path',
       };
-      
-      const validRead2 = {
-        memoryClass: 'working',
-        memoryType: 'event',
-      };
-      
-      expect(() => ReadToolSchema.parse(validRead1)).not.toThrow();
-      expect(() => ReadToolSchema.parse(validRead2)).not.toThrow();
+
+      expect(() => ReadToolSchema.parse(validRead)).not.toThrow();
+      expect(() => ReadToolSchema.parse({ memoryName: 'activeContext' })).not.toThrow();
     });
 
     it('should validate update tool schema', () => {
-      const validUpdate1 = {
-        fileName: 'activeContext.md',
+      const validUpdate = {
+        memoryName: 'activeContext',
         content: '# Active Context\nTest content',
+        projectPath: '/test/path',
       };
-      
-      const validUpdate2 = {
-        memoryClass: 'working',
-        content: '{"action": "test", "context": {}}',
-      };
-      
-      expect(() => UpdateToolSchema.parse(validUpdate1)).not.toThrow();
-      expect(() => UpdateToolSchema.parse(validUpdate2)).not.toThrow();
+
+      expect(() => UpdateToolSchema.parse(validUpdate)).not.toThrow();
+      expect(() => UpdateToolSchema.parse({
+        memoryName: 'progress',
+        content: 'Test content'
+      })).not.toThrow();
     });
 
     it('should validate search tool schema with defaults', () => {
       const validSearch = {
         query: 'test query',
       };
-      
+
       const parsed = SearchToolSchema.parse(validSearch);
       expect(parsed.limit).toBe(10);
-      expect(parsed.searchType).toBe('rankfusion');
+      expect(parsed.query).toBe('test query');
     });
 
-    it('should validate sync tool schema', () => {
-      const validSync = {
-        projectPath: '/test/path',
-        forceRegenerate: true,
+    it('should validate search tool schema with code search', () => {
+      const validSearch = {
+        query: 'test query',
+        codeSearch: 'similar',
+        language: 'typescript',
       };
-      
-      expect(() => SyncToolSchema.parse(validSync)).not.toThrow();
-      expect(() => SyncToolSchema.parse({})).not.toThrow(); // all optional
+
+      expect(() => SearchToolSchema.parse(validSearch)).not.toThrow();
     });
   });
 });

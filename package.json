@@ -1,7 +1,7 @@
 {
   "name": "memory-engineering-mcp",
-  "version": "3.2.0",
-  "description": "Persistent memory for AI coding assistants. Mandatory session discipline, MongoDB storage, and hybrid $rankFusion search.",
+  "version": "11.0.0",
+  "description": "🧠 AI Memory System powered by MongoDB Atlas & Voyage AI - Simple, persistent memory for coding assistants",
   "main": "dist/index.js",
   "type": "module",
   "repository": {
@@ -19,7 +19,6 @@
     "test:coverage": "vitest run --coverage",
     "lint": "eslint src --ext ts",
     "typecheck": "tsc --noEmit",
-    "prepublishOnly": "pnpm build && pnpm test",
     "mcp:inspect": "npx @modelcontextprotocol/inspector dist/index.js",
     "db:indexes": "tsx scripts/create-indexes.ts",
     "db:check": "tsx scripts/check-indexes.ts",
@@ -62,9 +61,10 @@
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.17.0",
     "dotenv": "^17.2.0",
+    "glob": "^10.3.10",
     "mongodb": "^6.17.0",
     "uuid": "^11.1.0",
-    "voyageai": "^0.0.4",
+    "voyageai": "^0.0.5",
     "zod": "^4.0.5"
   },
   "devDependencies": {

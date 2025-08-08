@@ -3,15 +3,24 @@
 import { Server } from '@modelcontextprotocol/sdk/server/index.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import { config } from 'dotenv';
-import { setupTools } from './tools/index.js';
+import { setupTools } from './tools/index-v5.js';
 import { connectToMongoDB, closeMongoDBConnection } from './db/connection.js';
 import { logger } from './utils/logger.js';
+import { readFileSync } from 'fs';
+import { fileURLToPath } from 'url';
+import { dirname, join } from 'path';
 
-// Load environment variables
+// Load environment variables (check .env.local first, then .env)
 config({ path: '.env.local' });
+config({ path: '.env' });
+
+// Get version from package.json
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+const packageJson = JSON.parse(readFileSync(join(__dirname, '..', 'package.json'), 'utf-8'));
 
 const SERVER_NAME = 'memory-engineering-mcp';
-const SERVER_VERSION = '3.1.0';
+const SERVER_VERSION = packageJson.version;
 
 async function main(): Promise<void> {
   // Create server instance
@@ -41,7 +50,7 @@ async function main(): Promise<void> {
   }
 
   // Set up tools
-  setupTools(server);
+  setupTools(server, SERVER_VERSION);
 
   // Handle graceful shutdown
   process.on('SIGINT', async () => {

@@ -6,7 +6,8 @@ class FileLogger {
   private logFile: string;
 
   constructor() {
-    const logDir = join(process.cwd(), 'logs');
+    // Use environment variable for log directory, fallback to ./logs
+    const logDir = process.env.LOG_DIRECTORY || join(process.cwd(), 'logs');
     if (!existsSync(logDir)) {
       mkdirSync(logDir, { recursive: true });
     }

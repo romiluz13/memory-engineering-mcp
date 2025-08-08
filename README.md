@@ -1,69 +1,45 @@
-# Memory Engineering MCP - Persistent Memory for AI Coding Assistants
+# Memory Engineering MCP v11 - Persistent Memory for AI Assistants
 
 [![npm version](https://badge.fury.io/js/memory-engineering-mcp.svg)](https://www.npmjs.com/package/memory-engineering-mcp)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-> Persistent memory system for AI coding assistants using MongoDB storage and hybrid search
+🧠 **AI Memory System powered by MongoDB Atlas & Voyage AI**  
+> Simple, reliable persistent memory across coding sessions - restored from the proven v6.3 approach
 
-## Problem
+**🎯 GOLDEN RULE: "I MUST read ALL memory bank files at the start of EVERY task"**
 
-Every AI coding assistant (Cursor, Windsurf, Claude Code) forgets everything between sessions. You have to re-explain your project, patterns, and context every single time.
+## 🎯 Problem
 
-## Solution
+AI coding assistants (Cursor, Claude, ChatGPT) forget everything between sessions. You have to re-explain your project, patterns, and context every single time.
 
-Memory Engineering MCP implements a memory system with:
-- **Mandatory Context Reading** - AI MUST read all memories at session start
-- **MongoDB Storage** - Reliable persistence, not just files
-- **Smart Search** - Vector + text search with MongoDB's $rankFusion
-- **Working Memory** - Remember debug solutions for 30 days
-- **Simple & Clear** - Just 2 memory types, 6 tools, no complexity
+## ✨ Solution
 
-## What's New in v3.1.0
+Memory Engineering MCP implements Cline's proven 7-memory structure with:
+- **Persistent storage** - MongoDB stores memories across sessions
+- **Semantic code search** - Voyage AI embeddings for intelligent code retrieval
+- **MCP protocol** - Works with any MCP-compatible AI assistant
+- **Simple workflow** - Read all memories at start, update as you work
 
-Simplified architecture:
-- **2 Memory Classes** (was 4) - Just Core + Working
-- **Mandatory Discipline** - `memory_engineering_start_session` is required
-- **Manual Updates** - Deliberate, explicit memory updates
-- **Kept the Good** - $rankFusion, vector search, clean MongoDB storage
-- **Dropped the Complex** - No insights, evolution, or meta-tracking
-
-## Memory System
-
-### 1. **Core Memories** (7 Essential Documents)
-- `projectbrief` - What you're building
-- `productContext` - Why it exists
-- `activeContext` - Current work focus
-- `systemPatterns` - How to build
-- `techContext` - Technologies used
-- `progress` - What's completed
-- `codebaseMap` - Where things are
-
-### 2. **Working Memories** (Debug Sessions)
-- Bug fixes and solutions
-- Auto-expire after 30 days
-- Searchable by problem/solution
-
-## Quick Start
+## 🚀 Quick Start
 
 ### 1. Install
+
 ```bash
 npm install -g memory-engineering-mcp
 ```
 
-### 2. Configure MongoDB
-Create a MongoDB Atlas cluster (free tier works!) and get your connection string.
+### 2. Set Environment Variables
 
-### 3. Set Environment Variables
-```bash
-# .env.local
-MONGODB_URI=mongodb+srv://...
-VOYAGE_API_KEY=pa-...  # From voyageai.com
+Create `.env.local` in your project:
+```env
+MONGODB_URI=mongodb+srv://...  # Your MongoDB connection string
+VOYAGE_API_KEY=pa-...          # From voyageai.com
 ```
 
-### 4. Configure Your AI Assistant
+### 3. Configure Your AI Assistant
 
-#### Cursor
-Add to `.cursorrules`:
+Add to your MCP configuration file:
+
 ```json
 {
   "mcpServers": {
@@ -75,107 +51,97 @@ Add to `.cursorrules`:
 }
 ```
 
-#### Claude Code
-Add to claude_code_config.json:
-```json
-{
-  "mcpServers": {
-    "memory-engineering": {
-      "command": "npx",
-      "args": ["memory-engineering-mcp"]
-    }
-  }
-}
-```
+### 4. Start Using - PERFECT WORKFLOW
 
-## Usage
-
-### Every Session MUST Start With:
-```
-memory_engineering_start_session
-```
-This reads ALL core memories - no exceptions!
-
-### Core Workflow
+In your AI assistant:
 ```bash
-# 1. Initialize project (once)
+# 1. Initialize (ONCE per project only)
 memory_engineering_init
 
-# 2. Start session (EVERY TIME)
-memory_engineering_start_session
+# 2. ALWAYS start EVERY session with this (MANDATORY)
+memory_engineering_read_all
 
-# 3. Update current context
-memory_engineering_update --fileName "activeContext" --content "Working on: authentication"
+# 3. Update memories as you learn (activeContext most common)
+memory_engineering_update --memoryName "activeContext" --content "..."
 
-# 4. Search when needed
-memory_engineering_search --query "error handling patterns"
+# 4. Sync code after major changes (not every edit)
+memory_engineering_sync_code --patterns "**/*.{ts,js,py}"
 
-# 5. Save debug solutions
-memory_engineering_update --memoryClass "working" --content '{
-  "action": "fixed auth bug",
-  "context": {"error": "token expired"},
-  "solution": "Added refresh token logic"
-}'
-
-# 6. Update multiple memories
-memory_engineering_memory_bank_update --updates '{
-  "progress": "✅ Auth system complete",
-  "systemPatterns": "New pattern: JWT with refresh tokens"
-}'
+# 5. Search before implementing
+memory_engineering_search --query "authentication logic" --codeSearch "similar"
 ```
 
-## 🔧 Tools Reference
+**⚠️ CRITICAL**: Never skip `read_all` at session start - it loads your entire context!
 
-| Tool | Purpose | When to Use |
-|------|---------|-------------|
-| `memory_engineering_init` | Create 7 core memories | Once per project |
-| `memory_engineering_start_session` | Read ALL memories | Start of EVERY session |
-| `memory_engineering_read` | Read specific memory | When you need details |
-| `memory_engineering_update` | Update one memory | After completing work |
-| `memory_engineering_memory_bank_update` | Update multiple | Major milestones |
-| `memory_engineering_search` | Find relevant memories | When solving problems |
+## 📚 The 7 Core Memories
 
-## 🎯 Key Principles
+Following Cline's proven structure:
 
-1. **Mandatory Discipline** - MUST read all memories at start
-2. **Deliberate Updates** - Manual documentation, not automatic
-3. **Simple Storage** - Just MongoDB documents, not complex systems
-4. **Smart Search** - $rankFusion combines vector + text beautifully
-5. **Focused Purpose** - Remember what matters, drop what doesn't
+1. **projectbrief** - What you're building
+2. **productContext** - Who needs this and why
+3. **activeContext** - Current work and learnings
+4. **systemPatterns** - Architecture and conventions
+5. **techContext** - Technology stack and setup
+6. **progress** - Completed features and lessons
+7. **codebaseMap** - File structure + semantic code search
 
-## 🚀 Why This Works
+## 🛠️ MCP Tools - WHEN TO USE EACH
 
-The original Cline Memory Bank succeeded through simplicity:
-- 6 files you MUST read
-- Manual updates when needed
-- Clear, mandatory discipline
+| Tool | When to Use | Frequency |
+|------|------------|-----------|
+| `memory_engineering_init` | First time setup | Once per project |
+| `memory_engineering_read_all` | **START OF EVERY SESSION** | Always first command |
+| `memory_engineering_update` | After learning something | Multiple times per session |
+| `memory_engineering_search` | Before implementing | As needed |
+| `memory_engineering_sync_code` | After code changes | Daily/Weekly |
 
-We kept that simplicity and added:
-- MongoDB for reliable storage
-- Vector search for finding patterns
-- Working memory for debug sessions
-- But NO unnecessary complexity
+## 🔍 Code Search Modes
 
-## 📊 Requirements
+- **similar** - Find semantically similar code
+- **implements** - Find implementations of concepts
+- **uses** - Find code using specific functions
+- **pattern** - Find architectural patterns
+
+## 🎯 PERFECT USAGE PATTERNS
+
+### The Golden Workflow
+1. **Session Start**: `memory_engineering_read_all` (MANDATORY)
+2. **During Work**: Update `activeContext` with learnings
+3. **Code Changes**: Batch changes, then `sync_code`
+4. **Before Search**: Run `sync_code` if searching code
+5. **Session End**: Final `activeContext` update
+
+### Common Mistakes to Avoid
+- ❌ Skipping `read_all` at start (loses all context)
+- ❌ Over-syncing code (batch changes instead)
+- ❌ Creating duplicate memories (update existing)
+- ❌ Manual codebaseMap updates (let sync handle it)
+
+### Which Memory to Update?
+- **activeContext**: Current learnings and decisions (MOST COMMON)
+- **systemPatterns**: Architecture decisions
+- **progress**: Completed features
+- **techContext**: Stack changes
+- **projectbrief**: Scope changes
+- **productContext**: Requirement changes
+- **codebaseMap**: AUTO-UPDATED by sync_code
+
+📖 **See [PERFECT_MCP_USAGE.md](PERFECT_MCP_USAGE.md) for complete guide**
+
+## 📋 Requirements
 
 - Node.js 18+
-- MongoDB Atlas 8.1+ (for $rankFusion)
+- MongoDB (Atlas free tier works)
 - Voyage AI API key (free tier available)
 
 ## 🤝 Contributing
 
-We're back to basics! When contributing:
-- Keep it simple
-- No automatic features
-- Respect the mandatory discipline
-- Test everything
+See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 
 ## 📄 License
 
-MIT - Because great memory should be free
+MIT - See [LICENSE](LICENSE) for details.
 
 ---
 
-*"We don't need to track insights about insights. We just need to remember what we're building."*
-
-Built with ❤️ for developers tired of explaining their project every session.
+Built with the philosophy: *"Read ALL memories at the start of EVERY session"*
