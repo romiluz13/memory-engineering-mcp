@@ -4,7 +4,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 🧠 **AI Memory System powered by MongoDB Atlas & Voyage AI**  
-> Simple, reliable persistent memory across coding sessions - restored from the proven v6.3 approach
+> Simple, reliable persistent memory across coding sessions
 
 **🎯 GOLDEN RULE: "I MUST read ALL memory bank files at the start of EVERY task"**
 

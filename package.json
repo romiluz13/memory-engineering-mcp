@@ -48,7 +48,6 @@
     "dist",
     "bin",
     "scripts",
-    "TEMPLATES",
     "README.md",
     "LICENSE",
     ".env.example",
