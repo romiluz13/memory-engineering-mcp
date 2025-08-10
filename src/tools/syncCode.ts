@@ -1,18 +1,78 @@
-import { join } from 'path';
-import { readFileSync, existsSync, statSync } from 'fs';
+import { join, basename } from 'path';
+import { readFileSync, existsSync, statSync, readdirSync } from 'fs';
 import { glob } from 'glob';
 import type { CallToolResult } from '@modelcontextprotocol/sdk/types.js';
-import { SyncCodeSchema, type CodeChunk } from '../types/memory-v5.js';
+import { SyncCodeSchema, type CodeChunk, type MemoryDocument } from '../types/memory-v5.js';
 import { getMemoryCollection, getDb } from '../db/connection.js';
 import { chunkFile } from '../utils/codeChunking.js';
 import { generateCodeEmbeddings } from '../embeddings/codeEmbeddings.js';
+import { generateEmbedding } from '../embeddings/voyage-v5.js';
 import { logger } from '../utils/logger.js';
+import { resolveProjectPath } from '../utils/sessionContext.js';
+import { detectFramework } from '../utils/frameworkDetection.js';
 import type { Collection } from 'mongodb';
+
+
+
+// Auto-generate directory structure for codebaseMap
+function generateDirectoryStructure(projectPath: string, indent = '', maxDepth = 3, currentDepth = 0): string {
+  if (currentDepth >= maxDepth) return '';
+  
+  let structure = '';
+  try {
+    const entries = readdirSync(projectPath, { withFileTypes: true });
+    const filtered = entries.filter(e => 
+      !e.name.startsWith('.') && 
+      !['node_modules', 'dist', 'build', '__pycache__', 'vendor'].includes(e.name)
+    );
+    
+    filtered.forEach((entry, index) => {
+      const isLast = index === filtered.length - 1;
+      const prefix = isLast ? '└── ' : '├── ';
+      const childIndent = indent + (isLast ? '    ' : '│   ');
+      
+      if (entry.isDirectory()) {
+        structure += `${indent}${prefix}${entry.name}/\n`;
+        if (currentDepth < maxDepth - 1) {
+          structure += generateDirectoryStructure(
+            join(projectPath, entry.name), 
+            childIndent, 
+            maxDepth, 
+            currentDepth + 1
+          );
+        }
+      } else {
+        structure += `${indent}${prefix}${entry.name}\n`;
+      }
+    });
+  } catch (e) {
+    // Ignore permission errors
+  }
+  
+  return structure;
+}
 
 export async function syncCodeTool(args: unknown): Promise<CallToolResult> {
   try {
     const params = SyncCodeSchema.parse(args);
-    const projectPath = params.projectPath || process.cwd();
+    const projectPath = resolveProjectPath(params.projectPath);
+    
+    // Detect framework and use smart defaults
+    const framework = detectFramework(projectPath);
+    
+    // Use provided patterns or framework-specific patterns
+    const patterns = params.patterns.length > 0 
+      ? params.patterns 
+      : framework.patterns;
+    
+    // Use provided minChunkSize or framework-specific default
+    const minChunkSize = params.minChunkSize || framework.minChunkSize;
+    
+    logger.info(`🏗️ FRAMEWORK: ${framework.displayName} detected - Using optimized settings`, {
+      patterns,
+      minChunkSize,
+      excludes: framework.excludes
+    });
 
     // Read project config
     const configPath = join(projectPath, '.memory-engineering', 'config.json');
@@ -21,7 +81,7 @@ export async function syncCodeTool(args: unknown): Promise<CallToolResult> {
         content: [
           {
             type: 'text',
-            text: 'Memory Engineering not initialized. Run memory_engineering_init first.',
+            text: '🔴 FATAL: No brain to store embeddings! INIT REQUIRED!\n\n⚡ RUN NOW: memory_engineering_init\n\nCode sync impossible without memory system!',
           },
         ],
       };
@@ -38,33 +98,60 @@ export async function syncCodeTool(args: unknown): Promise<CallToolResult> {
     });
 
     if (!codebaseMap) {
-      return {
-        content: [
-          {
-            type: 'text',
-            text: `❌ codebaseMap memory not found.
-
-Create it first with:
-memory_engineering_update --memoryName "codebaseMap" --content "# Codebase Map
+      // Auto-create codebaseMap with smart content
+      logger.info('🗺️ AUTO-CREATING CODEBASE MAP - Building your GPS system...');
+      
+      const dirStructure = generateDirectoryStructure(projectPath);
+      const projectName = basename(projectPath);
+      
+      const codebaseMapContent = `# Codebase Map - ${projectName}
 
 ## Directory Structure
 \`\`\`
-[your project structure]
+${dirStructure || 'No visible directories found'}
 \`\`\`
 
 ## Key Files
-- Important files and their purposes
-"`,
-          },
-        ],
+(Will be auto-detected during sync)
+
+## Module Organization
+(Will be analyzed during sync)
+
+## Code Embedding Statistics
+(Will be auto-updated by sync_code)`;
+      
+      // Generate embedding for the codebaseMap
+      const embedding = await generateEmbedding(codebaseMapContent);
+      
+      // Create the memory document
+      const newCodebaseMap: MemoryDocument = {
+        projectId: config.projectId,
+        memoryName: 'codebaseMap',
+        content: codebaseMapContent,
+        contentVector: embedding,
+        metadata: {
+          version: 1,
+          lastModified: new Date(),
+          accessCount: 0
+        },
+        createdAt: new Date(),
+        updatedAt: new Date()
       };
+      
+      // Insert into database
+      const result = await memoryCollection.insertOne(newCodebaseMap);
+      logger.info('✅ CODEBASE MAP CREATED - Your navigation system is ready!');
+      
+      // Fetch the inserted document with _id
+      codebaseMap = await memoryCollection.findOne({ _id: result.insertedId });
     }
 
     // Create indexes for code collection if needed
     await ensureCodeIndexes(codeCollection);
 
     // Find all code files matching patterns
-    const files = await glob(params.patterns, {
+    logger.info(`🎯 SCAN PATTERNS LOCKED: ${patterns.join(', ')}`);
+    const files = await glob(patterns, {
       cwd: projectPath,
       absolute: true,
       ignore: [
@@ -77,7 +164,7 @@ memory_engineering_update --memoryName "codebaseMap" --content "# Codebase Map
       ]
     });
 
-    logger.info(`Found ${files.length} code files to process`);
+    logger.info(`🔥 FOUND ${files.length} CODE FILES - Preparing to absorb knowledge!`);
 
     // Process files with progress tracking
     let totalChunks = 0;
@@ -106,7 +193,7 @@ memory_engineering_update --memoryName "codebaseMap" --content "# Codebase Map
       if (batchNumber % 10 === 0 || currentTime - lastProgressReport > 30000) {
         const elapsed = Math.round((currentTime - startTime) / 1000);
         const progress = Math.round((i / files.length) * 100);
-        logger.info(`📊 Progress: ${progress}% (batch ${batchNumber}/${totalBatches}, ${processedFiles + skippedFiles}/${files.length} files, ${totalChunks} chunks, ${elapsed}s elapsed)`);
+        logger.info(`⚡ EMBEDDING PROGRESS: ${progress}% | Batch ${batchNumber}/${totalBatches} | Files: ${processedFiles + skippedFiles}/${files.length} | Chunks: ${totalChunks} | Time: ${elapsed}s`);
         lastProgressReport = currentTime;
       }
       
@@ -152,7 +239,7 @@ memory_engineering_update --memoryName "codebaseMap" --content "# Codebase Map
           }
           
         } catch (error) {
-          logger.error(`Failed to process ${file}:`, error);
+          logger.error(`❌ CHUNK EXTRACTION FAILED: ${file}`, error);
           errors.push(`${file}: ${error instanceof Error ? error.message : 'Unknown error'}`);
         }
       }
@@ -160,29 +247,29 @@ memory_engineering_update --memoryName "codebaseMap" --content "# Codebase Map
       // Generate embeddings for this batch
       if (batchChunks.length > 0) {
         try {
-          logger.info(`🔄 Generating embeddings for ${batchChunks.length} chunks from ${batch.length} files`);
+          logger.info(`🧠 GENERATING EMBEDDINGS: ${batchChunks.length} chunks from ${batch.length} files`);
 
           // Generate contextualized embeddings
           const embeddings = await generateCodeEmbeddings(batchChunks);
 
-          logger.info(`✅ Generated ${embeddings.length} embeddings for ${batchChunks.length} chunks`);
+          logger.info(`🎆 EMBEDDINGS CREATED: ${embeddings.length} vectors ready!`);
 
           // Debug: Check if embeddings are actually valid
           const validEmbeddingCount = embeddings.filter(e => e && e.length > 0).length;
           const emptyEmbeddingCount = embeddings.filter(e => !e || e.length === 0).length;
-          logger.info(`📊 Embedding validation: ${validEmbeddingCount} valid, ${emptyEmbeddingCount} empty`);
+          logger.info(`🎯 EMBEDDING VALIDATION: ${validEmbeddingCount} valid | ${emptyEmbeddingCount} empty`);
 
           // Add embeddings and timestamps to chunks
-          logger.info(`🔄 Processing ${batchChunks.length} chunks with ${embeddings.length} embeddings`);
+          logger.info(`💾 STORING IN MONGODB: ${batchChunks.length} chunks with ${embeddings.length} embeddings`);
 
           const chunksWithEmbeddings = batchChunks
             .map((chunk, idx) => {
               const embedding = embeddings[idx];
               if (!embedding || embedding.length === 0) {
-                logger.error(`❌ Missing or empty embedding for chunk ${idx}: ${chunk.chunk.name || 'unnamed'} (embedding: ${embedding ? 'empty array' : 'undefined'})`);
+                logger.error(`💀 EMBEDDING VOID: Chunk ${idx} [${chunk.chunk.name || 'unnamed'}] has ${embedding ? 'empty array' : 'NO'} embedding!`);
                 return null;
               }
-              logger.debug(`✅ Valid embedding for chunk ${idx}: ${chunk.chunk.name || 'unnamed'} (${embedding.length} dimensions)`);
+              logger.debug(`🌟 PERFECT EMBEDDING: Chunk ${idx} [${chunk.chunk.name || 'unnamed'}] - ${embedding.length} dimensions`);
               return {
                 ...chunk,
                 contentVector: embedding,
@@ -198,21 +285,21 @@ memory_engineering_update --memoryName "codebaseMap" --content "# Codebase Map
 
           // Insert into database
           if (chunksWithEmbeddings.length > 0) {
-            logger.info(`💾 Attempting to insert ${chunksWithEmbeddings.length} chunks into database...`);
+                          logger.info(`🚀 LAUNCHING TO MONGODB: ${chunksWithEmbeddings.length} chunks...`);
             try {
               const result = await codeCollection.insertMany(chunksWithEmbeddings);
-              logger.info(`✅ Successfully inserted ${result.insertedCount} chunks into database`);
+              logger.info(`🎉 SUCCESS! ${result.insertedCount} chunks now searchable in MongoDB!`);
             } catch (dbError) {
-              logger.error(`❌ Database insertion failed:`, dbError);
+              logger.error(`💥 MONGODB EXPLOSION! Insertion failed:`, dbError);
               throw dbError;
             }
           } else {
-            logger.error(`❌ No chunks to insert - all embeddings were invalid!`);
+            logger.error(`🔴 CRITICAL: Zero valid embeddings! Nothing to store!`);
           }
           totalChunks += chunksWithEmbeddings.length;
           
         } catch (error) {
-          logger.error('Failed to generate embeddings:', error);
+          logger.error('💣 EMBEDDING GENERATION EXPLODED:', error);
           errors.push(`Embedding generation failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
         }
       }
@@ -245,35 +332,60 @@ memory_engineering_update --memoryName "codebaseMap" --content "# Codebase Map
 
     // Build response with timing information
     const totalTime = Math.round((Date.now() - startTime) / 1000);
-    let response = `🔄 Code Sync Complete (${totalTime}s)\n\n`;
-    response += `Files processed: ${processedFiles}\n`;
-    response += `Files skipped (up-to-date): ${skippedFiles}\n`;
-    response += `Total chunks created: ${totalChunks}\n`;
-    response += `Processing time: ${totalTime} seconds\n\n`;
+    const avgSpeed = processedFiles > 0 ? Math.round(processedFiles / totalTime * 10) / 10 : 0;
     
-    // Language stats removed to fix Voyage AI issues
+    let response = `⚡ CODE INTELLIGENCE ACTIVATED! Your code is now SEARCHABLE! 🧠\n\n`;
+    response += `📊 SYNC PERFORMANCE METRICS:\n`;
+    response += `• ⏱️ Total Time: ${totalTime} seconds${totalTime < 5 ? ' (LIGHTNING FAST! ⚡)' : totalTime < 30 ? ' (Quick sync ✨)' : ' (Large codebase processed)'}\n`;
+    response += `• 📁 Files Processed: ${processedFiles} files${processedFiles > 100 ? ' (MASSIVE codebase!)' : processedFiles > 50 ? ' (Substantial project)' : ''}\n`;
+    response += `• ⏭️ Files Skipped: ${skippedFiles} (already up-to-date)\n`;
+    response += `• 🧩 Chunks Created: ${totalChunks} searchable units\n`;
+    response += `• 🚀 Processing Speed: ${avgSpeed} files/second\n`;
+    response += `• 💾 Embeddings: ${totalChunks} vectors stored in MongoDB\n\n`;
     
     if (patternStats.size > 0) {
-      response += `## Detected Patterns\n`;
-      for (const [pattern, count] of patternStats) {
-        response += `- ${pattern}: ${count} occurrences\n`;
+      response += `🔍 DISCOVERED PATTERNS (use these in searches!):\n`;
+      const sortedPatterns = Array.from(patternStats.entries()).sort((a, b) => b[1] - a[1]);
+      for (const [pattern, count] of sortedPatterns.slice(0, 10)) {
+        const emoji = count > 50 ? '🔥' : count > 20 ? '⭐' : '•';
+        response += `${emoji} ${pattern}: ${count} occurrences\n`;
       }
       response += '\n';
     }
     
     if (errors.length > 0) {
-      response += `## Errors (${errors.length})\n`;
-      response += errors.slice(0, 5).join('\n');
-      if (errors.length > 5) {
-        response += `\n... and ${errors.length - 5} more`;
+      response += `⚠️ SYNC WARNINGS (${errors.length} files had issues):\n`;
+      response += errors.slice(0, 3).map(e => `• ${e}`).join('\n');
+      if (errors.length > 3) {
+        response += `\n• ... and ${errors.length - 3} more (non-critical)\n`;
       }
+      response += '\n';
     }
     
-    response += `\n## Next Steps\n`;
-    response += `You can now search code with:\n`;
-    response += `- memory_engineering_search --query "authenticate user" --codeSearch "similar"\n`;
-    response += `- memory_engineering_search --query "Repository pattern" --codeSearch "implements"\n`;
-    response += `- memory_engineering_search --query "generateEmbedding" --codeSearch "uses"`;
+    response += `🎯 YOUR CODE IS NOW SEARCHABLE! Try these POWER SEARCHES:\n\n`;
+    response += `1️⃣ **Find Similar Code** (semantic search):\n`;
+    response += `   memory_engineering_search --query "authentication" --codeSearch "similar"\n`;
+    response += `   → Finds ALL auth-related code, even without exact matches!\n\n`;
+    
+    response += `2️⃣ **Find Implementations** (where things are built):\n`;
+    response += `   memory_engineering_search --query "UserService" --codeSearch "implements"\n`;
+    response += `   → Locates where classes/functions are defined\n\n`;
+    
+    response += `3️⃣ **Find Usage** (where things are used):\n`;
+    response += `   memory_engineering_search --query "generateToken" --codeSearch "uses"\n`;
+    response += `   → Discovers all places using this function\n\n`;
+    
+    response += `4️⃣ **Find Patterns** (architectural search):\n`;
+    response += `   memory_engineering_search --query "Repository" --codeSearch "pattern"\n`;
+    response += `   → Identifies design pattern implementations\n\n`;
+    
+    response += `⚡ SYNC INTELLIGENCE:\n`;
+    response += `• Next sync needed: ${skippedFiles > processedFiles ? 'Not soon (most files unchanged)' : 'After 10-15 file edits'}\n`;
+    response += `• Auto-sync triggers: File changes, >24h gap, before searches\n`;
+    response += `• Optimization: ${processedFiles === 0 ? '✅ Everything was already synced!' : totalChunks > 500 ? '💡 Large codebase - consider targeted syncs with patterns' : '✅ Optimal chunk size'}\n\n`;
+    
+    response += `🔥 REMEMBER: Fresh embeddings = Perfect search. Stale embeddings = Blind search!\n\n`;
+    response += `💡 PRO TIP: ${totalChunks > 1000 ? 'With ' + totalChunks + ' chunks, use specific searches for speed!' : totalChunks < 50 ? 'Small codebase synced - search will be instant!' : 'Perfect size for fast, accurate searches!'}`;
 
     return {
       content: [
@@ -285,7 +397,7 @@ memory_engineering_update --memoryName "codebaseMap" --content "# Codebase Map
     };
 
   } catch (error) {
-    logger.error('Sync code tool error:', error);
+    logger.error('💀 SYNC CATASTROPHE - Code intelligence failed!', error);
     return {
       isError: true,
       content: [
@@ -319,15 +431,15 @@ async function ensureCodeIndexes(collection: Collection<CodeChunk>): Promise<voi
       
       if (!exists) {
         await collection.createIndex(indexDef.keys as any, { name: indexDef.name });
-        logger.info(`Created code index: ${indexDef.name}`);
+        logger.info(`🎯 INDEX CREATED: ${indexDef.name} - Search speed boosted!`);
       } else {
-        logger.info(`Code index already exists for keys: ${keyString}`);
+        logger.info(`♾️ INDEX EXISTS: ${keyString} - Already optimized!`);
       }
     } catch (error: any) {
       if (error.code === 85) {
-        logger.info(`Index with same keys already exists, skipping: ${indexDef.name}`);
+        logger.info(`⏭️ DUPLICATE INDEX: ${indexDef.name} - Skipping creation`);
       } else {
-        logger.error(`Failed to create index ${indexDef.name}:`, error);
+        logger.error(`🔴 INDEX CREATION FAILED: ${indexDef.name}`, error);
         throw error;
       }
     }

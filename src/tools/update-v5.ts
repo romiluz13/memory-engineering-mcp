@@ -19,7 +19,7 @@ export async function updateTool(args: unknown): Promise<CallToolResult> {
         content: [
           {
             type: 'text',
-            text: 'Memory Engineering not initialized. Run memory_engineering_init first.',
+            text: '🚨 FATAL: NO BRAIN DETECTED! Cannot store memories in the void!\n\n⚡ EXECUTE NOW: memory_engineering_init\n\nYou\'re trying to remember without a memory system. IMPOSSIBLE!',
           },
         ],
       };
@@ -45,12 +45,23 @@ export async function updateTool(args: unknown): Promise<CallToolResult> {
           content: [
             {
               type: 'text',
-              text: `⚠️ Cannot create ${params.memoryName} yet!
+              text: `🔴 DEPENDENCY VIOLATION! Memory hierarchy MUST be respected!
 
-This memory depends on: ${missingDependencies.join(', ')}
+❌ BLOCKED: Cannot create "${params.memoryName}" 
+⚠️ MISSING PREREQUISITES: ${missingDependencies.map(d => `"${d}"`).join(', ')}
 
-Create the dependencies first, following the hierarchy:
-projectbrief → productContext/systemPatterns/techContext → activeContext → progress`,
+🧠 MEMORY DEPENDENCY CHAIN (follow this ORDER):
+1️⃣ projectbrief (FOUNDATION - create FIRST!)
+2️⃣ productContext, systemPatterns, techContext (can create in parallel)
+3️⃣ activeContext (needs above memories)
+4️⃣ progress (tracks activeContext)
+
+⚡ IMMEDIATE ACTION REQUIRED:
+→ Create ${missingDependencies[0]} FIRST
+→ Use: memory_engineering_update --memoryName "${missingDependencies[0]}" --content "..."
+
+💀 WHY THIS MATTERS:
+Memories depend on each other! Creating out of order = corrupted context = you fail!`,
             },
           ],
         };
@@ -61,8 +72,57 @@ projectbrief → productContext/systemPatterns/techContext → activeContext →
     const validation = validateMemoryStructure(params.memoryName, params.content);
     
     if (!validation.isValid && validation.requiredSections.length > 0) {
-      let response = `⚠️ Memory structure needs improvement\n\n`;
+      let response = `🔴 MEMORY STRUCTURE VIOLATION DETECTED!\n\n`;
+      response += `🧠 CRITICAL: Your ${params.memoryName} memory is INCOMPLETE or MALFORMED!\n`;
       response += `📝 ${params.memoryName} - ${memoryInfo.description}\n\n`;
+      response += `⚠️ WITHOUT PROPER STRUCTURE, THIS MEMORY IS USELESS!\n\n`;
+      
+      // Add detailed guidance on what this memory should contain
+      response += `## What ${params.memoryName} MUST contain:\n\n`;
+      
+      if (params.memoryName === 'projectbrief') {
+        response += `• **Core requirements and goals** - What are you building?\n`;
+        response += `• **Project scope** - What's included/excluded?\n`;
+        response += `• **Success criteria** - How do you know when done?\n`;
+        response += `• **Main features** - Key functionality to implement\n\n`;
+      } else if (params.memoryName === 'productContext') {
+        response += `• **Why this exists** - The motivation and need\n`;
+        response += `• **Problems solved** - Specific issues addressed\n`;
+        response += `• **How it works** - User flow and behavior\n`;
+        response += `• **User experience goals** - What users should achieve\n\n`;
+      } else if (params.memoryName === 'activeContext') {
+        response += `• **Current focus** - What you're working on NOW\n`;
+        response += `• **Recent changes** - What you just did (with timestamps)\n`;
+        response += `• **Next steps** - Immediate tasks ahead\n`;
+        response += `• **Learnings** - Patterns, decisions, insights discovered\n`;
+        response += `• **Blockers** - What's stopping progress\n\n`;
+        response += `⚠️ UPDATE THIS 10+ TIMES PER SESSION!\n\n`;
+      } else if (params.memoryName === 'systemPatterns') {
+        response += `• **Architecture** - Overall system design (MVC, microservices, etc)\n`;
+        response += `• **Design patterns** - Repository, Factory, Observer, etc\n`;
+        response += `• **Component relationships** - How parts connect\n`;
+        response += `• **Data flow** - How information moves\n`;
+        response += `• **Error handling** - Approach to failures\n\n`;
+      } else if (params.memoryName === 'techContext') {
+        response += `• **Languages & frameworks** - With versions (Node 18, React 18, etc)\n`;
+        response += `• **Dependencies** - Key packages and WHY chosen\n`;
+        response += `• **Development setup** - Tools, env requirements\n`;
+        response += `• **Technical constraints** - Limitations to work within\n`;
+        response += `• **Configuration** - Important settings\n\n`;
+      } else if (params.memoryName === 'progress') {
+        response += `• **Completed features** - ✅ What works (with dates)\n`;
+        response += `• **In progress** - 🔄 Currently implementing\n`;
+        response += `• **TODO** - 📝 What's left to build\n`;
+        response += `• **Known issues** - ⚠️ Bugs and problems\n`;
+        response += `• **Technical debt** - What needs refactoring\n\n`;
+      } else if (params.memoryName === 'codebaseMap') {
+        response += `• **Directory structure** - Complete file tree\n`;
+        response += `• **Key files** - Important files and their purposes\n`;
+        response += `• **Module organization** - How code is grouped\n`;
+        response += `• **Entry points** - Where execution starts\n`;
+        response += `• **Code statistics** - From sync_code results\n\n`;
+      }
+      
       response += `Missing required sections:\n`;
       
       validation.requiredSections.forEach((section: any) => {
@@ -72,10 +132,9 @@ projectbrief → productContext/systemPatterns/techContext → activeContext →
         }
       });
 
-      response += `\nWould you like to:\n`;
-      response += `1. Update anyway (not recommended)\n`;
-      response += `2. Add the missing sections to your content\n\n`;
-      response += `💡 Tip: Good memories follow Cline's structure. This ensures consistency across sessions.`;
+      response += `\n🔥 CRITICAL: Your AI effectiveness DEPENDS on proper memory structure!\n`;
+      response += `💀 BAD STRUCTURE = USELESS AI = REPEATED FAILURES!\n`;
+      response += `⚡ FIX THIS NOW or suffer memory amnesia forever!`;
 
       return {
         content: [
@@ -99,9 +158,9 @@ projectbrief → productContext/systemPatterns/techContext → activeContext →
     let contentVector: number[] | undefined;
     try {
       contentVector = await generateDocumentEmbedding(params.content);
-      logger.info(`Generated embedding for ${params.memoryName} (${contentVector.length} dimensions)`);
+      logger.info(`🧠 EMBEDDING GENERATED: ${params.memoryName} - ${contentVector.length} dimensions of intelligence!`);
     } catch (error) {
-      logger.error(`Failed to generate embedding for ${params.memoryName}:`, error);
+      logger.error(`🔴 EMBEDDING FAILURE: ${params.memoryName} - Will continue without vector search!`, error);
       // Continue without embedding rather than failing the update
     }
     
@@ -120,18 +179,36 @@ projectbrief → productContext/systemPatterns/techContext → activeContext →
         }
       );
 
+      // Count total memories for context
+      const totalMemoryCount = await collection.countDocuments({
+        projectId: config.projectId
+      });
+      
       return {
         content: [
           {
             type: 'text',
-            text: `✅ Updated ${params.memoryName}
+            text: `⚡ MEMORY CAPTURED! ${params.memoryName} updated successfully! 🧠
 
-Version: ${(existing.metadata?.version || 0) + 1}
-Modified: ${now.toISOString()}
+📊 UPDATE STATS:
+• Memory: ${params.memoryName}
+• Version: v${(existing.metadata?.version || 0) + 1} (iteration ${(existing.metadata?.version || 0) + 1})
+• Timestamp: ${now.toISOString()}
+• Size: ${params.content.length} characters
+• Structure: ${validation.isValid ? '✅ PERFECT! All required sections present!' : '⚠️ FUNCTIONAL but could be richer'}
 
-${validation.isValid ? '✨ Memory structure validated!' : '⚠️ Structure could be improved'}
+${params.memoryName === 'activeContext' ? `
+🔥 CRITICAL REMINDER:
+activeContext should be updated EVERY 3-5 MINUTES!
+Your last update was just now. Set timer for next update!
+` : ''}
 
-Next: Run \`memory_engineering_read_all\` to see all memories in context.`,
+⚡ IMMEDIATE NEXT ACTIONS:
+1. ${params.memoryName === 'activeContext' ? 'Continue working, capture EVERYTHING' : 'Verify with: memory_engineering_read --memoryName "' + params.memoryName + '"'}
+2. ${totalMemoryCount < 7 ? 'Create remaining memories (' + (7 - totalMemoryCount) + ' left)' : 'All memories created! Keep them fresh!'}
+3. ${params.memoryName === 'techContext' || params.memoryName === 'codebaseMap' ? 'Run sync_code to update embeddings' : 'Continue capturing knowledge'}
+
+💡 PRO TIP: ${params.memoryName === 'progress' ? 'Update progress after EVERY task completion!' : params.memoryName === 'systemPatterns' ? 'Found a pattern? Document it IMMEDIATELY!' : 'Rich, specific content = better future context!'}`,
           },
         ],
       };
@@ -202,13 +279,13 @@ Next: Run \`memory_engineering_read_all\` to see all memories in context.`,
     }
 
   } catch (error) {
-    logger.error('Update tool error:', error);
+    logger.error('💀 MEMORY UPDATE EXPLOSION!', error);
     return {
       isError: true,
       content: [
         {
           type: 'text',
-          text: `Update failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
+          text: `💀 MEMORY UPDATE CATASTROPHE!\n\n💥 EXPLOSION: ${error instanceof Error ? error.message : 'UNKNOWN SYSTEM MELTDOWN'}\n\n🚨 EMERGENCY RECOVERY:\n1. Check memory name is valid\n2. Verify content is not empty\n3. Run memory_engineering_check_env\n4. Try again with simpler content\n\n🔴 YOUR MEMORY UPDATE FAILED CATASTROPHICALLY!`,
         },
       ],
     };

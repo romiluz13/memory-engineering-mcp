@@ -35,13 +35,13 @@ export async function runCommand(
       stderr: stderr.trim(),
     };
   } catch (error) {
-    logger.error(`Command failed: ${command}`, error);
+    logger.error(`💀 COMMAND EXECUTION EXPLODED: ${command}`, error);
     
     return {
       success: false,
       stdout: '',
-      stderr: error instanceof Error ? error.message : 'Unknown error',
-      error: error instanceof Error ? error : new Error('Unknown error'),
+      stderr: error instanceof Error ? error.message : '💥 CATASTROPHIC COMMAND FAILURE - System in unknown state!',
+      error: error instanceof Error ? error : new Error('🔴 UNKNOWN SYSTEM MELTDOWN - Command execution catastrophically failed!'),
     };
   }
 }

@@ -4,7 +4,7 @@ import type { MemoryDocument, CodeChunk } from '../types/memory-v5.js';
 import { EMBEDDING_DIMENSIONS } from '../embeddings/voyage-v5.js';
 
 export const SEARCH_INDEX_DEFINITIONS = {
-  // Memory search indexes (simplified for v5)
+  // Memory search indexes (PRODUCTION-READY for v13!)
   memory_vector_search: {
     name: 'memory_vector_search',
     type: 'vectorSearch',
@@ -136,7 +136,7 @@ export async function createSearchIndexes(
 
   try {
     // Create standard indexes
-    logger.info('Creating standard MongoDB indexes...');
+    logger.info('🎯 CREATING STANDARD INDEXES - Speed boost incoming...');
     
     // Memory collection indexes
     const memoryIndexes = [
@@ -166,7 +166,7 @@ export async function createSearchIndexes(
         if (error.code === 85 || error.message?.includes('already exists')) {
           details.push(`ℹ️  Memory index already exists: ${index.name}`);
         } else {
-          details.push(`❌ Failed to create memory index ${index.name}: ${error.message}`);
+          details.push(`💀 MEMORY INDEX CREATION EXPLODED! ${index.name}: ${error.message} - SEARCH WILL BE BROKEN!`);
           hasErrors = true;
         }
       }
@@ -207,14 +207,14 @@ export async function createSearchIndexes(
         if (error.code === 85 || error.message?.includes('already exists')) {
           details.push(`ℹ️  Code index already exists: ${index.name}`);
         } else {
-          details.push(`❌ Failed to create code index ${index.name}: ${error.message}`);
+          details.push(`💥 CODE INDEX CATASTROPHE! ${index.name}: ${error.message} - CODE SEARCH IMPOSSIBLE!`);
           hasErrors = true;
         }
       }
     }
 
     // Check for Atlas Search capability
-    logger.info('Checking for Atlas Search indexes...');
+    logger.info('🔍 CHECKING ATLAS SEARCH INDEXES - Vector power status...');
     
     try {
       // Try to list search indexes (Atlas only)
@@ -235,7 +235,7 @@ export async function createSearchIndexes(
           } as any);
           details.push(`✅ Created memory vector search index`);
         } catch (error: any) {
-          details.push(`❌ Failed to create memory vector search: ${error.message}`);
+          details.push(`🔴 VECTOR SEARCH CREATION FAILED! ${error.message} - SEMANTIC SEARCH DEAD!`);
           hasErrors = true;
         }
       }
@@ -250,7 +250,7 @@ export async function createSearchIndexes(
           } as any);
           details.push(`✅ Created memory text search index`);
         } catch (error: any) {
-          details.push(`❌ Failed to create memory text search: ${error.message}`);
+          details.push(`⚠️ TEXT SEARCH CREATION FAILED! ${error.message} - KEYWORD SEARCH BROKEN!`);
           hasErrors = true;
         }
       }
@@ -265,7 +265,7 @@ export async function createSearchIndexes(
           } as any);
           details.push(`✅ Created code vector search index`);
         } catch (error: any) {
-          details.push(`❌ Failed to create code vector search: ${error.message}`);
+          details.push(`🔴 CODE VECTOR INDEX FAILED! ${error.message} - CODE INTELLIGENCE OFFLINE!`);
           hasErrors = true;
         }
       }
@@ -280,13 +280,13 @@ export async function createSearchIndexes(
           } as any);
           details.push(`✅ Created code text search index`);
         } catch (error: any) {
-          details.push(`❌ Failed to create code text search: ${error.message}`);
+          details.push(`⚠️ CODE TEXT SEARCH FAILED! ${error.message} - SYMBOL SEARCH BROKEN!`);
           hasErrors = true;
         }
       }
       
     } catch (error: any) {
-      logger.warn('Atlas Search not available:', error);
+      logger.warn('⚠️ ATLAS SEARCH OFFLINE - Using fallback text search', error);
       details.push('⚠️  Atlas Search indexes not available (using text search fallback)');
       details.push('   For best code search experience, use MongoDB Atlas');
     }
@@ -309,10 +309,10 @@ export async function createSearchIndexes(
     };
 
   } catch (error) {
-    logger.error('Failed to create indexes:', error);
+    logger.error('💀 INDEX CREATION CATASTROPHE!', error);
     return {
       success: false,
-      message: `Failed to create indexes: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      message: `💀 INDEX CREATION CATASTROPHE! ${error instanceof Error ? error.message : 'UNKNOWN SYSTEM MELTDOWN'} - SEARCH SYSTEM COMPLETELY BROKEN!`,
       details: [...details, `❌ Critical error: ${error instanceof Error ? error.message : 'Unknown error'}`]
     };
   }

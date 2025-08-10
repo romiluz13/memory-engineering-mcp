@@ -87,11 +87,80 @@ export async function checkEnvTool(): Promise<CallToolResult> {
     
     logger.info('Environment check completed', report);
     
+    // Build rich diagnostic response
+    let richResponse = `🔬 ENVIRONMENT DIAGNOSTIC COMPLETE - System Health Report 🏥\n\n`;
+    
+    // Version status
+    richResponse += `📦 VERSION STATUS:\n`;
+    richResponse += `• Current: ${report.version}\n`;
+    richResponse += `• Status: ${report.version.includes(version) ? '✅ LATEST VERSION!' : '⚠️ Update available (run: npm install -g memory-engineering-mcp@latest)'}\n\n`;
+    
+    // Critical services
+    richResponse += `🔐 CRITICAL SERVICES:\n`;
+    const mongoStatus = envStatus.MONGODB_URI?.status === 'SET (masked)';
+    const voyageStatus = envStatus.VOYAGE_API_KEY?.status === 'SET (masked)';
+    
+    richResponse += `• MongoDB: ${mongoStatus ? '✅ Connected' : '🔴 NOT CONFIGURED!'}\n`;
+    richResponse += `• Voyage AI: ${voyageStatus ? '✅ API Key Present' : '🔴 NO API KEY!'}\n\n`;
+    
+    // Working directory
+    richResponse += `📁 WORKING DIRECTORY:\n`;
+    richResponse += `• Current: ${processInfo.cwd}\n`;
+    richResponse += `• Status: ${processInfo.cwd.includes('node_modules') ? '⚠️ Wrong directory!' : '✅ Looks correct'}\n\n`;
+    
+    // Environment files
+    richResponse += `📄 CONFIGURATION FILES:\n`;
+    richResponse += `• .env: ${envFiles['.env'] ? '✅ Found' : '⚠️ Not found (optional)'}\n`;
+    richResponse += `• .env.local: ${envFiles['.env.local'] ? '✅ Found' : '⚠️ Not found (recommended)'}\n\n`;
+    
+    // Overall health
+    const healthScore = (mongoStatus ? 40 : 0) + (voyageStatus ? 40 : 0) + (processInfo.cwd.includes('node_modules') ? 0 : 20);
+    richResponse += `🏥 OVERALL HEALTH: ${healthScore}%\n`;
+    if (healthScore === 100) {
+      richResponse += `✅✅✅ PERFECT! All systems operational!\n\n`;
+    } else if (healthScore >= 80) {
+      richResponse += `✅ Good health, minor issues only\n\n`;
+    } else if (healthScore >= 60) {
+      richResponse += `⚠️ Functional but needs attention\n\n`;
+    } else {
+      richResponse += `🔴 CRITICAL ISSUES DETECTED!\n\n`;
+    }
+    
+    // Action items
+    if (!mongoStatus || !voyageStatus) {
+      richResponse += `🚨 IMMEDIATE ACTIONS REQUIRED:\n\n`;
+      
+      if (!mongoStatus) {
+        richResponse += `1️⃣ **Configure MongoDB:**\n`;
+        richResponse += `   • Create .env.local file\n`;
+        richResponse += `   • Add: MONGODB_URI=mongodb+srv://user:pass@cluster.mongodb.net/dbname\n`;
+        richResponse += `   • Get URI from MongoDB Atlas → Connect → Drivers\n\n`;
+      }
+      
+      if (!voyageStatus) {
+        richResponse += `2️⃣ **Configure Voyage AI:**\n`;
+        richResponse += `   • Sign up at https://voyageai.com (free tier available)\n`;
+        richResponse += `   • Add to .env.local: VOYAGE_API_KEY=pa-xxxxx\n`;
+        richResponse += `   • Restart after adding key\n\n`;
+      }
+    }
+    
+    // Success path
+    if (healthScore === 100) {
+      richResponse += `⚡ NEXT STEPS (You're ready!):\n`;
+      richResponse += `1. Run: memory_engineering_init (if new project)\n`;
+      richResponse += `2. Run: memory_engineering_read_all (if existing project)\n`;
+      richResponse += `3. Start working with full memory power!\n`;
+    }
+    
+    // Add raw JSON at the end for debugging
+    richResponse += `\n📊 RAW DIAGNOSTIC DATA:\n\`\`\`json\n${JSON.stringify(report, null, 2)}\n\`\`\``;
+    
     return {
       content: [
         {
           type: 'text',
-          text: JSON.stringify(report, null, 2),
+          text: richResponse,
         },
       ],
     };

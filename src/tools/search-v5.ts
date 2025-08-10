@@ -19,7 +19,7 @@ export async function searchTool(args: unknown): Promise<CallToolResult> {
         content: [
           {
             type: 'text',
-            text: 'Memory Engineering not initialized. Run memory_engineering_init first.',
+            text: '🔴 CRITICAL: Cannot search without a brain! NO MEMORY SYSTEM!\n\n⚡ EXECUTE: memory_engineering_init\n\nSearching requires memories to exist. Initialize NOW!',
           },
         ],
       };
@@ -36,13 +36,27 @@ export async function searchTool(args: unknown): Promise<CallToolResult> {
     return await executeMemorySearch(config.projectId, params);
 
   } catch (error) {
-    logger.error('Search tool error:', error);
+    logger.error('💀 SEARCH ENGINE EXPLODED!', error);
     return {
       isError: true,
       content: [
         {
           type: 'text',
-          text: `Search failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
+          text: `🔴 SEARCH EXPLOSION! Something went terribly wrong!
+
+💀 ERROR: ${error instanceof Error ? error.message : 'Unknown catastrophic failure'}
+
+🆘 EMERGENCY RECOVERY PROTOCOL:
+1. Check environment: memory_engineering_check_env
+2. Verify connection: Is MongoDB alive?
+3. Retry with simpler query: Single word only
+4. If persists: Check Voyage API key
+
+⚡ MOST LIKELY CAUSE:
+${error instanceof Error && error.message.includes('connect') ? '• MongoDB connection lost!' : ''}
+${error instanceof Error && error.message.includes('voyage') ? '• Voyage API issue!' : ''}
+${error instanceof Error && error.message.includes('timeout') ? '• Search timed out - query too complex!' : ''}
+🔄 TRY AGAIN with a simpler search term!`,
         },
       ],
     };
@@ -66,7 +80,7 @@ async function executeMemorySearch(
   if (hasVectors) {
     try {
       // v8: Vector search with embeddings for semantic memory search!
-      logger.info('Using v8 vector search for memories...');
+      logger.info('🎯 VECTOR SEARCH ACTIVATED - Semantic intelligence engaged!');
       const queryEmbedding = await generateQueryEmbedding(params.query);
 
       results = await collection.aggregate([
@@ -87,11 +101,11 @@ async function executeMemorySearch(
         }
       ]).toArray() as MemoryDocument[];
 
-      logger.info(`v8 Vector search found ${results.length} results`);
+      logger.info(`🎆 VECTOR SEARCH SUCCESS: ${results.length} memories discovered!`);
       searchType = 'vector';
 
     } catch (error) {
-      logger.warn('Vector search failed, falling back to text search:', error);
+      logger.warn('⚠️ VECTOR SEARCH FAILED - Activating text search fallback!', error);
       searchType = 'text';
     }
   }
@@ -112,10 +126,39 @@ async function executeMemorySearch(
       content: [
         {
           type: 'text',
-          text: `No results found for: "${params.query}"
+          text: `🔴 ZERO RESULTS for: "${params.query}" - But don\'t give up!
 
-Remember: In v5, you should start with memory_engineering_read_all to see all memories.
-Search is secondary - use it to find specific sections within memories.`,
+⚠️ DIAGNOSTIC CHECK:
+${results.length === 0 ? '🔍 No matches found - try different search terms' : '✅ Search executed successfully'}
+${searchType === 'text' ? '📦 Using text search (embeddings might help)' : '🎯 Using vector search'}
+
+💡 SEARCH OPTIMIZATION STRATEGIES:
+
+1️⃣ **Try BROADER terms:**
+   Instead of: "${params.query}"
+   Try: "${params.query.split(' ')[0]}" or "${params.query.includes(' ') ? params.query.split(' ').slice(-1)[0] : params.query.substring(0, Math.floor(params.query.length/2))}"
+
+2️⃣ **Search by MEMORY TYPE:**
+   📝 projectbrief → "requirements", "goals", "scope", "MVP"
+   🎯 productContext → "problem", "user", "pain", "solution"
+   ⚡ activeContext → "current", "now", "working", "TODO"
+   🏗️ systemPatterns → "pattern", "architecture", "design"
+   🔧 techContext → "stack", "version", "dependency"
+   ✅ progress → "done", "complete", "bug", "issue"
+   🗺️ codebaseMap → "file", "folder", "structure"
+
+3️⃣ **Common POWER SEARCHES:**
+   🔥 "TODO" - Find all pending work
+   🔥 "bug" or "issue" - Find problems
+   🔥 "decision" - Find architectural choices
+   🔥 "current" - Find what you\'re working on
+
+⚡ IMMEDIATE ACTIONS:
+1. Run: memory_engineering_read_all (see what memories exist)
+2. Try: memory_engineering_search --query "${params.query.split(' ')[0] || 'TODO'}"
+3. Check: Did you sync_code recently? Code search needs fresh embeddings!
+
+💀 REMEMBER: No results often means memories need updating, not that info doesn\'t exist!`,
         },
       ],
     };
@@ -191,13 +234,38 @@ async function executeCodeSearch(
       content: [
         {
           type: 'text',
-          text: `No code results found for: "${params.query}" (mode: ${params.codeSearch})
+          text: `🔴 CODE SEARCH RETURNED NOTHING! Query: "${params.query}" | Mode: ${params.codeSearch}
 
-Try different search modes:
-- similar: Find code semantically similar to your query
-- implements: Find implementations of a concept
-- uses: Find code using specific functions/modules
-- pattern: Find code matching architectural patterns`,
+⚠️ YOUR CODE IS INVISIBLE TO THE SEARCH!
+
+🧠 DIAGNOSTIC CHECK:
+${params.codeSearch === 'similar' ? '• Vector search active but found NO semantic matches' : ''}
+${params.codeSearch === 'implements' ? '• No implementations found - this concept might not exist!' : ''}
+${params.codeSearch === 'uses' ? '• No usage found - this function/module is UNUSED or DOESN\'T EXIST!' : ''}
+${params.codeSearch === 'pattern' ? '• Pattern not found - your architecture might not use this pattern!' : ''}
+
+💡 EMERGENCY RECOVERY STRATEGIES:
+
+1️⃣ **CHECK IF CODE IS SYNCED:**
+   Run: memory_engineering_sync_code
+   → Your code might not be indexed yet!
+
+2️⃣ **TRY DIFFERENT SEARCH MODES:**
+   🔍 similar: Semantic search (finds related concepts)
+   🏗️ implements: Where things are built
+   🔗 uses: Where things are used
+   🎯 pattern: Architectural patterns
+
+3️⃣ **POWER SEARCH EXAMPLES:**
+   • memory_engineering_search --query "auth" --codeSearch "similar"
+   • memory_engineering_search --query "UserService" --codeSearch "implements"
+   • memory_engineering_search --query "generateToken" --codeSearch "uses"
+
+4️⃣ **BROADEN YOUR SEARCH:**
+   Instead of: "${params.query}"
+   Try: "${params.query.split(' ')[0] || params.query.substring(0, Math.floor(params.query.length/2))}"
+
+🔥 REMEMBER: No results often means code needs syncing, not that it doesn't exist!`,
         },
       ],
     };
@@ -214,23 +282,33 @@ async function searchSimilarCode(
   // Generate query embedding
   const queryEmbedding = await generateCodeQueryEmbedding(params.query);
   
-  // Vector search with optional filters
+  // Vector search - Atlas doesn't support regex in filter, so we post-filter
   const pipeline: any[] = [
     {
       $vectorSearch: {
         index: 'code_vector_search',
         path: 'contentVector',
         queryVector: queryEmbedding,
-        numCandidates: params.limit * 3,
-        limit: params.limit,
+        numCandidates: params.limit * 10, // Get more candidates for post-filtering
+        limit: params.limit * 3, // Get extra for filtering
         filter: {
-          projectId,
-          // language filter removed to fix Voyage AI issues
-          ...(params.filePath && { filePath: { $regex: params.filePath } })
+          projectId
         }
       }
     }
   ];
+  
+  // Add post-filtering stage if filePath is specified
+  if (params.filePath) {
+    pipeline.push({
+      $match: {
+        filePath: { $regex: params.filePath, $options: 'i' }
+      }
+    });
+  }
+  
+  // Limit to requested amount
+  pipeline.push({ $limit: params.limit });
   
   return await collection.aggregate(pipeline).toArray();
 }
@@ -247,7 +325,7 @@ async function searchImplementations(
   };
   
   // language filter removed to fix Voyage AI issues
-  if (params.filePath) query.filePath = { $regex: params.filePath };
+  if (params.filePath) query.filePath = { $regex: params.filePath, $options: 'i' };
   
   return await collection
     .find(query)
@@ -266,7 +344,7 @@ async function searchUsages(
   };
   
   // language filter removed to fix Voyage AI issues
-  if (params.filePath) query.filePath = { $regex: params.filePath };
+  if (params.filePath) query.filePath = { $regex: params.filePath, $options: 'i' };
   
   return await collection
     .find(query)
@@ -274,18 +352,59 @@ async function searchUsages(
     .toArray();
 }
 
+// Normalize pattern queries for better matching
+function normalizePatternQuery(query: string): string[] {
+  // Base normalization: spaces to hyphens, lowercase
+  const normalized = query.toLowerCase().replace(/\s+/g, '-');
+  
+  // Create variations for common patterns
+  const variations: string[] = [normalized];
+  
+  // Add common variations
+  if (normalized.includes('error')) {
+    variations.push('error-handler', 'error-handling', 'exception');
+  }
+  if (normalized === 'async' || normalized.includes('async')) {
+    variations.push('async', 'promise', 'await');
+  }
+  if (normalized.includes('auth')) {
+    variations.push('authentication', 'authorization', 'auth', 'login');
+  }
+  if (normalized.includes('test')) {
+    variations.push('test', 'spec', 'testing');
+  }
+  if (normalized.includes('util')) {
+    variations.push('utility', 'utilities', 'utils', 'helper');
+  }
+  if (normalized.includes('db') || normalized.includes('database')) {
+    variations.push('database', 'db', 'repository', 'model');
+  }
+  if (normalized.includes('api')) {
+    variations.push('api', 'endpoint', 'route', 'router');
+  }
+  if (normalized.includes('log')) {
+    variations.push('logging', 'logger', 'log');
+  }
+  
+  // Remove duplicates
+  return [...new Set(variations)];
+}
+
 async function searchPatterns(
   collection: any,
   projectId: string,
   params: any
 ): Promise<CodeChunk[]> {
+  // Get normalized variations of the query
+  const patternVariations = normalizePatternQuery(params.query);
+  
   const query: any = {
     projectId,
-    'metadata.patterns': params.query
+    'metadata.patterns': { $in: patternVariations }
   };
   
   // language filter removed to fix Voyage AI issues
-  if (params.filePath) query.filePath = { $regex: params.filePath };
+  if (params.filePath) query.filePath = { $regex: params.filePath, $options: 'i' };
   
   return await collection
     .find(query)

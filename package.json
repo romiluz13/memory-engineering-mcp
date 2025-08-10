@@ -1,12 +1,12 @@
 {
   "name": "memory-engineering-mcp",
-  "version": "11.0.0",
-  "description": "🧠 AI Memory System powered by MongoDB Atlas & Voyage AI - Simple, persistent memory for coding assistants",
+  "version": "13.3.0",
+  "description": "🧠 AI Memory System powered by MongoDB Atlas & Voyage AI - Autonomous memory management with zero manual work",
   "main": "dist/index.js",
   "type": "module",
   "repository": {
     "type": "git",
-    "url": "https://github.com/romiluz13/memory-engineering-mcp.git"
+    "url": "git+https://github.com/romiluz13/memory-engineering-mcp.git"
   },
   "homepage": "https://github.com/romiluz13/memory-engineering-mcp#readme",
   "bugs": {
@@ -47,11 +47,10 @@
   "files": [
     "dist",
     "bin",
-    "scripts",
     "README.md",
     "LICENSE",
     ".env.example",
-    ".mcp.json"
+    "CHANGELOG.md"
   ],
   "engines": {
     "node": ">=18.0.0"

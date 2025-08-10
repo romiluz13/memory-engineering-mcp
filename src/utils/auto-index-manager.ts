@@ -19,12 +19,12 @@ export async function ensureAllIndexes(
   codeCollection: Collection<CodeChunk>
 ): Promise<void> {
   if (indexesEnsured) {
-    logger.debug('Indexes already ensured this session');
+    logger.debug('♾️ INDEXES CACHED - Already optimized this session');
     return;
   }
 
   try {
-    logger.info('Auto-creating all required indexes...');
+    logger.info('⚡ AUTO-CREATING ALL INDEXES - Brain synapses forming...');
     
     // Standard MongoDB indexes for memories
     const memoryIndexes = [
@@ -41,7 +41,7 @@ export async function ensureAllIndexes(
         });
       } catch (error: any) {
         if (error.code !== 85 && error.code !== 86) { // Ignore "already exists" errors
-          logger.warn(`Index creation warning: ${error.message}`);
+          logger.warn(`⚠️ INDEX WARNING: ${error.message}`);
         }
       }
     }
@@ -59,7 +59,7 @@ export async function ensureAllIndexes(
         await codeCollection.createIndex(index.keys as any, { name: index.name });
       } catch (error: any) {
         if (error.code !== 85 && error.code !== 86) {
-          logger.warn(`Index creation warning: ${error.message}`);
+          logger.warn(`⚠️ INDEX WARNING: ${error.message}`);
         }
       }
     }
@@ -68,14 +68,14 @@ export async function ensureAllIndexes(
     try {
       await ensureAtlasSearchIndexes(memoryCollection, codeCollection);
     } catch (error) {
-      logger.debug('Atlas Search not available - using standard text search');
+      logger.debug('📦 ATLAS OFFLINE - Fallback to standard text search');
     }
 
     indexesEnsured = true;
-    logger.info('✅ All indexes ensured automatically');
+    logger.info('🎉 ALL INDEXES READY - Search speed MAXIMIZED!');
     
   } catch (error) {
-    logger.error('Failed to ensure indexes:', error);
+    logger.error('💀 INDEX SETUP EXPLOSION!', error);
     // Don't throw - let the system work with whatever indexes exist
   }
 }
@@ -118,7 +118,7 @@ async function ensureAtlasSearchIndexes(
           ]
         }
       } as any);
-      logger.info('Created memory vector search index');
+      logger.info('🧠 MEMORY VECTOR INDEX CREATED - Semantic search online!');
     }
 
     // Memory text search
@@ -148,7 +148,7 @@ async function ensureAtlasSearchIndexes(
           }
         }
       } as any);
-      logger.info('Created memory text search index');
+      logger.info('📖 MEMORY TEXT INDEX CREATED - Keyword search ready!');
     }
 
     // Code vector search
@@ -177,7 +177,7 @@ async function ensureAtlasSearchIndexes(
           ]
         }
       } as any);
-      logger.info('Created code vector search index');
+      logger.info('🔍 CODE VECTOR INDEX CREATED - Code intelligence activated!');
     }
 
     // Code text search
@@ -219,16 +219,16 @@ async function ensureAtlasSearchIndexes(
           }
         }
       } as any);
-      logger.info('Created code text search index');
+      logger.info('📝 CODE TEXT INDEX CREATED - Symbol search enabled!');
     }
 
-    logger.info('✅ Atlas Search indexes ready');
+    logger.info('🚀 ATLAS SEARCH FULLY OPERATIONAL - Maximum intelligence!');
     
   } catch (error: any) {
     if (error.message?.includes('listSearchIndexes')) {
       throw new Error('Not MongoDB Atlas');
     }
-    logger.warn('Atlas Search index creation warning:', error.message);
+    logger.warn('⚠️ ATLAS INDEX WARNING:', error.message);
   }
 }
 
@@ -243,21 +243,21 @@ export function startIndexBackgroundTask(
   // Check after 30 seconds
   setTimeout(async () => {
     try {
-      logger.debug('Running background index check...');
+      logger.debug('🔄 BACKGROUND INDEX CHECK - Ensuring persistence...');
       await ensureAllIndexes(memoryCollection, codeCollection);
     } catch (error) {
-      logger.debug('Background index check failed:', error);
+      logger.debug('⚠️ Background check failed (non-critical):', error);
     }
   }, 30000);
 
   // Check again after 2 minutes (for Atlas indexes that take time)
   setTimeout(async () => {
     try {
-      logger.debug('Running second background index check...');
+      logger.debug('🔁 SECOND INDEX CHECK - Double ensuring...');
       indexesEnsured = false; // Force recheck
       await ensureAllIndexes(memoryCollection, codeCollection);
     } catch (error) {
-      logger.debug('Second background index check failed:', error);
+      logger.debug('⚠️ Second check failed (non-critical):', error);
     }
   }, 120000);
 }

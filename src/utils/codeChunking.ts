@@ -16,6 +16,65 @@ export async function chunkFile(
   return chunkByPatterns(content, filePath, projectId, codebaseMapId, lastModified);
 }
 
+// Smart semantic boundary detection for complete chunks
+function findSemanticBoundary(lines: string[], startIdx: number, maxLines: number = 200): number {
+  let braceCount = 0;
+  let parenCount = 0;
+  let inBlock = false;
+  const baseIndent = lines[startIdx]?.match(/^(\s*)/)?.[1].length || 0;
+  
+  for (let i = startIdx; i < Math.min(lines.length, startIdx + maxLines); i++) {
+    const line = lines[i];
+    const currentIndent = line.match(/^(\s*)/)?.[1].length || 0;
+    
+    // Track braces and parentheses
+    for (const char of line) {
+      if (char === '{') { braceCount++; inBlock = true; }
+      else if (char === '}') { braceCount--; }
+      else if (char === '(') { parenCount++; }
+      else if (char === ')') { parenCount--; }
+    }
+    
+    // Function/class ended when:
+    // 1. Braces are balanced and we were in a block
+    // 2. Indentation returns to base level or less
+    // 3. Next function/class starts
+    if (inBlock && braceCount === 0 && parenCount === 0) {
+      return i + 1; // Found complete semantic unit!
+    }
+    
+    // Python/indentation-based: check indent level
+    if (i > startIdx + 5 && currentIndent <= baseIndent && line.trim().length > 0) {
+      // Back to original indent = function ended
+      return i;
+    }
+    
+    // Safety: if we see another function/class definition
+    if (i > startIdx + 10) {
+      const isNewBlock = /^(export\s+)?(async\s+)?(function|class|interface|def|func|fn)\s+/.test(line.trim());
+      if (isNewBlock) return i;
+    }
+  }
+  
+  // Fallback: take up to maxLines
+  return Math.min(startIdx + maxLines, lines.length);
+}
+
+// Extract imports and top-level context
+function extractContext(lines: string[], upToLine: number): string {
+  const contextLines: string[] = [];
+  const importPattern = /^(import|from|require|use|using|include)/;
+  
+  for (let i = 0; i < Math.min(upToLine, lines.length); i++) {
+    const line = lines[i].trim();
+    if (importPattern.test(line) || line.startsWith('//') || line.startsWith('/*')) {
+      contextLines.push(lines[i]);
+    }
+  }
+  
+  return contextLines.join('\n');
+}
+
 // Generic pattern-based chunking for all languages
 function chunkByPatterns(
   content: string,
@@ -26,6 +85,9 @@ function chunkByPatterns(
 ): Omit<CodeChunk, '_id' | 'contentVector' | 'createdAt' | 'updatedAt'>[] {
   const chunks: Omit<CodeChunk, '_id' | 'contentVector' | 'createdAt' | 'updatedAt'>[] = [];
   const lines = content.split('\n');
+  
+  // Extract file-level context (imports, comments)
+  const fileContext = extractContext(lines, 50);
   
   // Common patterns for functions/methods across languages
   const functionPatterns = [
@@ -61,7 +123,7 @@ function chunkByPatterns(
       if (match) {
         const name = match[1];
         const startLine = i + 1;
-        const endLine = Math.min(i + 50, lines.length); // Take next 50 lines or until end
+        const endLine = findSemanticBoundary(lines, i); // SMART boundary detection!
         
         chunks.push({
           projectId,
@@ -73,7 +135,7 @@ function chunkByPatterns(
             name,
             signature: line.trim(),
             content: lines.slice(i, endLine).join('\n'),
-            context: '',
+            context: fileContext, // Include imports and top-level context!
             startLine,
             endLine
           },
@@ -81,7 +143,7 @@ function chunkByPatterns(
           metadata: {
             dependencies: [],
             exports: [name],
-            patterns: detectPatterns(name),
+            patterns: detectPatterns(name, lines.slice(i, endLine).join('\n')),
             size: endLine - startLine
           }
         });
@@ -95,7 +157,7 @@ function chunkByPatterns(
       if (match) {
         const name = match[1];
         const startLine = i + 1;
-        const endLine = Math.min(i + 100, lines.length); // Take next 100 lines for classes
+        const endLine = findSemanticBoundary(lines, i, 300); // SMART boundary for classes (up to 300 lines)
         
         chunks.push({
           projectId,
@@ -107,7 +169,7 @@ function chunkByPatterns(
             name,
             signature: line.trim(),
             content: lines.slice(i, endLine).join('\n'),
-            context: '',
+            context: fileContext, // Include imports and top-level context!
             startLine,
             endLine
           },
@@ -115,7 +177,7 @@ function chunkByPatterns(
           metadata: {
             dependencies: [],
             exports: [name],
-            patterns: detectPatterns(name),
+            patterns: detectPatterns(name, lines.slice(i, endLine).join('\n')),
             size: endLine - startLine
           }
         });
@@ -153,21 +215,50 @@ function chunkByPatterns(
   return chunks;
 }
 
-function detectPatterns(name: string): string[] {
+function detectPatterns(name: string, content?: string): string[] {
   const patterns: string[] = [];
   const lowerName = name.toLowerCase();
+  const lowerContent = content?.toLowerCase() || '';
   
-  // Detect common patterns
-  if (lowerName.includes('handler')) patterns.push('event-handler');
+  // Detect common patterns from name
+  if (lowerName.includes('handler') || lowerName.includes('handle')) patterns.push('event-handler');
   if (lowerName.includes('middleware')) patterns.push('middleware');
   if (lowerName.includes('controller')) patterns.push('controller');
   if (lowerName.includes('service')) patterns.push('service');
-  if (lowerName.includes('repository')) patterns.push('repository');
-  if (lowerName.includes('error')) patterns.push('error-handler');
-  if (lowerName.includes('auth')) patterns.push('authentication');
-  if (lowerName.includes('test')) patterns.push('test');
-  if (lowerName.includes('util')) patterns.push('utility');
+  if (lowerName.includes('repository') || lowerName.includes('repo')) patterns.push('repository');
+  if (lowerName.includes('error') || lowerName.includes('exception')) patterns.push('error-handler');
+  if (lowerName.includes('auth') || lowerName.includes('login')) patterns.push('authentication');
+  if (lowerName.includes('test') || lowerName.includes('spec')) patterns.push('test');
+  if (lowerName.includes('util') || lowerName.includes('utils')) patterns.push('utility');
   if (lowerName.includes('helper')) patterns.push('helper');
+  if (lowerName.includes('model') || lowerName.includes('schema')) patterns.push('model');
+  if (lowerName.includes('route') || lowerName.includes('router')) patterns.push('router');
+  if (lowerName.includes('api')) patterns.push('api');
+  if (lowerName.includes('db') || lowerName.includes('database')) patterns.push('database');
+  if (lowerName.includes('cache')) patterns.push('cache');
+  if (lowerName.includes('queue')) patterns.push('queue');
+  if (lowerName.includes('logger') || lowerName.includes('log')) patterns.push('logging');
+  if (lowerName.includes('config')) patterns.push('configuration');
+  if (lowerName.includes('validator') || lowerName.includes('validate')) patterns.push('validation');
   
-  return patterns;
+  // Detect patterns from content
+  if (content && content.length > 0) {
+    // Error handling patterns
+    if (lowerContent.includes('try') && lowerContent.includes('catch')) patterns.push('error-handling');
+    if (lowerContent.includes('throw') || lowerContent.includes('error')) patterns.push('error-handling');
+    
+    // Async patterns
+    if (lowerContent.includes('async') || lowerContent.includes('await')) patterns.push('async');
+    if (lowerContent.includes('promise')) patterns.push('promise');
+    
+    // Common patterns
+    if (lowerContent.includes('export') || lowerContent.includes('module.exports')) patterns.push('module');
+    if (lowerContent.includes('import') || lowerContent.includes('require')) patterns.push('dependency');
+    if (lowerContent.includes('class')) patterns.push('class-based');
+    if (lowerContent.includes('function')) patterns.push('functional');
+    if (lowerContent.includes('interface') || lowerContent.includes('type')) patterns.push('typescript');
+  }
+  
+  // Remove duplicates
+  return [...new Set(patterns)];
 }

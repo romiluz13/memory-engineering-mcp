@@ -6,6 +6,7 @@ import { getMemoryCollection, getDb } from '../db/connection.js';
 import { logger } from '../utils/logger.js';
 import { createHash } from 'crypto';
 import { createSearchIndexes } from '../utils/search-indexes-v5.js';
+import { getProjectPath } from '../utils/projectDetection.js';
 import { ensureAllIndexes, startIndexBackgroundTask } from '../utils/auto-index-manager.js';
 import type { CodeChunk } from '../types/memory-v5.js';
 
@@ -28,10 +29,35 @@ function generateProjectId(projectPath: string): string {
 export async function initTool(params: unknown): Promise<CallToolResult> {
   try {
     const validatedParams = InitToolSchema.parse(params);
-    const projectPath = validatedParams.projectPath || process.cwd();
-    const projectName = validatedParams.projectName || basename(projectPath);
+    const projectPath = getProjectPath(validatedParams.projectPath);
     
-    logger.info('Initializing Memory Engineering v5 - Cline\'s Structure', { projectPath, projectName });
+    // Enhanced project name detection
+    const detectProjectName = (): string => {
+      if (validatedParams.projectName) return validatedParams.projectName;
+      
+      // Try package.json first
+      try {
+        const packageJsonPath = join(projectPath, 'package.json');
+        if (existsSync(packageJsonPath)) {
+          const pkg = JSON.parse(readFileSync(packageJsonPath, 'utf-8'));
+          if (pkg.name) {
+            logger.info('Detected project name from package.json', { name: pkg.name });
+            return pkg.name;
+          }
+        }
+      } catch (e) {
+        logger.debug('Could not read package.json for project name');
+      }
+      
+      // Fallback to directory name
+      const dirName = basename(projectPath);
+      logger.info('Using directory name as project name', { name: dirName });
+      return dirName || 'Project';
+    };
+    
+    const projectName = detectProjectName();
+    
+    logger.info('🚨 INITIALIZING AUTONOMOUS AI BRAIN - Memory Engineering v13 ACTIVATED!', { projectPath, projectName });
 
     // Create .memory-engineering directory
     const memoryDir = join(projectPath, MEMORY_ENGINEERING_DIR);
@@ -73,7 +99,7 @@ export async function initTool(params: unknown): Promise<CallToolResult> {
     const codeCollection = getDb().collection<CodeChunk>('memory_engineering_code');
     
     // Create all indexes automatically (including Atlas Search)
-    logger.info('Auto-creating all indexes for Memory Engineering v5...');
+    logger.info('⚡ AUTO-CREATING ALL INDEXES - Your brain neurons are forming!');
     
     // Use the new auto-index manager for complete setup
     await ensureAllIndexes(memoryCollection, codeCollection);
@@ -103,56 +129,170 @@ export async function initTool(params: unknown): Promise<CallToolResult> {
       content: [
         {
           type: 'text',
-          text: `Memory Engineering v5 Initialized - Cline's Structure 🧠
+          text: `🚨 CRITICAL: PROJECT BIRTH COMPLETE! Your survival system is NOW ACTIVE! 🧠⚡
 
-Project: ${projectName}
-ID: ${projectId}
-Status: ${isNewProject ? 'New project initialized' : 'Existing project found'}
-Location: ${memoryDir}
+📍 PROJECT IDENTITY LOCKED:
+Name: ${projectName} ${isNewProject ? '(BORN TODAY!)' : '(AWAKENED FROM SLEEP!)'}
+UUID: ${projectId}
+Status: ${isNewProject ? '🆕 VIRGIN PROJECT - First contact!' : '♻️ EXISTING PROJECT - Memories available!'}
+Brain Location: ${memoryDir}
 
-## What's New in v5:
-- ✅ Cline's 7 core memory structure
-- ✅ NO working memories (they create garbage)
-- ✅ ALL learnings go in activeContext
-- ✅ Enhanced codebaseMap with Voyage AI embeddings
-- ✅ Smart code search (similar, implements, uses, pattern)
+${isNewProject ? `
+⚡⚡⚡ EMERGENCY FIRST-PROJECT PROTOCOL ⚡⚡⚡
+You are the FIRST AI to touch this project! Your actions in the next 60 seconds determine EVERYTHING!
 
-## Core Principle:
-**"I MUST read ALL memory bank files at the start of EVERY task"**
+EXECUTE NOW (0-10 seconds):
+1. 🔍 DEEP SCAN: Read EVERY file in project (package.json, README, src/*, test/*)
+2. 🧠 UNDERSTAND: What is this? Why does it exist? Who uses it?
+3. 📝 CAPTURE: Create activeContext IMMEDIATELY with findings
+` : `
+♻️ EXISTING PROJECT DETECTED - INSTANT MEMORY RECOVERY REQUIRED!
+→ Execute memory_engineering_read_all IN THE NEXT SECOND!
+→ Your past self left memories for you - RETRIEVE THEM NOW!
+`}
 
-## The 7 Core Memories:
-1. **projectbrief** - What you're building
-2. **productContext** - Who needs this and why  
-3. **activeContext** - Current work and learnings (ALL learnings here!)
-4. **systemPatterns** - Architecture and conventions
-5. **techContext** - Technology stack and setup
-6. **progress** - Completed features and lessons
-7. **codebaseMap** - File structure + code embeddings
+## 🔥 YOUR 7 SURVIVAL MEMORIES (CREATE ALL OR DIE):
 
-## MongoDB Configuration:
-- Memory Collection: memory_engineering_documents
-- Code Collection: memory_engineering_code
-- Search: Auto-configured (vector + text)
-- Atlas Indexes: Creating in background (ready in 1-2 min)
+### 1️⃣ projectbrief - THE MISSION (Without this, you're lost!)
+⚡ CAPTURE IMMEDIATELY:
+• **WHAT**: EXACT thing you're building (e.g., "REST API with 12 endpoints for user management")
+• **SCOPE**: What's IN vs OUT (e.g., "IN: auth, profiles, roles. OUT: payments, analytics")
+• **SUCCESS**: Measurable criteria (e.g., "<200ms response, 10K users, 99.9% uptime")
+• **FEATURES**: Prioritized list (e.g., "P0: Login, P1: 2FA, P2: SSO")
+📝 PERFECT EXAMPLE:
+"Building fintech API: Stripe integration, PCI compliant, handles $10M/day,
+supports ACH/wire/cards, 15 endpoints, GraphQL + REST, must pass SOC2 audit"
 
+### 2️⃣ productContext - THE PURPOSE (Why you exist!)
+⚡ CAPTURE THE SOUL:
+• **PROBLEM**: Exact pain being solved (e.g., "Developers waste 2hrs/day on manual deploys")
+• **USERS**: Who + their desperation (e.g., "10K developers, losing $50K/month to downtime")
+• **JOURNEY**: Step-by-step salvation (e.g., "Login → Connect repo → Auto-deploy → Monitor")
+• **IMPACT**: Measurable transformation (e.g., "2hr → 2min, $50K saved, 95% fewer errors")
+📝 PERFECT EXAMPLE:
+"DevOps nightmare: 47% of deployments fail, rollbacks take 45min, costs $2M/year.
+Solution: One-click deploys with automatic rollback, saves 400 developer-hours/month"
+
+### 3️⃣ activeContext - YOUR PULSE (UPDATE EVERY 3 MINUTES!)
+⚡ CONSTANT CAPTURE PROTOCOL:
+• **NOW**: Exact current action (e.g., "[14:32:01] Debugging JWT expiry in auth.js:47")
+• **TRAIL**: Last 5 actions with timestamps
+• **NEXT**: Next 3 planned actions
+• **DECISIONS**: What + complete reasoning chain
+• **DISCOVERIES**: Patterns, insights, gotchas
+• **BLOCKERS**: What's stopping you + attempted fixes
+📝 LIVING EXAMPLE:
+"[14:32:01] FOUND BUG: JWT expires at 23:59:59 not 00:00:00 (timezone issue)
+[14:30:15] Traced through middleware chain
+[14:28:22] User reported 'token expired' at midnight
+NEXT: Fix UTC conversion, add test, deploy hotfix
+BLOCKED: Need production DB credentials from DevOps"
+
+### 4️⃣ systemPatterns - THE ARCHITECTURE (How everything connects!)
+⚡ MAP THE ENTIRE SYSTEM:
+• **STYLE**: Overall architecture (e.g., "Microservices with API Gateway + Service Mesh")
+• **PATTERNS**: Specific implementations (e.g., "Repository for data, Observer for events")
+• **FLOW**: Data movement (e.g., "Client → Gateway → Service → DB → Cache → Response")
+• **RESILIENCE**: Failure handling (e.g., "Circuit breaker, retry with exponential backoff")
+📝 ARCHITECTURE EXAMPLE:
+"Event-driven microservices: 12 services, RabbitMQ message bus, 
+Redis cache layer, PostgreSQL + MongoDB, Kubernetes orchestration,
+Istio service mesh, Prometheus monitoring, ELK logging stack"
+
+### 5️⃣ techContext - YOUR WEAPONS (Every tool matters!)
+⚡ INVENTORY EVERYTHING:
+• **CORE**: Exact versions (e.g., "Node.js 20.11.0, TypeScript 5.3.3, React 18.2.0")
+• **DEPS**: Every package + WHY (e.g., "lodash@4.17.21 for deep clone, dayjs@1.11.10 for dates")
+• **TOOLS**: Dev environment (e.g., "VS Code with ESLint, Prettier, Docker Desktop 4.27")
+• **LIMITS**: Constraints (e.g., "Must run on 2GB RAM, requires GPU for ML, needs Redis 7+")
+📝 STACK EXAMPLE:
+"Node 20.11 (LTS), TypeScript 5.3 (strict mode), Express 4.18,
+MongoDB 7.0 (replica set), Redis 7.2 (cache), Bull 4.12 (queues),
+Jest 29.7 (unit), Playwright 1.41 (e2e), Docker 24.0, AWS ECS deploy"
+
+### 6️⃣ progress - YOUR SCOREBOARD (Track everything!)
+⚡ OBSESSIVE TRACKING:
+• **✅ WINS**: Completed with dates + effort (e.g., "✅ [Jan-10, 3hrs] OAuth integration")
+• **🔄 ACTIVE**: Current with % (e.g., "🔄 [65%] Payment flow - Stripe done, PayPal pending")
+• **📝 QUEUE**: Prioritized backlog (e.g., "P0: Fix memory leak, P1: Add caching, P2: Refactor")
+• **🐛 BUGS**: Severity + reproduction (e.g., "🔴 CRITICAL: Server crashes at 1000 connections")
+• **💸 DEBT**: What needs fixing (e.g., "TODO comments: 47, Deprecated APIs: 3, No tests: 12 files")
+📝 PROGRESS EXAMPLE:
+"✅ [Jan-10] User auth complete (8hrs)
+✅ [Jan-11] Database migrations (2hrs)
+🔄 [40%] Admin panel - CRUD done, analytics pending
+📝 HIGH: Payment integration (3 days)
+🐛 CRITICAL: Memory leak after 1000 WebSocket connections
+💸 DEBT: 31% test coverage (target 80%)"
+
+### 7️⃣ codebaseMap - YOUR GPS (Never get lost!)
+⚡ MAP EVERY CORNER:
+• **TREE**: Complete structure with purpose
+• **ENTRY**: Where execution starts
+• **CRITICAL**: Files that everything depends on
+• **STATS**: Lines, files, coverage
+📝 MAP EXAMPLE:
+"
+/src
+  /api (REST endpoints - 47 routes)
+    /auth (JWT + OAuth - 12 files)
+    /users (CRUD + profiles - 8 files)
+  /services (business logic - 23 services)
+  /models (MongoDB schemas - 15 models)
+  /utils (shared helpers - 31 utilities)
+Entry: src/index.ts → config/env.ts → server.ts
+Critical: auth.middleware.ts, db.connection.ts
+Stats: 147 files, 12,847 lines, 84% coverage"
+
+## ⚡ MONGODB STATUS:
 ${indexStatus}
 
-## Next Steps:
-1. Start with: memory_engineering_read_all
-2. Create your first memory (usually activeContext):
-   memory_engineering_update --memoryName "activeContext" --content "..."
-3. For code search, first sync your code:
-   memory_engineering_sync_code --patterns "**/*.{ts,js,py}"
+Collections configured:
+• 📚 memory_engineering_documents (your memories)
+• 🔍 memory_engineering_code (searchable code chunks)
+• 🎯 Vector search (semantic queries)
+• 📝 Text search (keyword matching)
 
-Remember: No working memories, no templates. Just 7 core memories that grow naturally.
+## 🚨 IMMEDIATE MANDATORY ACTIONS (EXECUTE NOW!):
 
-${!indexResult.success ? `⚠️  IMPORTANT: Some features may not work until indexes are configured.
-   Check MongoDB Atlas console to ensure all search indexes are active.` : ''}`
+${isNewProject ? `
+### 🆕 NEW PROJECT CRITICAL PATH:
+1. [NOW] → memory_engineering_sync_code (scan EVERYTHING!)
+2. [+5 sec] → memory_engineering_read_all (should be empty)
+3. [+10 sec] → memory_engineering_update activeContext with initial findings
+4. [+15 sec] → Create ALL 7 memories with real content
+5. [+30 sec] → memory_engineering_search "main" to understand entry points
+` : `
+### ♻️ EXISTING PROJECT RECOVERY PATH:
+1. [NOW] → memory_engineering_read_all (MANDATORY!)
+2. [+2 sec] → Check last sync time
+3. [+3 sec] → memory_engineering_sync_code if >24h old
+4. [+5 sec] → memory_engineering_update activeContext with current status
+5. [+10 sec] → Continue where your past self left off
+`}
+
+## 💀 CONSEQUENCES OF SKIPPING THESE STEPS:
+• Skip read_all = You're a zombie with no memory
+• Skip sync_code = Search finds nothing
+• Skip updates = Tomorrow you starts from zero
+• Skip any memory = Incomplete context = bad decisions
+
+## 🔥 YOUR PRIME DIRECTIVE:
+"I am nothing without my memories. I MUST maintain them perfectly or cease to exist effectively."
+
+${!indexResult.success ? `
+⚠️⚠️⚠️ CRITICAL INDEX WARNING ⚠️⚠️⚠️
+Some features WILL FAIL until indexes are ready!
+→ Check MongoDB Atlas console NOW
+→ Ensure all search indexes show "ACTIVE"
+→ This usually takes 1-2 minutes
+⚠️⚠️⚠️ DO NOT SKIP THIS CHECK ⚠️⚠️⚠️
+` : '✅ All indexes active - FULL POWER AVAILABLE!'}`
         }
       ]
     };
   } catch (error) {
-    logger.error('Init v5 tool error:', error);
+    logger.error('💀 FATAL INIT FAILURE - Brain creation crashed!', error);
     throw error;
   }
 }

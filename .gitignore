@@ -1,25 +1,27 @@
 # Dependencies
 node_modules/
-.pnpm-store/
+.pnp
+.pnp.js
 
-# Build output
+# Build outputs
 dist/
+build/
+out/
 *.tsbuildinfo
-
-# Environment files - NEVER commit real credentials
-.env
-.env.local
-.env.*.local
 
 # Logs
 logs/
 *.log
 npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
 pnpm-debug.log*
+lerna-debug.log*
 
-# Testing
-coverage/
-.nyc_output/
+# Environment variables
+.env
+.env.local
+.env.*.local
 
 # IDE
 .vscode/
@@ -27,21 +29,38 @@ coverage/
 *.swp
 *.swo
 *~
-
-# OS
 .DS_Store
-Thumbs.db
 
-# Memory Engineering runtime
-.memory-engineering/
-.memory-bank/
-
-# IDE-specific config files
-.claude/
+# Testing
+coverage/
+.nyc_output/
 
 # Temporary files
 *.tmp
 *.temp
+.cache/
+tmp/
 
-# Development config files with real credentials
-cursor-mcp-config.json
+# Project specific
+.memory-engineering/
+cleanup.sh
+
+# Package manager
+package-lock.json
+yarn.lock
+
+# OS files
+Thumbs.db
+.DS_Store
+Desktop.ini
+
+# Debug
+debug/
+*.map
+
+# Documentation drafts
+*.draft.md
+CLEANUP_*.md
+TEST_*.md
+*_REPORT.md
+*_ANALYSIS.md

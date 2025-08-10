@@ -38,9 +38,9 @@ export async function connectToMongoDB(): Promise<void> {
     
     // Verify connection
     await db.admin().ping();
-    logger.info(`Connected to MongoDB database: ${dbName}`);
+    logger.info(`🌐 MONGODB NEURAL LINK ESTABLISHED: ${dbName} database online!`);
   } catch (error) {
-    logger.error('MongoDB connection error:', error);
+    logger.error('💀 MONGODB CONNECTION EXPLODED!', error);
     throw error;
   }
 }
@@ -49,9 +49,9 @@ export async function closeMongoDBConnection(): Promise<void> {
   if (client) {
     try {
       await client.close();
-      logger.info('MongoDB connection closed');
+      logger.info('🚪 MONGODB CONNECTION TERMINATED - Brain offline');
     } catch (error) {
-      logger.error('Error closing MongoDB connection:', error);
+      logger.error('⚠️ MONGODB DISCONNECT FAILED - Connection stuck!', error);
     }
   }
 }

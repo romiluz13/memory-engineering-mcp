@@ -42,18 +42,18 @@ export async function generateEmbedding(
 
     if (!response.ok) {
       const error = await response.text();
-      throw new Error(`Voyage AI API error: ${response.status} ${error}`);
+      throw new Error(`💀 VOYAGE AI CATASTROPHE! Status: ${response.status} | ${error} | EMBEDDING GENERATION IMPOSSIBLE! Check API key NOW!`);
     }
 
     const data = await response.json() as VoyageEmbeddingResponse;
     
     if (!data.data || data.data.length === 0) {
-      throw new Error('No embeddings returned from Voyage AI');
+      throw new Error('🔴 VOYAGE AI RETURNED NOTHING! Zero embeddings generated! Your text might be invalid or API is DOWN!');
     }
 
     return data.data[0]?.embedding || [];
   } catch (error) {
-    logger.error('Failed to generate embedding:', error);
+    logger.error('💀 VOYAGE EMBEDDING EXPLOSION!', error);
     throw error;
   }
 }
@@ -96,13 +96,13 @@ export async function generateEmbeddings(texts: string[]): Promise<number[][]> {
 
       if (!response.ok) {
         const error = await response.text();
-        throw new Error(`Voyage AI API error: ${response.status} ${error}`);
+        throw new Error(`💥 VOYAGE AI BATCH EXPLOSION! Status: ${response.status} | ${error} | BATCH EMBEDDINGS FAILED! Your API key might be DEAD or rate limited!`);
       }
 
       const data = await response.json() as VoyageEmbeddingResponse;
       
       if (!data.data || data.data.length !== batch.length) {
-        throw new Error('Unexpected number of embeddings returned from Voyage AI');
+        throw new Error(`🔴 EMBEDDING COUNT MISMATCH! Expected ${batch.length} but got ${data.data?.length || 0}! VOYAGE AI IS CORRUPTING YOUR DATA!`);
       }
 
       // Sort by index to ensure correct order
@@ -115,7 +115,7 @@ export async function generateEmbeddings(texts: string[]): Promise<number[][]> {
 
     return embeddings;
   } catch (error) {
-    logger.error('Failed to generate embeddings:', error);
+    logger.error('💥 BATCH EMBEDDING CATASTROPHE!', error);
     throw error;
   }
 }

@@ -3,7 +3,8 @@
 import { Server } from '@modelcontextprotocol/sdk/server/index.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import { config } from 'dotenv';
-import { setupTools } from './tools/index-v5.js';
+import { setupToolsConsolidated as setupTools } from './tools/index-v6-consolidated.js';
+import { setupResources } from './tools/resources.js';
 import { connectToMongoDB, closeMongoDBConnection } from './db/connection.js';
 import { logger } from './utils/logger.js';
 import { readFileSync } from 'fs';
@@ -43,24 +44,27 @@ async function main(): Promise<void> {
   // Connect to MongoDB
   try {
     await connectToMongoDB();
-    logger.info('Connected to MongoDB');
+    logger.info('🌐 MONGODB NEURAL LINK ESTABLISHED - Memory system online!');
   } catch (error) {
-    logger.error('Failed to connect to MongoDB:', error);
+    logger.error('💀 MONGODB CONNECTION CATASTROPHE - Memory system OFFLINE!', error);
     process.exit(1);
   }
 
-  // Set up tools
-  setupTools(server, SERVER_VERSION);
+  // Set up consolidated tools (6 instead of 10)
+  setupTools(server);
+  
+  // Set up resources
+  setupResources(server);
 
   // Handle graceful shutdown
   process.on('SIGINT', async () => {
-    logger.info('Shutting down server...');
+    logger.info('🛑 GRACEFUL SHUTDOWN INITIATED - Saving all memories...');
     await closeMongoDBConnection();
     process.exit(0);
   });
 
   process.on('SIGTERM', async () => {
-    logger.info('Shutting down server...');
+    logger.info('🛑 GRACEFUL SHUTDOWN INITIATED - Saving all memories...');
     await closeMongoDBConnection();
     process.exit(0);
   });
@@ -69,22 +73,22 @@ async function main(): Promise<void> {
   const transport = new StdioServerTransport();
   await server.connect(transport);
 
-  logger.info(`${SERVER_NAME} v${SERVER_VERSION} started`);
+  logger.info(`🚀 ${SERVER_NAME} v${SERVER_VERSION} ACTIVATED - AI Memory System ONLINE!`);
 }
 
 // Handle uncaught errors
 process.on('uncaughtException', (error) => {
-  logger.error('Uncaught exception:', error);
+  logger.error('💀 UNCAUGHT EXCEPTION - System crash imminent!', error);
   process.exit(1);
 });
 
 process.on('unhandledRejection', (error) => {
-  logger.error('Unhandled rejection:', error);
+  logger.error('💥 UNHANDLED REJECTION - Promise explosion!', error);
   process.exit(1);
 });
 
 // Start the server
 main().catch((error) => {
-  logger.error('Server failed to start:', error);
+  logger.error('🔴 SERVER STARTUP CATASTROPHE - Memory system FAILED!', error);
   process.exit(1);
 });

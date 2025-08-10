@@ -45,7 +45,7 @@ File: ${chunk.filePath} | Type: ${chunk.chunk.type} | Patterns: ${chunk.metadata
     const batch = chunkTexts.slice(i, i + BATCH_SIZE);
 
     try {
-      logger.info(`Generating embeddings for batch of ${batch.length} chunks with voyage-3`);
+      logger.info(`🧠 GENERATING INTELLIGENCE: ${batch.length} chunks → voyage-3 embeddings`);
 
       // Use regular embed which is more stable
       const response = await client.embed({
@@ -54,7 +54,7 @@ File: ${chunk.filePath} | Type: ${chunk.chunk.type} | Patterns: ${chunk.metadata
         inputType: 'document'
       });
 
-      logger.info(`Received response with ${response.data?.length || 0} embeddings`);
+      logger.info(`🎆 EMBEDDINGS RECEIVED: ${response.data?.length || 0} vectors from Voyage AI`);
 
       // Extract embeddings from regular embed response
       // The response structure is simpler: response.data[index].embedding
@@ -62,25 +62,25 @@ File: ${chunk.filePath} | Type: ${chunk.chunk.type} | Patterns: ${chunk.metadata
         for (const item of response.data) {
           if (item.embedding && Array.isArray(item.embedding) && item.embedding.length > 0) {
             allEmbeddings.push(item.embedding);
-            logger.debug(`Added embedding with ${item.embedding.length} dimensions`);
+            logger.debug(`✨ PERFECT VECTOR: ${item.embedding.length} dimensions captured`);
           } else {
-            logger.error(`Invalid embedding in response:`, item);
+            logger.error(`🔴 CORRUPT EMBEDDING DETECTED!`, item);
           }
         }
       } else {
-        logger.error('No data in embedding response:', response);
+        logger.error('💀 VOYAGE AI RETURNED EMPTY!', response);
       }
 
-      logger.info(`Total embeddings collected so far: ${allEmbeddings.length}`);
+      logger.info(`📊 EMBEDDING PROGRESS: ${allEmbeddings.length} vectors ready`);
 
     } catch (error: any) {
       // More robust error handling for embed API
       if (error.message?.includes('invalid model')) {
         throw new Error(`Model voyage-3 not available. Please check your Voyage AI account permissions.`);
       } else if (error.response?.status === 401) {
-        throw new Error('Invalid Voyage AI API key. Please check your VOYAGE_API_KEY environment variable.');
+        throw new Error('💀 VOYAGE API KEY DEAD! Your VOYAGE_API_KEY is INVALID or EXPIRED! GET A NEW KEY NOW at voyageai.com!');
       } else {
-        logger.error('Failed to generate code embeddings:', error);
+        logger.error('💥 EMBEDDING GENERATION EXPLODED!', error);
         throw error;
       }
     }
@@ -88,10 +88,10 @@ File: ${chunk.filePath} | Type: ${chunk.chunk.type} | Patterns: ${chunk.metadata
   
   // SIMPLIFIED: Just return all embeddings in the order they were generated
   // The contextualized embeddings should maintain the same order as the input chunks
-  logger.debug(`Generated ${allEmbeddings.length} embeddings for ${chunks.length} chunks`);
+  logger.debug(`🎯 FINAL COUNT: ${allEmbeddings.length} embeddings for ${chunks.length} chunks`);
 
   if (allEmbeddings.length !== chunks.length) {
-    logger.error(`Embedding count mismatch: ${allEmbeddings.length} embeddings for ${chunks.length} chunks`);
+    logger.error(`⚠️ EMBEDDING MISMATCH: ${allEmbeddings.length} vectors ≠ ${chunks.length} chunks!`);
 
     // Pad with empty arrays if we have fewer embeddings
     while (allEmbeddings.length < chunks.length) {
@@ -104,7 +104,7 @@ File: ${chunk.filePath} | Type: ${chunk.chunk.type} | Patterns: ${chunk.metadata
     }
   }
 
-  logger.info(`Returning ${allEmbeddings.filter(e => e.length > 0).length} valid embeddings out of ${chunks.length} chunks`);
+  logger.info(`🎉 EMBEDDING SUCCESS: ${allEmbeddings.filter(e => e.length > 0).length}/${chunks.length} valid vectors`);
 
   return allEmbeddings;
 }
@@ -116,7 +116,7 @@ export async function generateCodeQueryEmbedding(query: string): Promise<number[
   const client = getVoyageClient();
 
   try {
-    logger.info(`Generating embedding for query: "${query.substring(0, 100)}..."`);
+    logger.info(`🔍 QUERY EMBEDDING: "${query.substring(0, 100)}..."`);
 
     // Use regular embed API which is more stable
     const response = await client.embed({
@@ -129,20 +129,20 @@ export async function generateCodeQueryEmbedding(query: string): Promise<number[
     if (response.data && response.data.length > 0) {
       const item = response.data[0];
       if (item && item.embedding && Array.isArray(item.embedding) && item.embedding.length > 0) {
-        logger.info(`Generated query embedding with ${item.embedding.length} dimensions`);
+        logger.info(`✅ QUERY VECTOR READY: ${item.embedding.length} dimensions`);
         return item.embedding;
       }
     }
     
-    throw new Error('Failed to generate embedding for query');
+    throw new Error('💥 QUERY EMBEDDING CATASTROPHE! Failed to generate search vector! Your query might be corrupted or Voyage AI is DOWN!');
   } catch (error: any) {
     // Provide specific error messages
     if (error.message?.includes('invalid model')) {
       throw new Error(`Model voyage-3 not available for queries.`);
     } else if (error.response?.status === 401) {
-      throw new Error('Invalid Voyage AI API key for query embedding.');
+      throw new Error('🔴 VOYAGE KEY REJECTED! Cannot generate query embeddings! CHECK YOUR API KEY IMMEDIATELY!');
     } else {
-      logger.error('Failed to generate query embedding:', error);
+      logger.error('🔴 QUERY EMBEDDING FAILED!', error);
       throw error;
     }
   }

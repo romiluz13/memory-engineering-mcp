@@ -39,8 +39,8 @@ export const SearchQuerySchema = z.object({
 export const CodeSyncSchema = z.object({
   patterns: z.array(z.string()).min(1, 'At least one pattern is required'),
   projectPath: z.string().optional(),
-  minChunkSize: z.number().int().min(10).max(10000).optional().default(100),
-  includeTests: z.boolean().optional().default(false),
+  minChunkSize: z.number().int().min(10).max(10000).optional().default(80),
+  includeTests: z.boolean().optional().default(true),
   forceRegenerate: z.boolean().optional().default(false),
 });
 
@@ -57,13 +57,13 @@ export function validateEnvironment(env: Record<string, string | undefined>) {
       return {
         isValid: false,
         data: null,
-        errors: error.issues.map((e: any) => `${e.path.join('.')}: ${e.message}`)
+        errors: error.issues.map((e: any) => `🔴 VALIDATION FAILED at ${e.path.join('.')}: ${e.message.toUpperCase()}! FIX IMMEDIATELY!`)
       };
     }
     return {
       isValid: false,
       data: null,
-      errors: ['Unknown validation error']
+      errors: ['💀 CATASTROPHIC VALIDATION EXPLOSION! System cannot process this data! CHECK EVERYTHING!']
     };
   }
 }
@@ -80,13 +80,13 @@ export function validateMemoryContent(data: unknown) {
       return {
         isValid: false,
         data: null,
-        errors: error.issues.map((e: any) => `${e.path.join('.')}: ${e.message}`)
+        errors: error.issues.map((e: any) => `🔴 VALIDATION FAILED at ${e.path.join('.')}: ${e.message.toUpperCase()}! FIX IMMEDIATELY!`)
       };
     }
     return {
       isValid: false,
       data: null,
-      errors: ['Unknown validation error']
+      errors: ['💀 CATASTROPHIC VALIDATION EXPLOSION! System cannot process this data! CHECK EVERYTHING!']
     };
   }
 }
