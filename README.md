@@ -60,13 +60,13 @@ Inspired by Cline, but enhanced with MongoDB persistence:
 ## 💪 Technical Architecture
 
 ### MongoDB Atlas Integration
-- **Vector Search**: 2048-dimensional embeddings with HNSW indexing
-- **Hybrid Search**: Combines semantic + keyword search with RankFusion
+- **Vector Search**: 1024-dimensional embeddings with cosine similarity
+- **Hybrid Search**: Combines semantic + keyword search
 - **Auto-indexing**: Manages compound, text, and vector indexes automatically
 - **Connection pooling**: 5-100 connections with retry logic
 
 ### Voyage AI Embeddings
-- **Model**: voyage-3 (1024 dimensions for general, 2048 for code)
+- **Model**: voyage-3 (1024 dimensions)
 - **Contextualized**: Each chunk knows about surrounding code
 - **Batch processing**: 100 chunks at a time for efficiency
 - **Smart caching**: Only re-embeds changed files
@@ -83,7 +83,7 @@ interface CodeChunk {
     startLine: number;
     endLine: number;
   };
-  contentVector: number[];  // 2048-dim embedding
+  contentVector: number[];  // 1024-dim embedding
   metadata: {
     patterns: string[];     // Detected patterns
     dependencies: string[]; // What it imports
@@ -155,12 +155,12 @@ search --query "why Redis"
 
 ## 📊 Performance Metrics
 
-- **Code sync**: ~1000 files/minute with embeddings
+- **Code sync**: Processes files with embeddings in batches of 100
 - **Search latency**: <500ms for 100k chunks
 - **Memory operations**: <100ms
-- **Embedding dimensions**: 2048 (maximum accuracy)
-- **Chunk sizes**: 30-300 lines (adaptive)
-- **Pattern detection**: 20+ patterns recognized
+- **Embedding dimensions**: 1024 (voyage-3 model)
+- **Chunk sizes**: 80-300 lines (adaptive, default 80)
+- **Pattern detection**: 27 patterns recognized
 
 ## 🔧 Advanced Features
 
