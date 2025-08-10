@@ -18,6 +18,7 @@ export default function Navigation() {
 
   const navItems = [
     { href: '#code-search', label: 'Code Search' },
+    { href: '#memory', label: 'Memory' },
     { href: '#features', label: 'Features' },
     { href: '#performance', label: 'Performance' },
     { href: '#demo', label: 'Demo' },

@@ -49,16 +49,16 @@ export default function Hero() {
 
           {/* Main Headline */}
           <h1 className="text-5xl md:text-7xl font-bold mb-6 bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
-            Your AI Understands Code
+            AI That Understands & Remembers
           </h1>
 
           {/* Subheadline */}
           <p className="text-xl md:text-2xl text-gray-300 mb-4 max-w-3xl mx-auto">
-            <span className="text-white font-semibold">Semantic code search</span> that finds by meaning, not text.
-            Plus persistent memory across sessions.
+            <span className="text-white font-semibold">Semantic code search</span> finds by meaning + 
+            <span className="text-white font-semibold"> Persistent memory</span> survives forever
           </p>
           <p className="text-lg text-blue-300 mb-8">
-            🔥 Ask "How does auth work?" and get instant, accurate answers
+            🧠 Never explain your project twice | 🔍 Find code by asking questions
           </p>
 
           {/* Stats */}
