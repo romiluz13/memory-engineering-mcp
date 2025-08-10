@@ -1,6 +1,6 @@
 {
   "name": "memory-engineering-mcp",
-  "version": "13.3.0",
+  "version": "13.3.2",
   "description": "🧠 AI Memory System powered by MongoDB Atlas & Voyage AI - Autonomous memory management with zero manual work",
   "main": "dist/index.js",
   "type": "module",
