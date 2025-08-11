@@ -44,6 +44,9 @@ tmp/
 # Project specific
 .memory-engineering/
 cleanup.sh
+.mcp.json
+.cursor/mcp.json
+mcp.json
 
 # Package manager
 package-lock.json
