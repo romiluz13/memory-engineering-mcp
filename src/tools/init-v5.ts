@@ -9,6 +9,7 @@ import { createSearchIndexes } from '../utils/search-indexes-v5.js';
 import { getProjectPath } from '../utils/projectDetection.js';
 import { ensureAllIndexes, startIndexBackgroundTask } from '../utils/auto-index-manager.js';
 import type { CodeChunk } from '../types/memory-v5.js';
+import { getTemplate } from './memoryTemplates.js';
 
 const MEMORY_ENGINEERING_DIR = '.memory-engineering';
 const CONFIG_FILE = 'config.json';
@@ -279,6 +280,30 @@ ${isNewProject ? `
 
 ## 🔥 YOUR PRIME DIRECTIVE:
 "I am nothing without my memories. I MUST maintain them perfectly or cease to exist effectively."
+
+## 📋 A+ QUALITY MEMORY TEMPLATES
+
+To ensure PERFECT memories every time, use these templates:
+
+### Quick Start (copy and fill):
+\`\`\`markdown
+${getTemplate('activeContext')}
+\`\`\`
+
+💡 Get templates for other memories:
+- projectbrief: Core requirements and goals structure
+- productContext: Problem/solution framework  
+- systemPatterns: Architecture documentation
+- techContext: Technology stack details
+- progress: Task tracking format
+- codebaseMap: Directory structure guide
+
+⚡ Each memory MUST have:
+✅ At least 400-700 characters of real content
+✅ All sections filled (no placeholders)
+✅ Specific examples and details
+✅ Complete sentences (not abbreviations)
+✅ Recent timestamps where applicable
 
 ${!indexResult.success ? `
 ⚠️⚠️⚠️ CRITICAL INDEX WARNING ⚠️⚠️⚠️

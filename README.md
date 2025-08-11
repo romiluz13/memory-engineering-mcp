@@ -12,7 +12,7 @@
 ### Revolutionary Code Chunking
 - **Smart Semantic Boundaries**: Tracks braces, parentheses, and indentation to capture COMPLETE functions (up to 200 lines) and classes (up to 300 lines)
 - **Context-Aware**: Every chunk includes its imports, dependencies, and surrounding context
-- **Pattern Detection**: Automatically identifies 20+ code patterns (error-handling, async, authentication, etc.)
+- **Pattern Detection**: Automatically identifies 27 code patterns (error-handling, async, authentication, etc.)
 
 ### Why This Matters
 ```javascript
@@ -217,6 +217,18 @@ class AuthService {
 3. **Behavioral Prompting**: Dramatic prompts ensure AI assistants take memory seriously
 4. **MongoDB Scale**: Handles millions of chunks with millisecond queries
 5. **Voyage AI Quality**: State-of-the-art embeddings optimized for code
+
+## 📦 Latest Updates
+
+### v13.4.0 (January 2025)
+- Enhanced memory quality with structured templates
+- Improved pattern detection in code embeddings (now 27 patterns)
+- Better validation for consistent memory creation
+- All improvements are backwards compatible
+
+### v13.3.2
+- Consolidated tools for simpler interface
+- Performance optimizations
 
 ## 📄 License
 

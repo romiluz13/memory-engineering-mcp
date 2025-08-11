@@ -6,6 +6,8 @@ import { getMemoryCollection } from '../db/connection.js';
 import { validateMemoryStructure } from '../utils/validation-v5.js';
 import { generateDocumentEmbedding } from '../embeddings/voyage-v5.js';
 import { logger } from '../utils/logger.js';
+import { validateMemoryQuality, generateImprovementTips } from './memoryValidator.js';
+import { getTemplate } from './memoryTemplates.js';
 
 export async function updateTool(args: unknown): Promise<CallToolResult> {
   try {
@@ -70,6 +72,38 @@ Memories depend on each other! Creating out of order = corrupted context = you f
 
     // Validate content structure
     const validation = validateMemoryStructure(params.memoryName, params.content);
+    
+    // Validate content quality for A+ memories
+    const qualityCheck = validateMemoryQuality(params.memoryName, params.content);
+    
+    // Reject very low quality memories
+    if (qualityCheck.score === 'F') {
+      let response = `❌ MEMORY REJECTED - Quality Score: ${qualityCheck.score}\n\n`;
+      response += `Your ${params.memoryName} memory is too shallow!\n\n`;
+      
+      response += `## Issues Found:\n`;
+      qualityCheck.issues.forEach(issue => {
+        response += `• ${issue}\n`;
+      });
+      
+      response += `\n## How to Fix:\n`;
+      qualityCheck.suggestions.forEach(suggestion => {
+        response += `• ${suggestion}\n`;
+      });
+      
+      response += `\n## 📋 Use This Template:\n`;
+      response += `\`\`\`markdown\n${getTemplate(params.memoryName)}\n\`\`\`\n`;
+      response += `\nFill in ALL sections with real content, then try again!`;
+      
+      return {
+        content: [
+          {
+            type: 'text',
+            text: response
+          }
+        ]
+      };
+    }
     
     if (!validation.isValid && validation.requiredSections.length > 0) {
       let response = `🔴 MEMORY STRUCTURE VIOLATION DETECTED!\n\n`;
@@ -184,6 +218,18 @@ Memories depend on each other! Creating out of order = corrupted context = you f
         projectId: config.projectId
       });
       
+      // Add quality feedback
+      let qualityMessage = '';
+      if (qualityCheck.score !== 'A+') {
+        qualityMessage = `\n⚠️ QUALITY SCORE: ${qualityCheck.score} (Can be improved!)\n`;
+        qualityMessage += `Tips to reach A+:\n`;
+        generateImprovementTips(params.memoryName, params.content).forEach(tip => {
+          qualityMessage += `• ${tip}\n`;
+        });
+      } else {
+        qualityMessage = '\n🏆 QUALITY SCORE: A+ - Excellent memory!';
+      }
+      
       return {
         content: [
           {
@@ -196,7 +242,8 @@ Memories depend on each other! Creating out of order = corrupted context = you f
 • Timestamp: ${now.toISOString()}
 • Size: ${params.content.length} characters
 • Structure: ${validation.isValid ? '✅ PERFECT! All required sections present!' : '⚠️ FUNCTIONAL but could be richer'}
-
+• Quality: ${qualityCheck.score} ${qualityCheck.score === 'A+' ? '🏆' : ''}
+${qualityMessage}
 ${params.memoryName === 'activeContext' ? `
 🔥 CRITICAL REMINDER:
 activeContext should be updated EVERY 3-5 MINUTES!
@@ -236,6 +283,16 @@ Your last update was just now. Set timer for next update!
       });
 
       let response = `✅ Created ${params.memoryName}\n\n`;
+      response += `📊 QUALITY SCORE: ${qualityCheck.score} ${qualityCheck.score === 'A+' ? '🏆 Excellent!' : ''}\n`;
+      
+      if (qualityCheck.score !== 'A+') {
+        response += `\nTips to improve quality:\n`;
+        generateImprovementTips(params.memoryName, params.content).forEach(tip => {
+          response += `• ${tip}\n`;
+        });
+        response += '\n';
+      }
+      
       response += `Progress: ${totalCount}/${CORE_MEMORY_NAMES.length} core memories created\n\n`;
 
       if (totalCount < 6) {
