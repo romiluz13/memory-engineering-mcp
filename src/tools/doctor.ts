@@ -1,5 +1,5 @@
 /**
- * Doctor Tool v13 - Comprehensive system diagnostics
+ * Doctor Tool - Comprehensive system diagnostics
  * Finds and fixes ALL problems automatically!
  */
 

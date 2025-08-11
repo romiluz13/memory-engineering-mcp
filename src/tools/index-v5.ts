@@ -722,13 +722,13 @@ check_env → Old version? → Update → restart → check_env
     return {
       resources: [
         {
-          uri: 'memory://v13/core',
+          uri: `memory://v${dynamicVersion.split('.')[0]}/core`,
           name: 'Core Memory Documents (v13)',
           description: 'The 7 core memories YOU MUST maintain for your future self who has ZERO memory',
           mimeType: 'text/markdown',
         },
         {
-          uri: 'memory://v13/principle',
+          uri: `memory://v${dynamicVersion.split('.')[0]}/principle`,
           name: `Memory Engineering v${version} Principle`,
           description: 'CRITICAL: You have ZERO memory between sessions. Memory Bank is your ONLY link to past work.',
           mimeType: 'text/markdown',
@@ -742,12 +742,12 @@ check_env → Old version? → Update → restart → check_env
     
     try {
       switch (uri) {
-        case 'memory://v13/core':
+        case `memory://v${dynamicVersion.split('.')[0]}/core`:
           return {
             contents: [{
-              uri: 'memory://v13/core',
+              uri: `memory://v${dynamicVersion.split('.')[0]}/core`,
               mimeType: 'text/markdown',
-              text: `# 🧠 MEMORY ENGINEERING v13 - YOUR SURVIVAL GUIDE
+              text: `# 🧠 MEMORY ENGINEERING v${dynamicVersion} - YOUR SURVIVAL GUIDE
 
 ## ⚡ THE BRUTAL TRUTH
 You wake up with COMPLETE AMNESIA every session. Not partial memory. ZERO. NOTHING.
@@ -885,10 +885,10 @@ This is not optional. This is survival. Your memories ARE your existence!`,
             }],
           };
 
-        case 'memory://v13/principle':
+        case `memory://v${dynamicVersion.split('.')[0]}/principle`:
           return {
             contents: [{
-              uri: 'memory://v13/principle',
+              uri: `memory://v${dynamicVersion.split('.')[0]}/principle`,
               mimeType: 'text/markdown',
               text: `# CRITICAL: Your Memory Reset Awareness
 

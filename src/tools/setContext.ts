@@ -1,5 +1,5 @@
 /**
- * Set Context Tool v13 - Session-level project binding
+ * Set Context Tool - Session-level project binding
  * THE MOST IMPORTANT COMMAND - Solves context drift!
  */
 

@@ -1,5 +1,5 @@
 /**
- * Status Tool v13 - Complete system state visibility
+ * Status Tool - Complete system state visibility
  * Shows EVERYTHING about current project and memory state
  */
 
