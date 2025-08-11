@@ -98,3 +98,12 @@ The `.replit` file already configures port 3000 → 80 mapping
 ---
 
 **Ready to deploy!** Just import to Replit and watch your landing page go live! 🎉
+
+
+
+
+
+
+
+
+

@@ -1,4 +1,4 @@
-import { join, basename } from 'path';
+import { join, basename, dirname } from 'path';
 import { existsSync, mkdirSync, writeFileSync, readFileSync } from 'fs';
 import type { CallToolResult } from '@modelcontextprotocol/sdk/types.js';
 import { InitToolSchema, type ProjectConfig } from '../types/memory-v5.js';
@@ -10,6 +10,13 @@ import { getProjectPath } from '../utils/projectDetection.js';
 import { ensureAllIndexes, startIndexBackgroundTask } from '../utils/auto-index-manager.js';
 import type { CodeChunk } from '../types/memory-v5.js';
 import { getTemplate } from './memoryTemplates.js';
+import { fileURLToPath } from 'url';
+
+// Get the actual version from package.json dynamically
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+const packageJson = JSON.parse(readFileSync(join(__dirname, '../../package.json'), 'utf-8'));
+const version = packageJson.version;
 
 const MEMORY_ENGINEERING_DIR = '.memory-engineering';
 const CONFIG_FILE = 'config.json';
@@ -58,7 +65,7 @@ export async function initTool(params: unknown): Promise<CallToolResult> {
     
     const projectName = detectProjectName();
     
-    logger.info('🚨 INITIALIZING AUTONOMOUS AI BRAIN - Memory Engineering v13 ACTIVATED!', { projectPath, projectName });
+    logger.info(`🚨 INITIALIZING AUTONOMOUS AI BRAIN - Memory Engineering v${version} ACTIVATED!`, { projectPath, projectName });
 
     // Create .memory-engineering directory
     const memoryDir = join(projectPath, MEMORY_ENGINEERING_DIR);

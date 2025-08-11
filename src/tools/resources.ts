@@ -6,6 +6,15 @@ import {
   type ReadResourceRequest,
 } from '@modelcontextprotocol/sdk/types.js';
 import { logger } from '../utils/logger.js';
+import { join, dirname } from 'path';
+import { fileURLToPath } from 'url';
+import { readFileSync } from 'fs';
+
+// Get the actual version from package.json dynamically
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+const packageJson = JSON.parse(readFileSync(join(__dirname, '../../package.json'), 'utf-8'));
+const version = packageJson.version;
 
 export function setupResources(server: Server): void {
   // Register resources handlers
@@ -13,14 +22,14 @@ export function setupResources(server: Server): void {
     return {
       resources: [
         {
-          uri: 'memory://v13/core',
-          name: 'Core Memory Documents (v13)',
+          uri: `memory://v${version.split('.')[0]}/core`,
+          name: `Core Memory Documents (v${version})`,
           description: 'The 7 core memories YOU MUST maintain for your future self who has ZERO memory',
           mimeType: 'text/markdown',
         },
         {
-          uri: 'memory://v13/principle',
-          name: 'Memory Engineering v13 Principle',
+          uri: `memory://v${version.split('.')[0]}/principle`,
+          name: `Memory Engineering v${version} Principle`,
           description: 'CRITICAL: You have ZERO memory between sessions. Memory Bank is your ONLY link to past work.',
           mimeType: 'text/markdown',
         },
@@ -33,12 +42,12 @@ export function setupResources(server: Server): void {
     
     try {
       switch (uri) {
-        case 'memory://v13/core':
+        case `memory://v${version.split('.')[0]}/core`:
           return {
             contents: [{
-              uri: 'memory://v13/core',
+              uri: `memory://v${version.split('.')[0]}/core`,
               mimeType: 'text/markdown',
-              text: `# 🧠 MEMORY ENGINEERING v13 - YOUR SURVIVAL GUIDE
+              text: `# 🧠 MEMORY ENGINEERING v${version} - YOUR SURVIVAL GUIDE
 
 ## ⚡ THE BRUTAL TRUTH
 You wake up with COMPLETE AMNESIA every session. Not partial memory. ZERO. NOTHING.
@@ -85,12 +94,12 @@ The Memory Bank is your ONLY link to past work. Without it, you're a goldfish st
             }],
           };
 
-        case 'memory://v13/principle':
+        case `memory://v${version.split('.')[0]}/principle`:
           return {
             contents: [{
-              uri: 'memory://v13/principle',
+              uri: `memory://v${version.split('.')[0]}/principle`,
               mimeType: 'text/markdown',
-              text: `# MEMORY ENGINEERING PRINCIPLE v13
+              text: `# MEMORY ENGINEERING PRINCIPLE v${version}
 
 ## The Core Truth
 
@@ -136,8 +145,8 @@ This is NOT optional - it's your survival mechanism across resets.`,
 ⚠️ THIS RESOURCE DOES NOT EXIST IN THE SYSTEM!
 
 🧠 AVAILABLE RESOURCES:
-• memory://v13/core - The 7 core memory documents
-• memory://v13/principle - Memory engineering principles
+• memory://v${version.split('.')[0]}/core - The 7 core memory documents
+• memory://v${version.split('.')[0]}/principle - Memory engineering principles
 
 ⚡ IMMEDIATE FIX:
 Use one of the valid resource URIs listed above!`,
