@@ -8,6 +8,8 @@ dist/
 build/
 out/
 *.tsbuildinfo
+.next/
+next-env.d.ts
 
 # Logs
 logs/
@@ -18,10 +20,18 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
-# Environment variables
+# Environment variables and secrets
 .env
+.env.*
 .env.local
 .env.*.local
+*.key
+*.pem
+*.cert
+*.crt
+secrets.json
+config.json
+credentials.json
 
 # IDE
 .vscode/
@@ -61,9 +71,19 @@ Desktop.ini
 debug/
 *.map
 
-# Documentation drafts
+# Documentation drafts and internal files
 *.draft.md
 CLEANUP_*.md
 TEST_*.md
 *_REPORT.md
 *_ANALYSIS.md
+*_SOLUTION.md
+*_GUIDE.md
+*_SUCCESS.md
+*_LAUNCH.md
+ULTRATHINK*.md
+V[0-9][0-9]*.md
+V[0-9]*.md
+MEMORY_GENERATION*.md
+*INTERNAL*.md
+*internal*.md
