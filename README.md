@@ -3,7 +3,32 @@
 [![npm version](https://img.shields.io/npm/v/memory-engineering-mcp.svg)](https://www.npmjs.com/package/memory-engineering-mcp)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
+<div align="center">
+  
+  <a href="https://memory-engineering-mcp.vercel.app">
+    <img src="https://img.shields.io/badge/🚀_Visit_Landing_Page-FF6B6B?style=for-the-badge&logoColor=white" alt="Landing Page" height="40"/>
+  </a>
+  
+  <br/>
+  
+  [**📦 NPM Package**](https://www.npmjs.com/package/memory-engineering-mcp) | 
+  [**💬 Discord**](https://discord.gg/memory-engineering) | 
+  [**📖 Documentation**](#-quick-start)
+  
+</div>
+
+<br/>
+
 **Persistent memory and semantic code understanding for AI assistants.** Built on MongoDB Atlas Vector Search and Voyage AI embeddings.
+
+## ✨ See It In Action
+
+<div align="center">
+  <a href="https://memory-engineering-mcp.vercel.app">
+    <img src="https://img.shields.io/badge/🌐_Interactive_Demo-4A90E2?style=for-the-badge" alt="Try Demo" />
+  </a>
+  <p><i>Experience the power of semantic code search and persistent AI memory</i></p>
+</div>
 
 ## 🔥 The Game Changer: Code Embeddings
 
