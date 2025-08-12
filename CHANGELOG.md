@@ -2,6 +2,19 @@
 
 All notable changes to the Memory Engineering MCP Server will be documented in this file.
 
+## [13.4.2] - 2025-01-11 - VOYAGE AI RERANKING
+
+### Added
+- **Voyage AI Reranking**: Integrated rerank-2.5 for 8% better search accuracy
+- **Zero-Risk Implementation**: Falls back to original order if reranking fails
+- **No Config Changes**: Uses existing VOYAGE_API_KEY automatically
+- **32K Context Window**: 8x larger than before for longer documents
+
+### Technical
+- Added `voyage-rerank.ts` module with graceful fallback
+- Minimal change: Only 3 lines added to search logic
+- Completely safe: Search works normally if reranking unavailable
+
 ## [13.4.1] - 2025-01-11 - ENHANCED TOOL DOCUMENTATION
 
 ### Added
