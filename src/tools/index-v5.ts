@@ -151,10 +151,12 @@ REAL EXAMPLE: React e-commerce → Scan package.json (React 18, Redux, Stripe), 
               projectPath: {
                 type: 'string',
                 description: 'Project directory path (defaults to current directory)',
+                examples: ['.', '/path/to/project', '../my-project']
               },
               projectName: {
                 type: 'string',
                 description: 'Project name (defaults to directory name)',
+                examples: ['my-app', 'backend-api', 'web-frontend']
               },
             },
           },
@@ -220,6 +222,7 @@ PERFECT EXECUTION:
               projectPath: {
                 type: 'string',
                 description: 'Project directory path (defaults to current directory)',
+                examples: ['.', '/path/to/project', '../my-project']
               },
             },
           },
@@ -312,12 +315,14 @@ User: "What database are we using?"
             properties: {
               memoryName: {
                 type: 'string',
-                description: 'Core memory name (e.g., activeContext, systemPatterns)',
-                enum: ['projectbrief', 'productContext', 'activeContext', 'systemPatterns', 'techContext', 'progress', 'codebaseMap']
+                description: 'Core memory name to read (one of 7 memories)',
+                enum: ['projectbrief', 'productContext', 'activeContext', 'systemPatterns', 'techContext', 'progress', 'codebaseMap'],
+                examples: ['activeContext', 'techContext', 'progress']
               },
               projectPath: {
                 type: 'string',
                 description: 'Project directory path (defaults to current directory)',
+                examples: ['.', '/path/to/project', '../my-project']
               },
             },
             required: ['memoryName'],
@@ -393,17 +398,20 @@ EXAMPLE: User: "Let's use Redis"
             properties: {
               memoryName: {
                 type: 'string',
-                description: 'Core memory name',
-                enum: ['projectbrief', 'productContext', 'activeContext', 'systemPatterns', 'techContext', 'progress', 'codebaseMap']
+                description: 'Core memory name to update (one of 7 memories)',
+                enum: ['projectbrief', 'productContext', 'activeContext', 'systemPatterns', 'techContext', 'progress', 'codebaseMap'],
+                examples: ['activeContext', 'progress', 'techContext']
               },
               content: {
                 type: 'string',
-                description: 'Markdown content for the memory',
-                minLength: 1
+                description: 'Markdown content for the memory (min 100 chars for quality, 500+ recommended)',
+                minLength: 1,
+                examples: ['## Current Focus\nWorking on authentication...', '## Progress\n✅ Login complete...']
               },
               projectPath: {
                 type: 'string',
                 description: 'Project directory path (defaults to current directory)',
+                examples: ['.', '/path/to/project', '../my-project']
               },
             },
             required: ['memoryName', 'content'],
@@ -485,18 +493,74 @@ User: "How do we handle errors?"
 - Document it IMMEDIATELY for your future self
 - Your search becomes the breadcrumb for tomorrow
 
-💡 REMEMBER: You're not alone! Your past self was brilliant and left treasures everywhere. FIND THEM FIRST!`,
+💡 REMEMBER: You're not alone! Your past self was brilliant and left treasures everywhere. FIND THEM FIRST!
+
+## TECHNICAL DOCUMENTATION
+
+Performs semantic search across memories and code using MongoDB Atlas Vector Search with Voyage AI embeddings (1024 dimensions).
+
+### Parameters:
+- **query** (string, required): Natural language search query
+  - Examples: "authentication flow", "error handling", "user registration"
+  - Supports semantic expansion (auth → authentication, JWT, tokens)
+- **codeSearch** (enum, optional): Specialized code search mode
+  - "similar": Find semantically similar code (default)
+  - "implements": Find where something is implemented/defined
+  - "uses": Find where something is used/referenced
+  - "pattern": Find architectural patterns (error-handling, async, etc.)
+- **limit** (integer, optional): Maximum results to return
+  - Range: 1-50, Default: 10
+  - Lower for focused search, higher for exploration
+- **filePath** (string, optional): Filter results by file path pattern
+  - Examples: "src/auth", "*.test.ts", "components/"
+- **projectPath** (string, optional): Project directory path
+  - Defaults to current working directory
+
+### Returns:
+\`\`\`json
+{
+  "memories": [...],     // Matching memory documents with scores
+  "codeChunks": [...],   // Matching code with embeddings
+  "patterns": [...],     // Detected code patterns
+  "score": 0.95          // Similarity score (0-1)
+}
+\`\`\`
+
+### Example Usage:
+\`\`\`javascript
+// Find authentication implementation
+search({ 
+  query: "JWT refresh token", 
+  codeSearch: "implements",
+  limit: 5 
+})
+
+// Debug an error
+search({ 
+  query: "Cannot connect to MongoDB",
+  codeSearch: "similar" 
+})
+
+// Find usage patterns
+search({ 
+  query: "error handling",
+  codeSearch: "pattern",
+  filePath: "src/" 
+})
+\`\`\``,
           inputSchema: {
             type: 'object',
             properties: {
               query: {
                 type: 'string',
-                description: 'Search query',
-                minLength: 1
+                description: 'Natural language search query with semantic expansion',
+                minLength: 1,
+                examples: ['authentication flow', 'error handling', 'database connection']
               },
               projectPath: {
                 type: 'string',
                 description: 'Project directory path (defaults to current directory)',
+                examples: ['.', '/path/to/project', '../my-project']
               },
               limit: {
                 type: 'number',
@@ -508,12 +572,14 @@ User: "How do we handle errors?"
               codeSearch: {
                 type: 'string',
                 enum: ['similar', 'implements', 'uses', 'pattern'],
-                description: 'Enable code search with specific mode'
+                description: 'Code search mode: similar (semantic), implements (definitions), uses (references), pattern (architectural)',
+                default: 'similar'
               },
 
               filePath: {
                 type: 'string',
-                description: 'Filter by file path pattern (for code search)'
+                description: 'Filter results by file path pattern (e.g., "src/", "*.test.ts")',
+                examples: ['src/auth/', '*.ts', 'components/']
               }
             },
             required: ['query'],
@@ -588,7 +654,69 @@ Created /src/auth folder with 15 files
 → Now searchable: "JWT", "refresh token", "middleware"
 → Your future self can find EVERYTHING!
 
-🔥 REMEMBER: Fresh embeddings = Perfect search. Stale embeddings = Blind search!`,
+🔥 REMEMBER: Fresh embeddings = Perfect search. Stale embeddings = Blind search!
+
+## TECHNICAL DOCUMENTATION
+
+Generates vector embeddings for all code files using Voyage AI, enabling semantic code search.
+
+### Parameters:
+- **patterns** (array, required): Glob patterns for code files
+  - Default: Auto-detects language from project
+  - Empty array [] = automatic detection
+  - Examples: ["**/*.ts", "src/**/*.js", "lib/**/*.py"]
+- **forceRegenerate** (boolean, optional): Force regenerate all embeddings
+  - Default: false (incremental updates only)
+  - Use when embeddings seem corrupted
+- **minChunkSize** (number, optional): Minimum chunk size in lines
+  - Default: 80 lines
+  - Range: 50-300 lines
+  - Larger = better context, fewer chunks
+- **includeTests** (boolean, optional): Include test files
+  - Default: true (tests are documentation!)
+  - Set false for faster syncing
+- **projectPath** (string, optional): Project directory path
+  - Defaults to current working directory
+
+### Process:
+1. Scans all files matching patterns
+2. Chunks code preserving semantic boundaries
+3. Detects 27 architectural patterns
+4. Generates 1024-dim embeddings via Voyage AI
+5. Stores in MongoDB with metadata
+6. Updates codebaseMap memory
+
+### Returns:
+\`\`\`json
+{
+  "filesProcessed": 59,
+  "chunksCreated": 117,
+  "patternsDetected": 10,
+  "embeddingsDimensions": 1024,
+  "timeElapsed": "4.2s"
+}
+\`\`\`
+
+### Example Usage:
+\`\`\`javascript
+// Auto-detect and sync all code
+sync_code({ patterns: [] })
+
+// Force full regeneration
+sync_code({ forceRegenerate: true })
+
+// Custom patterns for specific folders
+sync_code({ 
+  patterns: ["src/**/*.ts", "lib/**/*.js"],
+  includeTests: false 
+})
+
+// Sync after major changes
+sync_code({ 
+  forceRegenerate: true,
+  minChunkSize: 100 
+})
+\`\`\``,
           inputSchema: {
             type: 'object',
             properties: {
@@ -601,6 +729,7 @@ Created /src/auth folder with 15 files
               projectPath: {
                 type: 'string',
                 description: 'Project directory path (defaults to current directory)',
+                examples: ['.', '/path/to/project', '../my-project']
               },
               minChunkSize: {
                 type: 'number',
@@ -722,13 +851,13 @@ check_env → Old version? → Update → restart → check_env
     return {
       resources: [
         {
-          uri: `memory://v${dynamicVersion.split('.')[0]}/core`,
+          uri: `memory://v${version.split('.')[0]}/core`,
           name: 'Core Memory Documents (v13)',
           description: 'The 7 core memories YOU MUST maintain for your future self who has ZERO memory',
           mimeType: 'text/markdown',
         },
         {
-          uri: `memory://v${dynamicVersion.split('.')[0]}/principle`,
+          uri: `memory://v${version.split('.')[0]}/principle`,
           name: `Memory Engineering v${version} Principle`,
           description: 'CRITICAL: You have ZERO memory between sessions. Memory Bank is your ONLY link to past work.',
           mimeType: 'text/markdown',
@@ -742,12 +871,12 @@ check_env → Old version? → Update → restart → check_env
     
     try {
       switch (uri) {
-        case `memory://v${dynamicVersion.split('.')[0]}/core`:
+        case `memory://v${version.split('.')[0]}/core`:
           return {
             contents: [{
-              uri: `memory://v${dynamicVersion.split('.')[0]}/core`,
+              uri: `memory://v${version.split('.')[0]}/core`,
               mimeType: 'text/markdown',
-              text: `# 🧠 MEMORY ENGINEERING v${dynamicVersion} - YOUR SURVIVAL GUIDE
+              text: `# 🧠 MEMORY ENGINEERING v${version} - YOUR SURVIVAL GUIDE
 
 ## ⚡ THE BRUTAL TRUTH
 You wake up with COMPLETE AMNESIA every session. Not partial memory. ZERO. NOTHING.
@@ -885,10 +1014,10 @@ This is not optional. This is survival. Your memories ARE your existence!`,
             }],
           };
 
-        case `memory://v${dynamicVersion.split('.')[0]}/principle`:
+        case `memory://v${version.split('.')[0]}/principle`:
           return {
             contents: [{
-              uri: `memory://v${dynamicVersion.split('.')[0]}/principle`,
+              uri: `memory://v${version.split('.')[0]}/principle`,
               mimeType: 'text/markdown',
               text: `# CRITICAL: Your Memory Reset Awareness
 
