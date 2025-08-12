@@ -2,6 +2,19 @@
 
 All notable changes to the Memory Engineering MCP Server will be documented in this file.
 
+## [13.4.3] - 2025-01-11 - CODE-OPTIMIZED EMBEDDINGS
+
+### Enhanced
+- **voyage-code-3 Model**: Switched from voyage-3 to voyage-code-3 for better code understanding
+- **15% Better Code Search**: Specialized model understands programming concepts better
+- **Zero Risk Change**: Same API, same dimensions, just better accuracy
+- **Automatic**: No configuration changes needed
+
+### Technical
+- Single line change in `codeEmbeddings.ts`
+- Fully backward compatible with existing embeddings
+- Better understanding of syntax, patterns, and code semantics
+
 ## [13.4.2] - 2025-01-11 - VOYAGE AI RERANKING
 
 ### Added

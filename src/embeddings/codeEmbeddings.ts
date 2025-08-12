@@ -20,7 +20,7 @@ function getVoyageClient(): VoyageAIClient {
 
 
 /**
- * Generate embeddings for code chunks using voyage-3 model.
+ * Generate embeddings for code chunks using voyage-code-3 model.
  * Each chunk is embedded with its signature, content, and metadata.
  */
 export async function generateCodeEmbeddings(
@@ -45,12 +45,12 @@ File: ${chunk.filePath} | Type: ${chunk.chunk.type} | Patterns: ${chunk.metadata
     const batch = chunkTexts.slice(i, i + BATCH_SIZE);
 
     try {
-      logger.info(`🧠 GENERATING INTELLIGENCE: ${batch.length} chunks → voyage-3 embeddings`);
+      logger.info(`🧠 GENERATING INTELLIGENCE: ${batch.length} chunks → voyage-code-3 embeddings`);
 
       // Use regular embed which is more stable
       const response = await client.embed({
         input: batch,
-        model: 'voyage-3',  // Use stable non-contextualized model
+        model: 'voyage-code-3',  // Use code-optimized model for better accuracy
         inputType: 'document'
       });
 
