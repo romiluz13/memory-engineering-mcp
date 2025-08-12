@@ -5,6 +5,7 @@ import { SearchToolSchema, type MemoryDocument, type CodeChunk } from '../types/
 import { getMemoryCollection, getDb } from '../db/connection.js';
 import { generateCodeQueryEmbedding } from '../embeddings/codeEmbeddings.js';
 import { generateQueryEmbedding } from '../embeddings/voyage-v5.js';
+import { rerankResults } from '../embeddings/voyage-rerank.js';
 import { logger } from '../utils/logger.js';
 
 export async function searchTool(args: unknown): Promise<CallToolResult> {
@@ -164,10 +165,13 @@ ${searchType === 'text' ? '📦 Using text search (embeddings might help)' : '�
     };
   }
   
+  // Try to rerank for better relevance (safe - falls back if unavailable)
+  const rerankedResults = await rerankResults(params.query, results, params.limit || 10);
+  
   let response = `🔍 Search Results: "${params.query}"\n\n`;
-  response += `Found ${results.length} memories\n\n`;
+  response += `Found ${rerankedResults.length} memories\n\n`;
 
-  results.forEach((memory, idx) => {
+  rerankedResults.forEach((memory, idx) => {
     response += `${idx + 1}. ${memory.memoryName}\n`;
     response += `   Last updated: ${memory.metadata.lastModified.toISOString()}\n`;
 
@@ -271,7 +275,10 @@ ${params.codeSearch === 'pattern' ? '• Pattern not found - your architecture m
     };
   }
   
-  return formatCodeSearchResults(params.query, params.codeSearch, results);
+  // Try to rerank for better relevance (safe - falls back if unavailable)
+  const rerankedResults = await rerankResults(params.query, results, params.limit || 10);
+  
+  return formatCodeSearchResults(params.query, params.codeSearch, rerankedResults);
 }
 
 async function searchSimilarCode(
