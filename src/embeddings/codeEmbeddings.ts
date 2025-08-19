@@ -2,17 +2,18 @@ import { VoyageAIClient } from 'voyageai';
 import type { CodeChunk } from '../types/memory-v5.js';
 import { logger } from '../utils/logger.js';
 
-const VOYAGE_API_KEY = process.env.VOYAGE_API_KEY;
+// Don't read API key at module level - will be read inside functions
 const BATCH_SIZE = 100; // Process chunks in batches
 
 let voyageClient: VoyageAIClient | null = null;
 
 function getVoyageClient(): VoyageAIClient {
   if (!voyageClient) {
-    if (!VOYAGE_API_KEY) {
+    const apiKey = process.env.VOYAGE_API_KEY;
+    if (!apiKey) {
       throw new Error('VOYAGE_API_KEY environment variable is not set');
     }
-    voyageClient = new VoyageAIClient({ apiKey: VOYAGE_API_KEY });
+    voyageClient = new VoyageAIClient({ apiKey });
   }
   return voyageClient;
 }
