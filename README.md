@@ -12,7 +12,6 @@
   <br/>
   
   [**📦 NPM Package**](https://www.npmjs.com/package/memory-engineering-mcp) | 
-  [**💬 Discord**](https://discord.gg/memory-engineering) | 
   [**📖 Documentation**](#-quick-start)
   
 </div>
@@ -46,7 +45,7 @@ loginUser()         // Login flow
 ## ✨ See It In Action
 
 <div align="center">
-  <a href="https://memory-engineering-mcp.vercel.app">
+  <a href="https://memory-engineering-mcp.app">
     <img src="https://img.shields.io/badge/🌐_Interactive_Demo-4A90E2?style=for-the-badge" alt="Try Demo" />
   </a>
   <p><i>Experience the power of semantic code search and persistent AI memory</i></p>
